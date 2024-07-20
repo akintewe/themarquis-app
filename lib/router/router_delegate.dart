@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:marquis_v2/games/ludo/main.dart';
 import 'package:marquis_v2/models/app_state.dart';
 import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/user.dart';
@@ -213,12 +214,18 @@ class InnerRouterDelegate extends RouterDelegate<AppRoutePath>
           _ => [],
         },
         if (_appState.selectedGame != null)
-          FadeAnimationPage(
-            key: ValueKey('Game${_appState.selectedGame}Page'),
-            child: GameScreen(
-              id: _appState.selectedGame!,
-            ),
-          ),
+          switch (_appState.selectedGame) {
+            "ludo" => FadeAnimationPage(
+                key: ValueKey('LudoGame${_appState.selectedGame}Page'),
+                child: const LudoGameApp(),
+              ),
+            _ => FadeAnimationPage(
+                key: ValueKey('Game${_appState.selectedGame}Page'),
+                child: GameScreen(
+                  id: _appState.selectedGame!,
+                ),
+              ),
+          }
       ],
       onPopPage: (route, result) {
         if (_appState.selectedGame != null) {

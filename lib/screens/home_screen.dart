@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/router/route_path.dart';
 
 class HomePath extends AppRoutePath {
@@ -9,9 +11,14 @@ class HomePath extends AppRoutePath {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,7 +76,9 @@ class HomeScreen extends StatelessWidget {
                           'assets/images/ludo.png', // Replace with the actual asset
                       isActive: true,
                       isPopular: true,
-                      onPlay: () {},
+                      onPlay: () {
+                        ref.read(appStateProvider.notifier).selectGame("ludo");
+                      },
                     ),
                   ],
                 ),

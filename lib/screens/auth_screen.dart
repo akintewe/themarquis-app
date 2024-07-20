@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:magic_sdk/magic_sdk.dart';
+// import 'package:magic_sdk/magic_sdk.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/router/route_path.dart';
 
@@ -52,9 +52,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                     ),
                     onPressed: () async {
-                      var token = await Magic.instance.auth
-                          .loginWithEmailOTP(email: _emailController.text);
-                      ref.read(appStateProvider.notifier).login(token);
+                      // var token = await Magic.instance.auth
+                      //     .loginWithEmailOTP(email: _emailController.text);
+                      // ref.read(appStateProvider.notifier).login(token);
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
@@ -68,7 +68,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               ],
             ),
           ),
-          Magic.instance.relayer
+          // Magic.instance.relayer
         ],
       ),
     );

@@ -1,0 +1,95 @@
+{
+	"frames": {
+		"avatar1.png": {
+			"frame": {
+				"x": 1,
+				"y": 1,
+				"w": 2160,
+				"h": 2160
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 2160,
+				"h": 2160
+			},
+			"sourceSize": {
+				"w": 2160,
+				"h": 2160
+			}
+		},
+		"avatar2.png": {
+			"frame": {
+				"x": 2163,
+				"y": 1,
+				"w": 2160,
+				"h": 2160
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 2160,
+				"h": 2160
+			},
+			"sourceSize": {
+				"w": 2160,
+				"h": 2160
+			}
+		},
+		"avatar3.png": {
+			"frame": {
+				"x": 1,
+				"y": 2163,
+				"w": 2160,
+				"h": 2160
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 2160,
+				"h": 2160
+			},
+			"sourceSize": {
+				"w": 2160,
+				"h": 2160
+			}
+		},
+		"avatar4.png": {
+			"frame": {
+				"x": 2163,
+				"y": 2163,
+				"w": 2160,
+				"h": 2160
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 2160,
+				"h": 2160
+			},
+			"sourceSize": {
+				"w": 2160,
+				"h": 2160
+			}
+		}
+	},
+	"meta": {
+		"app": "http://www.codeandweb.com/texturepacker",
+		"version": "1.0",
+		"image": "spritesheet.png",
+		"format": "RGBA8888",
+		"size": {
+			"w": 4324,
+			"h": 4324
+		},
+		"scale": "1"
+	}
+}

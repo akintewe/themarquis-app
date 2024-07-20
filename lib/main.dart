@@ -1,4 +1,4 @@
-import 'package:magic_sdk/magic_sdk.dart';
+// import 'package:magic_sdk/magic_sdk.dart';
 import 'package:marquis_v2/models/app_state.dart';
 import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
@@ -17,7 +17,7 @@ void main() async {
   await Hive.openBox<AppStateData>("appState");
   await Hive.openBox<UserData>("user");
   runApp(const ProviderScope(child: MyApp()));
-  Magic.instance = Magic("pk_live_D38AAC9114F908B0");
+  // Magic.instance = Magic("pk_live_D38AAC9114F908B0");
 }
 
 class MyApp extends ConsumerWidget {
