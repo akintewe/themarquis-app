@@ -23,7 +23,7 @@ class UserData extends HiveObject with _$UserData {
     @HiveField(10) required DateTime updatedAt,
     @HiveField(11) required String referralCode,
     @HiveField(12) required String accountAddress,
-    @HiveField(13) required String sessionId,
+    @HiveField(13) required String? sessionId,
   }) = _UserData;
 
   factory UserData.fromJson(Map<String, dynamic> json) =>

@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 
 import 'package:marquis_v2/games/ludo/components/board.dart';
@@ -12,10 +13,12 @@ import 'package:marquis_v2/games/ludo/components/dice.dart';
 import 'package:marquis_v2/games/ludo/components/player_home.dart';
 import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
+import 'package:marquis_v2/games/ludo/ludo_session.dart';
+import 'package:marquis_v2/models/ludo_session.dart';
 
-enum PlayState { welcome, playing, gameOver, won }
+enum PlayState { welcome, waiting, playing, gameOver, won }
 
-class LudoGame extends FlameGame with TapCallbacks {
+class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   late Dice dice;
   late Board board;
   late TextComponent turnText;
@@ -24,6 +27,7 @@ class LudoGame extends FlameGame with TapCallbacks {
   int _currentPlayer = 0;
   bool playerCanMove = false;
   final int totalPlayers = 4;
+  LudoSessionData? _sessionData;
 
   LudoGame()
       : super(
@@ -46,6 +50,7 @@ class LudoGame extends FlameGame with TapCallbacks {
     _playState = playState;
     switch (playState) {
       case PlayState.welcome:
+      case PlayState.waiting:
       case PlayState.gameOver:
       case PlayState.won:
         overlays.add(playState.name);
@@ -59,6 +64,13 @@ class LudoGame extends FlameGame with TapCallbacks {
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    _sessionData = ref.read(ludoSessionProvider);
+    ref.listen(ludoSessionProvider, (prev, next) {
+      _sessionData = next;
+      if (_sessionData != null && _playState == PlayState.welcome) {
+        playState = PlayState.waiting;
+      }
+    });
     playState = PlayState.welcome;
 
     await Flame.images.load('spritesheet.png');

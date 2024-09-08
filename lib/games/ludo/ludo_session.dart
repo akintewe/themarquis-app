@@ -7,25 +7,31 @@ import 'package:marquis_v2/env.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 part "ludo_session.g.dart";
 
 final baseUrl = environment['apiUrl'];
+final wsUrl = environment['wsUrl'];
 
 @Riverpod(keepAlive: true)
 class LudoSession extends _$LudoSession {
   //Details Declaration
   Box<LudoSessionData>? _hiveBox;
-  late String _id;
+  final WebSocketChannel _channel = WebSocketChannel.connect(
+    Uri.parse(wsUrl!),
+  );
+  String? _id;
 
   @override
-  LudoSessionData? build(String id) {
-    _id = id;
+  LudoSessionData? build() {
     _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
-    return _hiveBox!.get(id);
+    _channel.stream.listen((data) => print(data));
+    return null;
   }
 
   Future<void> getLudoSession() async {
+    if (_id == null) return;
     final url = Uri.parse('$baseUrl/game/session/$_id');
     final response = await http.get(
       url,
@@ -37,7 +43,7 @@ class LudoSession extends _$LudoSession {
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     final ludoSession = LudoSessionData(
-      id: _id,
+      id: _id!,
       playerCount: decodedResponse['player_count'],
       status: decodedResponse['status'],
       nextPlayer: decodedResponse['next_player'],
@@ -153,6 +159,7 @@ class LudoSession extends _$LudoSession {
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     print(decodedResponse);
+    _id = sessionId;
     await getLudoSession();
   }
 

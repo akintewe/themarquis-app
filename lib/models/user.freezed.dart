@@ -47,7 +47,7 @@ mixin _$UserData {
   @HiveField(12)
   String get accountAddress => throw _privateConstructorUsedError;
   @HiveField(13)
-  String get sessionId => throw _privateConstructorUsedError;
+  String? get sessionId => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -74,7 +74,7 @@ abstract class $UserDataCopyWith<$Res> {
       @HiveField(10) DateTime updatedAt,
       @HiveField(11) String referralCode,
       @HiveField(12) String accountAddress,
-      @HiveField(13) String sessionId});
+      @HiveField(13) String? sessionId});
 }
 
 /// @nodoc
@@ -103,7 +103,7 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
     Object? updatedAt = null,
     Object? referralCode = null,
     Object? accountAddress = null,
-    Object? sessionId = null,
+    Object? sessionId = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -158,10 +158,10 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
           ? _value.accountAddress
           : accountAddress // ignore: cast_nullable_to_non_nullable
               as String,
-      sessionId: null == sessionId
+      sessionId: freezed == sessionId
           ? _value.sessionId
           : sessionId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
     ) as $Val);
   }
 }
@@ -188,7 +188,7 @@ abstract class _$$UserDataImplCopyWith<$Res>
       @HiveField(10) DateTime updatedAt,
       @HiveField(11) String referralCode,
       @HiveField(12) String accountAddress,
-      @HiveField(13) String sessionId});
+      @HiveField(13) String? sessionId});
 }
 
 /// @nodoc
@@ -215,7 +215,7 @@ class __$$UserDataImplCopyWithImpl<$Res>
     Object? updatedAt = null,
     Object? referralCode = null,
     Object? accountAddress = null,
-    Object? sessionId = null,
+    Object? sessionId = freezed,
   }) {
     return _then(_$UserDataImpl(
       id: null == id
@@ -270,10 +270,10 @@ class __$$UserDataImplCopyWithImpl<$Res>
           ? _value.accountAddress
           : accountAddress // ignore: cast_nullable_to_non_nullable
               as String,
-      sessionId: null == sessionId
+      sessionId: freezed == sessionId
           ? _value.sessionId
           : sessionId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
     ));
   }
 }
@@ -343,7 +343,7 @@ class _$UserDataImpl extends _UserData {
   final String accountAddress;
   @override
   @HiveField(13)
-  final String sessionId;
+  final String? sessionId;
 
   @override
   String toString() {
@@ -428,7 +428,7 @@ abstract class _UserData extends UserData {
       @HiveField(10) required final DateTime updatedAt,
       @HiveField(11) required final String referralCode,
       @HiveField(12) required final String accountAddress,
-      @HiveField(13) required final String sessionId}) = _$UserDataImpl;
+      @HiveField(13) required final String? sessionId}) = _$UserDataImpl;
   _UserData._() : super._();
 
   factory _UserData.fromJson(Map<String, dynamic> json) =
@@ -475,7 +475,7 @@ abstract class _UserData extends UserData {
   String get accountAddress;
   @override
   @HiveField(13)
-  String get sessionId;
+  String? get sessionId;
   @override
   @JsonKey(ignore: true)
   _$$UserDataImplCopyWith<_$UserDataImpl> get copyWith =>

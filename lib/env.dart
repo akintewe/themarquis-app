@@ -1,5 +1,5 @@
 const environment = {
   'apiUrl': 'http://desktop.wmtech.cc:8080',
-  'natsUrl2': 'wss://nats.jomluz.com:8003',
+  'wsUrl': 'ws://desktop.wmtech.cc:8080/ws',
   'build': 'DEBUG',
 };

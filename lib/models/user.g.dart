@@ -30,7 +30,7 @@ class UserDataImplAdapter extends TypeAdapter<_$UserDataImpl> {
       updatedAt: fields[10] as DateTime,
       referralCode: fields[11] as String,
       accountAddress: fields[12] as String,
-      sessionId: fields[13] as String,
+      sessionId: fields[13] as String?,
     );
   }
 
@@ -98,7 +98,7 @@ _$UserDataImpl _$$UserDataImplFromJson(Map<String, dynamic> json) =>
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       referralCode: json['referralCode'] as String,
       accountAddress: json['accountAddress'] as String,
-      sessionId: json['sessionId'] as String,
+      sessionId: json['sessionId'] as String?,
     );
 
 Map<String, dynamic> _$$UserDataImplToJson(_$UserDataImpl instance) =>

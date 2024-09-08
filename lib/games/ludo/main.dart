@@ -1,7 +1,10 @@
 import 'package:flame/game.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/widgets/overlay_screen.dart';
 import 'package:marquis_v2/screens/waiting_room_screen.dart';
 
@@ -9,25 +12,22 @@ void main() {
   runApp(const LudoGameApp());
 }
 
-class LudoGameApp extends StatefulWidget {
+class LudoGameApp extends ConsumerStatefulWidget {
   // Modify this line
   const LudoGameApp({super.key});
 
   @override // Add from here...
-  State<LudoGameApp> createState() => _LudoGameAppState();
+  ConsumerState<LudoGameApp> createState() => _LudoGameAppState();
 }
 
-class _LudoGameAppState extends State<LudoGameApp> {
-  late final LudoGame game;
-
-  @override
-  void initState() {
-    super.initState();
-    game = LudoGame();
-  } // To here.
+class _LudoGameAppState extends ConsumerState<LudoGameApp> {
+  final LudoGame _game = LudoGame();
+  final GlobalKey<RiverpodAwareGameWidgetState> _gameWidgetKey =
+      GlobalKey<RiverpodAwareGameWidgetState>();
 
   @override
   Widget build(BuildContext context) {
+    final session = ref.watch(ludoSessionProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Ludo"),
@@ -58,15 +58,16 @@ class _LudoGameAppState extends State<LudoGameApp> {
                       child: SizedBox(
                         width: gameWidth,
                         height: gameHeight,
-                        child: GameWidget(
-                          game: game,
+                        child: RiverpodAwareGameWidget(
+                          key: _gameWidgetKey,
+                          game: _game,
                           overlayBuilderMap: {
-                            // PlayState.welcome.name: (context, game) =>
-                            //     const OverlayScreen(
-                            //       title: 'Waiting Room',
-                            //       subtitle: 'Waiting for players...',
-                            //     ),
                             PlayState.welcome.name: (context, game) =>
+                                const OverlayScreen(
+                                  title: 'Welcome',
+                                  subtitle: 'Please join a session',
+                                ),
+                            PlayState.waiting.name: (context, game) =>
                                 const WaitingRoomScreen(),
                             PlayState.gameOver.name: (context, game) =>
                                 const OverlayScreen(
