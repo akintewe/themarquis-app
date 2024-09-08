@@ -62,15 +62,23 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   }
 
   @override
+  void onMount() {
+    _sessionData = ref.read(ludoSessionProvider);
+    addToGameWidgetBuild(() {
+      ref.listen(ludoSessionProvider, (prev, next) {
+        _sessionData = next;
+        if (_sessionData != null && _playState == PlayState.welcome) {
+          playState = PlayState.waiting;
+        }
+      });
+    });
+    super.onMount();
+  }
+
+  @override
   Future<void> onLoad() async {
     super.onLoad();
-    _sessionData = ref.read(ludoSessionProvider);
-    ref.listen(ludoSessionProvider, (prev, next) {
-      _sessionData = next;
-      if (_sessionData != null && _playState == PlayState.welcome) {
-        playState = PlayState.waiting;
-      }
-    });
+
     playState = PlayState.welcome;
 
     await Flame.images.load('spritesheet.png');
