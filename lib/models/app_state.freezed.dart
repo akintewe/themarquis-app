@@ -19,7 +19,7 @@ mixin _$AppStateData {
   @HiveField(0)
   int get navigatorIndex => throw _privateConstructorUsedError;
   @HiveField(1)
-  String? get token => throw _privateConstructorUsedError;
+  String? get accessToken => throw _privateConstructorUsedError;
   @HiveField(2)
   String get theme => throw _privateConstructorUsedError;
   @HiveField(3)
@@ -28,6 +28,8 @@ mixin _$AppStateData {
   bool get isConnectedInternet => throw _privateConstructorUsedError;
   @HiveField(5)
   String? get selectedGame => throw _privateConstructorUsedError;
+  @HiveField(6)
+  String? get refreshToken => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $AppStateDataCopyWith<AppStateData> get copyWith =>
@@ -42,11 +44,12 @@ abstract class $AppStateDataCopyWith<$Res> {
   @useResult
   $Res call(
       {@HiveField(0) int navigatorIndex,
-      @HiveField(1) String? token,
+      @HiveField(1) String? accessToken,
       @HiveField(2) String theme,
       @HiveField(3) bool? autoLoginResult,
       @HiveField(4) bool isConnectedInternet,
-      @HiveField(5) String? selectedGame});
+      @HiveField(5) String? selectedGame,
+      @HiveField(6) String? refreshToken});
 }
 
 /// @nodoc
@@ -63,20 +66,21 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
   @override
   $Res call({
     Object? navigatorIndex = null,
-    Object? token = freezed,
+    Object? accessToken = freezed,
     Object? theme = null,
     Object? autoLoginResult = freezed,
     Object? isConnectedInternet = null,
     Object? selectedGame = freezed,
+    Object? refreshToken = freezed,
   }) {
     return _then(_value.copyWith(
       navigatorIndex: null == navigatorIndex
           ? _value.navigatorIndex
           : navigatorIndex // ignore: cast_nullable_to_non_nullable
               as int,
-      token: freezed == token
-          ? _value.token
-          : token // ignore: cast_nullable_to_non_nullable
+      accessToken: freezed == accessToken
+          ? _value.accessToken
+          : accessToken // ignore: cast_nullable_to_non_nullable
               as String?,
       theme: null == theme
           ? _value.theme
@@ -93,6 +97,10 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
       selectedGame: freezed == selectedGame
           ? _value.selectedGame
           : selectedGame // ignore: cast_nullable_to_non_nullable
+              as String?,
+      refreshToken: freezed == refreshToken
+          ? _value.refreshToken
+          : refreshToken // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
   }
@@ -108,11 +116,12 @@ abstract class _$$AppStateDataImplCopyWith<$Res>
   @useResult
   $Res call(
       {@HiveField(0) int navigatorIndex,
-      @HiveField(1) String? token,
+      @HiveField(1) String? accessToken,
       @HiveField(2) String theme,
       @HiveField(3) bool? autoLoginResult,
       @HiveField(4) bool isConnectedInternet,
-      @HiveField(5) String? selectedGame});
+      @HiveField(5) String? selectedGame,
+      @HiveField(6) String? refreshToken});
 }
 
 /// @nodoc
@@ -127,20 +136,21 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? navigatorIndex = null,
-    Object? token = freezed,
+    Object? accessToken = freezed,
     Object? theme = null,
     Object? autoLoginResult = freezed,
     Object? isConnectedInternet = null,
     Object? selectedGame = freezed,
+    Object? refreshToken = freezed,
   }) {
     return _then(_$AppStateDataImpl(
       navigatorIndex: null == navigatorIndex
           ? _value.navigatorIndex
           : navigatorIndex // ignore: cast_nullable_to_non_nullable
               as int,
-      token: freezed == token
-          ? _value.token
-          : token // ignore: cast_nullable_to_non_nullable
+      accessToken: freezed == accessToken
+          ? _value.accessToken
+          : accessToken // ignore: cast_nullable_to_non_nullable
               as String?,
       theme: null == theme
           ? _value.theme
@@ -158,6 +168,10 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
           ? _value.selectedGame
           : selectedGame // ignore: cast_nullable_to_non_nullable
               as String?,
+      refreshToken: freezed == refreshToken
+          ? _value.refreshToken
+          : refreshToken // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -168,11 +182,12 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
 class _$AppStateDataImpl extends _AppStateData {
   _$AppStateDataImpl(
       {@HiveField(0) this.navigatorIndex = 0,
-      @HiveField(1) this.token,
+      @HiveField(1) this.accessToken,
       @HiveField(2) this.theme = "system",
       @HiveField(3) this.autoLoginResult,
       @HiveField(4) this.isConnectedInternet = false,
-      @HiveField(5) this.selectedGame})
+      @HiveField(5) this.selectedGame,
+      @HiveField(6) this.refreshToken})
       : super._();
 
   @override
@@ -181,7 +196,7 @@ class _$AppStateDataImpl extends _AppStateData {
   final int navigatorIndex;
   @override
   @HiveField(1)
-  final String? token;
+  final String? accessToken;
   @override
   @JsonKey()
   @HiveField(2)
@@ -196,10 +211,13 @@ class _$AppStateDataImpl extends _AppStateData {
   @override
   @HiveField(5)
   final String? selectedGame;
+  @override
+  @HiveField(6)
+  final String? refreshToken;
 
   @override
   String toString() {
-    return 'AppStateData(navigatorIndex: $navigatorIndex, token: $token, theme: $theme, autoLoginResult: $autoLoginResult, isConnectedInternet: $isConnectedInternet, selectedGame: $selectedGame)';
+    return 'AppStateData(navigatorIndex: $navigatorIndex, accessToken: $accessToken, theme: $theme, autoLoginResult: $autoLoginResult, isConnectedInternet: $isConnectedInternet, selectedGame: $selectedGame, refreshToken: $refreshToken)';
   }
 
   @override
@@ -209,19 +227,22 @@ class _$AppStateDataImpl extends _AppStateData {
             other is _$AppStateDataImpl &&
             (identical(other.navigatorIndex, navigatorIndex) ||
                 other.navigatorIndex == navigatorIndex) &&
-            (identical(other.token, token) || other.token == token) &&
+            (identical(other.accessToken, accessToken) ||
+                other.accessToken == accessToken) &&
             (identical(other.theme, theme) || other.theme == theme) &&
             (identical(other.autoLoginResult, autoLoginResult) ||
                 other.autoLoginResult == autoLoginResult) &&
             (identical(other.isConnectedInternet, isConnectedInternet) ||
                 other.isConnectedInternet == isConnectedInternet) &&
             (identical(other.selectedGame, selectedGame) ||
-                other.selectedGame == selectedGame));
+                other.selectedGame == selectedGame) &&
+            (identical(other.refreshToken, refreshToken) ||
+                other.refreshToken == refreshToken));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, navigatorIndex, token, theme,
-      autoLoginResult, isConnectedInternet, selectedGame);
+  int get hashCode => Object.hash(runtimeType, navigatorIndex, accessToken,
+      theme, autoLoginResult, isConnectedInternet, selectedGame, refreshToken);
 
   @JsonKey(ignore: true)
   @override
@@ -233,11 +254,12 @@ class _$AppStateDataImpl extends _AppStateData {
 abstract class _AppStateData extends AppStateData {
   factory _AppStateData(
       {@HiveField(0) final int navigatorIndex,
-      @HiveField(1) final String? token,
+      @HiveField(1) final String? accessToken,
       @HiveField(2) final String theme,
       @HiveField(3) final bool? autoLoginResult,
       @HiveField(4) final bool isConnectedInternet,
-      @HiveField(5) final String? selectedGame}) = _$AppStateDataImpl;
+      @HiveField(5) final String? selectedGame,
+      @HiveField(6) final String? refreshToken}) = _$AppStateDataImpl;
   _AppStateData._() : super._();
 
   @override
@@ -245,7 +267,7 @@ abstract class _AppStateData extends AppStateData {
   int get navigatorIndex;
   @override
   @HiveField(1)
-  String? get token;
+  String? get accessToken;
   @override
   @HiveField(2)
   String get theme;
@@ -258,6 +280,9 @@ abstract class _AppStateData extends AppStateData {
   @override
   @HiveField(5)
   String? get selectedGame;
+  @override
+  @HiveField(6)
+  String? get refreshToken;
   @override
   @JsonKey(ignore: true)
   _$$AppStateDataImplCopyWith<_$AppStateDataImpl> get copyWith =>

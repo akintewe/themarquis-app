@@ -36,7 +36,7 @@ class ProfileScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      user.nickname,
+                      user.email,
                       style: Theme.of(context)
                           .textTheme
                           .titleLarge!
@@ -51,11 +51,11 @@ class ProfileScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Username',
+                            'Referral Code',
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            user.username,
+                            user.referralCode,
                           ),
                           const SizedBox(height: 16),
                           const Text(

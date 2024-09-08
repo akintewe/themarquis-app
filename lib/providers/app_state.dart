@@ -1,11 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:marquis_v2/env.dart';
 import 'package:marquis_v2/models/app_state.dart';
 import 'package:hive/hive.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:http/http.dart' as http;
 
 part "app_state.g.dart";
+
+final baseUrl = environment['apiUrl'];
 
 @Riverpod(keepAlive: true)
 class AppState extends _$AppState {
@@ -35,53 +41,68 @@ class AppState extends _$AppState {
     _hiveBox!.put("appState", state);
   }
 
-  Future<void> login(String token) async {
-    state = state.copyWith(token: token, autoLoginResult: true);
+  Future<void> login(String email) async {
+    final url = Uri.parse('$baseUrl/auth/signin-sandbox');
+    final response = await http.post(
+      url,
+      body: jsonEncode({'email': email}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 200) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
+    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    //verify token
+    state = state.copyWith(
+        accessToken: decodedResponse['access_token'],
+        refreshToken: decodedResponse['refresh_token'],
+        autoLoginResult: true);
     await _hiveBox!.put("appState", state);
   }
 
-  Future<void> loginWithGoogle(String idToken) async {
-    // final response =
-    //     await ref.read(natsServiceProvider.notifier).makeMicroserviceRequest(
-    //           "auth.login",
-    //           jsonEncode({
-    //             "method": "google",
-    //             "id": "",
-    //             "token": idToken,
-    //             "service": "beautifood",
-    //             "device": await Utils.getDeviceInfo(),
-    //             "deviceType": kIsWeb
-    //                 ? "web"
-    //                 : Platform.isIOS
-    //                     ? "ios"
-    //                     : "android",
-    //           }),
-    //           isAuth: true,
-    //         );
-    // final json = jsonDecode(response) as Map<String, dynamic>;
-    // final token = Token.fromJson(json["token"]);
-    // final creds = json["creds"];
-    // await ref
-    //     .read(natsServiceProvider.notifier)
-    //     .updateConnection(creds, token.user);
+  Future<void> signup(String email, String referralCode) async {
+    final url = Uri.parse('$baseUrl/auth/signup-sandbox');
+    final response = await http.post(
+      url,
+      body: jsonEncode({'email': email}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 201) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
+    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    //verify token
+    state = state.copyWith(
+        accessToken: decodedResponse['access_token'],
+        refreshToken: decodedResponse['refresh_token'],
+        autoLoginResult: true);
+    await _hiveBox!.put("appState", state);
+  }
 
-    // _refreshTokenTimer = Timer(
-    //   token.accessTokenExpiry.difference(
-    //     DateTime.now(),
-    //   ),
-    //   () {
-    //     refreshToken();
-    //   },
-    // );
-    // state = state.copyWith(token: token, autoLoginResult: true);
-    // await _hiveBox!.put("appState", state);
+  Future<void> verifyCode(String email, String code) async {
+    final url = Uri.parse('$baseUrl/auth/verify-code');
+    final response = await http.post(
+      url,
+      body: jsonEncode({'email': email, 'code': code}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    //verify token
+    state = state.copyWith(
+        accessToken: decodedResponse['access_token'],
+        refreshToken: decodedResponse['refresh_token'],
+        autoLoginResult: true);
+    await _hiveBox!.put("appState", state);
   }
 
   Future<void> logout() async {
     print("logout");
     state = state.copyWith(
       navigatorIndex: 0,
-      token: null,
+      accessToken: null,
+      refreshToken: null,
       autoLoginResult: null,
       selectedGame: null,
     );
@@ -92,10 +113,11 @@ class AppState extends _$AppState {
   }
 
   Future<bool> tryAutoLogin() async {
-    if (state.token == null) {
+    if (state.accessToken == null) {
       return false;
     }
-    await refreshToken();
+    // await refreshToken();
+    state = state.copyWith(autoLoginResult: true);
     return true;
   }
 
@@ -108,7 +130,7 @@ class AppState extends _$AppState {
   }
 
   Future<void> refreshToken() async {
-    if (state.token == null) return;
+    if (state.accessToken == null) return;
     // await ref.read(natsServiceProvider.notifier).resetConnection();
     // final response =
     //     await ref.read(natsServiceProvider.notifier).makeMicroserviceRequest(
@@ -126,7 +148,8 @@ class AppState extends _$AppState {
     //     .read(natsServiceProvider.notifier)
     //     .updateConnection(creds, token.user);
 
-    state = state.copyWith(token: state.token, autoLoginResult: true);
+    state =
+        state.copyWith(accessToken: state.accessToken, autoLoginResult: true);
     // _refreshTokenTimer = Timer(
     //   token.accessTokenExpiry.difference(
     //     DateTime.now(),
