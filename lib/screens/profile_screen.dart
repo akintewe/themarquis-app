@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
 
@@ -65,6 +66,15 @@ class ProfileScreen extends ConsumerWidget {
                           Text(
                             DateFormat.yMMMMd().format(user.createdAt),
                           ),
+                          const SizedBox(height: 16),
+                          TextButton.icon(
+                              onPressed: () async {
+                                await ref
+                                    .read(appStateProvider.notifier)
+                                    .logout();
+                              },
+                              icon: const Icon(Icons.logout),
+                              label: const Text('LOGOUT'))
                         ],
                       ),
                     ),
