@@ -28,6 +28,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         children: [
           Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -54,7 +55,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     onPressed: () async {
                       // var token = await Magic.instance.auth
                       //     .loginWithEmailOTP(email: _emailController.text);
-                      // ref.read(appStateProvider.notifier).login(token);
+                      ref.read(appStateProvider.notifier).login("");
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),

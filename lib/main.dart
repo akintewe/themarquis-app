@@ -30,6 +30,7 @@ class MyApp extends ConsumerWidget {
     // ref.watch(natsServiceProvider);
     ref.watch(userProvider);
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Marquis V2',
       scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(

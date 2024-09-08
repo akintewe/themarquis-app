@@ -59,6 +59,8 @@ class LudoGame extends FlameGame with TapCallbacks {
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    playState = PlayState.welcome;
+
     await Flame.images.load('spritesheet.png');
     await Flame.images.load('avatar_spritesheet.png');
 

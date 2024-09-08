@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/widgets/overlay_screen.dart';
+import 'package:marquis_v2/screens/waiting_room_screen.dart';
 
 void main() {
   runApp(const LudoGameApp());
@@ -60,11 +61,13 @@ class _LudoGameAppState extends State<LudoGameApp> {
                         child: GameWidget(
                           game: game,
                           overlayBuilderMap: {
+                            // PlayState.welcome.name: (context, game) =>
+                            //     const OverlayScreen(
+                            //       title: 'Waiting Room',
+                            //       subtitle: 'Waiting for players...',
+                            //     ),
                             PlayState.welcome.name: (context, game) =>
-                                const OverlayScreen(
-                                  title: 'Waiting Room',
-                                  subtitle: 'Waiting for players...',
-                                ),
+                                const WaitingRoomScreen(),
                             PlayState.gameOver.name: (context, game) =>
                                 const OverlayScreen(
                                   title: 'G A M E   O V E R',
