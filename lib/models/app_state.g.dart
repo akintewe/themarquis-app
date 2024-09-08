@@ -18,22 +18,23 @@ class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
     };
     return _$AppStateDataImpl(
       navigatorIndex: fields[0] as int,
-      token: fields[1] as String?,
+      accessToken: fields[1] as String?,
       theme: fields[2] as String,
       autoLoginResult: fields[3] as bool?,
       isConnectedInternet: fields[4] as bool,
       selectedGame: fields[5] as String?,
+      refreshToken: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$AppStateDataImpl obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.navigatorIndex)
       ..writeByte(1)
-      ..write(obj.token)
+      ..write(obj.accessToken)
       ..writeByte(2)
       ..write(obj.theme)
       ..writeByte(3)
@@ -41,7 +42,9 @@ class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
       ..writeByte(4)
       ..write(obj.isConnectedInternet)
       ..writeByte(5)
-      ..write(obj.selectedGame);
+      ..write(obj.selectedGame)
+      ..writeByte(6)
+      ..write(obj.refreshToken);
   }
 
   @override

@@ -49,6 +49,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 ),
               if (ref.watch(userProvider) == null)
                 const Text("Fetching user..."),
+              if (snapshot.error != null)
+                Text(
+                  snapshot.error.toString(),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: OutlinedButton(

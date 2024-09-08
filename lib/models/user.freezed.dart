@@ -23,15 +23,31 @@ mixin _$UserData {
   @HiveField(0)
   String get id => throw _privateConstructorUsedError;
   @HiveField(1)
-  String get phoneNumber => throw _privateConstructorUsedError;
+  String get email => throw _privateConstructorUsedError;
   @HiveField(2)
-  String get username => throw _privateConstructorUsedError;
+  String get role => throw _privateConstructorUsedError;
   @HiveField(3)
-  String get nickname => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
   @HiveField(4)
-  DateTime get createdAt => throw _privateConstructorUsedError;
+  int get points => throw _privateConstructorUsedError;
   @HiveField(5)
+  String? get referredBy => throw _privateConstructorUsedError;
+  @HiveField(6)
+  int get referralId => throw _privateConstructorUsedError;
+  @HiveField(7)
+  int get walletId => throw _privateConstructorUsedError;
+  @HiveField(8)
+  String? get profileImageUrl => throw _privateConstructorUsedError;
+  @HiveField(9)
+  DateTime get createdAt => throw _privateConstructorUsedError;
+  @HiveField(10)
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  @HiveField(11)
+  String get referralCode => throw _privateConstructorUsedError;
+  @HiveField(12)
+  String get accountAddress => throw _privateConstructorUsedError;
+  @HiveField(13)
+  String get sessionId => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -46,11 +62,19 @@ abstract class $UserDataCopyWith<$Res> {
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) String phoneNumber,
-      @HiveField(2) String username,
-      @HiveField(3) String nickname,
-      @HiveField(4) DateTime createdAt,
-      @HiveField(5) DateTime updatedAt});
+      @HiveField(1) String email,
+      @HiveField(2) String role,
+      @HiveField(3) String status,
+      @HiveField(4) int points,
+      @HiveField(5) String? referredBy,
+      @HiveField(6) int referralId,
+      @HiveField(7) int walletId,
+      @HiveField(8) String? profileImageUrl,
+      @HiveField(9) DateTime createdAt,
+      @HiveField(10) DateTime updatedAt,
+      @HiveField(11) String referralCode,
+      @HiveField(12) String accountAddress,
+      @HiveField(13) String sessionId});
 }
 
 /// @nodoc
@@ -67,29 +91,57 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
   @override
   $Res call({
     Object? id = null,
-    Object? phoneNumber = null,
-    Object? username = null,
-    Object? nickname = null,
+    Object? email = null,
+    Object? role = null,
+    Object? status = null,
+    Object? points = null,
+    Object? referredBy = freezed,
+    Object? referralId = null,
+    Object? walletId = null,
+    Object? profileImageUrl = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? referralCode = null,
+    Object? accountAddress = null,
+    Object? sessionId = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      phoneNumber: null == phoneNumber
-          ? _value.phoneNumber
-          : phoneNumber // ignore: cast_nullable_to_non_nullable
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
               as String,
-      username: null == username
-          ? _value.username
-          : username // ignore: cast_nullable_to_non_nullable
+      role: null == role
+          ? _value.role
+          : role // ignore: cast_nullable_to_non_nullable
               as String,
-      nickname: null == nickname
-          ? _value.nickname
-          : nickname // ignore: cast_nullable_to_non_nullable
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
               as String,
+      points: null == points
+          ? _value.points
+          : points // ignore: cast_nullable_to_non_nullable
+              as int,
+      referredBy: freezed == referredBy
+          ? _value.referredBy
+          : referredBy // ignore: cast_nullable_to_non_nullable
+              as String?,
+      referralId: null == referralId
+          ? _value.referralId
+          : referralId // ignore: cast_nullable_to_non_nullable
+              as int,
+      walletId: null == walletId
+          ? _value.walletId
+          : walletId // ignore: cast_nullable_to_non_nullable
+              as int,
+      profileImageUrl: freezed == profileImageUrl
+          ? _value.profileImageUrl
+          : profileImageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -98,6 +150,18 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      referralCode: null == referralCode
+          ? _value.referralCode
+          : referralCode // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountAddress: null == accountAddress
+          ? _value.accountAddress
+          : accountAddress // ignore: cast_nullable_to_non_nullable
+              as String,
+      sessionId: null == sessionId
+          ? _value.sessionId
+          : sessionId // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -112,11 +176,19 @@ abstract class _$$UserDataImplCopyWith<$Res>
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) String phoneNumber,
-      @HiveField(2) String username,
-      @HiveField(3) String nickname,
-      @HiveField(4) DateTime createdAt,
-      @HiveField(5) DateTime updatedAt});
+      @HiveField(1) String email,
+      @HiveField(2) String role,
+      @HiveField(3) String status,
+      @HiveField(4) int points,
+      @HiveField(5) String? referredBy,
+      @HiveField(6) int referralId,
+      @HiveField(7) int walletId,
+      @HiveField(8) String? profileImageUrl,
+      @HiveField(9) DateTime createdAt,
+      @HiveField(10) DateTime updatedAt,
+      @HiveField(11) String referralCode,
+      @HiveField(12) String accountAddress,
+      @HiveField(13) String sessionId});
 }
 
 /// @nodoc
@@ -131,29 +203,57 @@ class __$$UserDataImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? phoneNumber = null,
-    Object? username = null,
-    Object? nickname = null,
+    Object? email = null,
+    Object? role = null,
+    Object? status = null,
+    Object? points = null,
+    Object? referredBy = freezed,
+    Object? referralId = null,
+    Object? walletId = null,
+    Object? profileImageUrl = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? referralCode = null,
+    Object? accountAddress = null,
+    Object? sessionId = null,
   }) {
     return _then(_$UserDataImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      phoneNumber: null == phoneNumber
-          ? _value.phoneNumber
-          : phoneNumber // ignore: cast_nullable_to_non_nullable
+      email: null == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
               as String,
-      username: null == username
-          ? _value.username
-          : username // ignore: cast_nullable_to_non_nullable
+      role: null == role
+          ? _value.role
+          : role // ignore: cast_nullable_to_non_nullable
               as String,
-      nickname: null == nickname
-          ? _value.nickname
-          : nickname // ignore: cast_nullable_to_non_nullable
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
               as String,
+      points: null == points
+          ? _value.points
+          : points // ignore: cast_nullable_to_non_nullable
+              as int,
+      referredBy: freezed == referredBy
+          ? _value.referredBy
+          : referredBy // ignore: cast_nullable_to_non_nullable
+              as String?,
+      referralId: null == referralId
+          ? _value.referralId
+          : referralId // ignore: cast_nullable_to_non_nullable
+              as int,
+      walletId: null == walletId
+          ? _value.walletId
+          : walletId // ignore: cast_nullable_to_non_nullable
+              as int,
+      profileImageUrl: freezed == profileImageUrl
+          ? _value.profileImageUrl
+          : profileImageUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -162,6 +262,18 @@ class __$$UserDataImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      referralCode: null == referralCode
+          ? _value.referralCode
+          : referralCode // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountAddress: null == accountAddress
+          ? _value.accountAddress
+          : accountAddress // ignore: cast_nullable_to_non_nullable
+              as String,
+      sessionId: null == sessionId
+          ? _value.sessionId
+          : sessionId // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -172,11 +284,19 @@ class __$$UserDataImplCopyWithImpl<$Res>
 class _$UserDataImpl extends _UserData {
   _$UserDataImpl(
       {@HiveField(0) required this.id,
-      @HiveField(1) required this.phoneNumber,
-      @HiveField(2) required this.username,
-      @HiveField(3) required this.nickname,
-      @HiveField(4) required this.createdAt,
-      @HiveField(5) required this.updatedAt})
+      @HiveField(1) required this.email,
+      @HiveField(2) required this.role,
+      @HiveField(3) required this.status,
+      @HiveField(4) required this.points,
+      @HiveField(5) required this.referredBy,
+      @HiveField(6) required this.referralId,
+      @HiveField(7) required this.walletId,
+      @HiveField(8) required this.profileImageUrl,
+      @HiveField(9) required this.createdAt,
+      @HiveField(10) required this.updatedAt,
+      @HiveField(11) required this.referralCode,
+      @HiveField(12) required this.accountAddress,
+      @HiveField(13) required this.sessionId})
       : super._();
 
   factory _$UserDataImpl.fromJson(Map<String, dynamic> json) =>
@@ -187,23 +307,47 @@ class _$UserDataImpl extends _UserData {
   final String id;
   @override
   @HiveField(1)
-  final String phoneNumber;
+  final String email;
   @override
   @HiveField(2)
-  final String username;
+  final String role;
   @override
   @HiveField(3)
-  final String nickname;
+  final String status;
   @override
   @HiveField(4)
-  final DateTime createdAt;
+  final int points;
   @override
   @HiveField(5)
+  final String? referredBy;
+  @override
+  @HiveField(6)
+  final int referralId;
+  @override
+  @HiveField(7)
+  final int walletId;
+  @override
+  @HiveField(8)
+  final String? profileImageUrl;
+  @override
+  @HiveField(9)
+  final DateTime createdAt;
+  @override
+  @HiveField(10)
   final DateTime updatedAt;
+  @override
+  @HiveField(11)
+  final String referralCode;
+  @override
+  @HiveField(12)
+  final String accountAddress;
+  @override
+  @HiveField(13)
+  final String sessionId;
 
   @override
   String toString() {
-    return 'UserData(id: $id, phoneNumber: $phoneNumber, username: $username, nickname: $nickname, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserData(id: $id, email: $email, role: $role, status: $status, points: $points, referredBy: $referredBy, referralId: $referralId, walletId: $walletId, profileImageUrl: $profileImageUrl, createdAt: $createdAt, updatedAt: $updatedAt, referralCode: $referralCode, accountAddress: $accountAddress, sessionId: $sessionId)';
   }
 
   @override
@@ -212,22 +356,48 @@ class _$UserDataImpl extends _UserData {
         (other.runtimeType == runtimeType &&
             other is _$UserDataImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.phoneNumber, phoneNumber) ||
-                other.phoneNumber == phoneNumber) &&
-            (identical(other.username, username) ||
-                other.username == username) &&
-            (identical(other.nickname, nickname) ||
-                other.nickname == nickname) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.role, role) || other.role == role) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.points, points) || other.points == points) &&
+            (identical(other.referredBy, referredBy) ||
+                other.referredBy == referredBy) &&
+            (identical(other.referralId, referralId) ||
+                other.referralId == referralId) &&
+            (identical(other.walletId, walletId) ||
+                other.walletId == walletId) &&
+            (identical(other.profileImageUrl, profileImageUrl) ||
+                other.profileImageUrl == profileImageUrl) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.referralCode, referralCode) ||
+                other.referralCode == referralCode) &&
+            (identical(other.accountAddress, accountAddress) ||
+                other.accountAddress == accountAddress) &&
+            (identical(other.sessionId, sessionId) ||
+                other.sessionId == sessionId));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-      runtimeType, id, phoneNumber, username, nickname, createdAt, updatedAt);
+      runtimeType,
+      id,
+      email,
+      role,
+      status,
+      points,
+      referredBy,
+      referralId,
+      walletId,
+      profileImageUrl,
+      createdAt,
+      updatedAt,
+      referralCode,
+      accountAddress,
+      sessionId);
 
   @JsonKey(ignore: true)
   @override
@@ -246,11 +416,19 @@ class _$UserDataImpl extends _UserData {
 abstract class _UserData extends UserData {
   factory _UserData(
       {@HiveField(0) required final String id,
-      @HiveField(1) required final String phoneNumber,
-      @HiveField(2) required final String username,
-      @HiveField(3) required final String nickname,
-      @HiveField(4) required final DateTime createdAt,
-      @HiveField(5) required final DateTime updatedAt}) = _$UserDataImpl;
+      @HiveField(1) required final String email,
+      @HiveField(2) required final String role,
+      @HiveField(3) required final String status,
+      @HiveField(4) required final int points,
+      @HiveField(5) required final String? referredBy,
+      @HiveField(6) required final int referralId,
+      @HiveField(7) required final int walletId,
+      @HiveField(8) required final String? profileImageUrl,
+      @HiveField(9) required final DateTime createdAt,
+      @HiveField(10) required final DateTime updatedAt,
+      @HiveField(11) required final String referralCode,
+      @HiveField(12) required final String accountAddress,
+      @HiveField(13) required final String sessionId}) = _$UserDataImpl;
   _UserData._() : super._();
 
   factory _UserData.fromJson(Map<String, dynamic> json) =
@@ -261,19 +439,43 @@ abstract class _UserData extends UserData {
   String get id;
   @override
   @HiveField(1)
-  String get phoneNumber;
+  String get email;
   @override
   @HiveField(2)
-  String get username;
+  String get role;
   @override
   @HiveField(3)
-  String get nickname;
+  String get status;
   @override
   @HiveField(4)
-  DateTime get createdAt;
+  int get points;
   @override
   @HiveField(5)
+  String? get referredBy;
+  @override
+  @HiveField(6)
+  int get referralId;
+  @override
+  @HiveField(7)
+  int get walletId;
+  @override
+  @HiveField(8)
+  String? get profileImageUrl;
+  @override
+  @HiveField(9)
+  DateTime get createdAt;
+  @override
+  @HiveField(10)
   DateTime get updatedAt;
+  @override
+  @HiveField(11)
+  String get referralCode;
+  @override
+  @HiveField(12)
+  String get accountAddress;
+  @override
+  @HiveField(13)
+  String get sessionId;
   @override
   @JsonKey(ignore: true)
   _$$UserDataImplCopyWith<_$UserDataImpl> get copyWith =>

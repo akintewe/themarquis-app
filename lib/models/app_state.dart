@@ -11,15 +11,15 @@ class AppStateData extends HiveObject with _$AppStateData {
   @HiveType(typeId: 0)
   factory AppStateData({
     @HiveField(0) @Default(0) int navigatorIndex,
-    @HiveField(1) String? token,
+    @HiveField(1) String? accessToken,
     @HiveField(2) @Default("system") String theme,
     @HiveField(3) bool? autoLoginResult,
     @HiveField(4) @Default(false) bool isConnectedInternet,
     @HiveField(5) String? selectedGame,
+    @HiveField(6) String? refreshToken,
   }) = _AppStateData;
 
-  // String get bearerToken =>
-  //     token?.accessToken == null ? '' : 'Bearer ${token!.accessToken}';
+  String get bearerToken => accessToken == null ? '' : 'Bearer $accessToken';
 
-  bool get isAuth => token != null;
+  bool get isAuth => accessToken != null;
 }
