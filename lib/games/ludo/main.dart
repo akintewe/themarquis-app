@@ -6,6 +6,7 @@ import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/widgets/overlay_screen.dart';
+import 'package:marquis_v2/screens/join_session_screen.dart';
 import 'package:marquis_v2/screens/waiting_room_screen.dart';
 
 void main() {
@@ -22,8 +23,8 @@ class LudoGameApp extends ConsumerStatefulWidget {
 
 class _LudoGameAppState extends ConsumerState<LudoGameApp> {
   final LudoGame _game = LudoGame();
-  final GlobalKey<RiverpodAwareGameWidgetState> _gameWidgetKey =
-      GlobalKey<RiverpodAwareGameWidgetState>();
+  final GlobalKey<RiverpodAwareGameWidgetState<LudoGame>> _gameWidgetKey =
+      GlobalKey<RiverpodAwareGameWidgetState<LudoGame>>();
 
   @override
   Widget build(BuildContext context) {
@@ -58,15 +59,16 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                       child: SizedBox(
                         width: gameWidth,
                         height: gameHeight,
-                        child: RiverpodAwareGameWidget(
+                        child: RiverpodAwareGameWidget<LudoGame>(
                           key: _gameWidgetKey,
                           game: _game,
                           overlayBuilderMap: {
                             PlayState.welcome.name: (context, game) =>
-                                const OverlayScreen(
-                                  title: 'Welcome',
-                                  subtitle: 'Please join a session',
-                                ),
+                                JoinSessionScreen(game: game),
+                            // const OverlayScreen(
+                            //   title: 'Welcome',
+                            //   subtitle: 'Please join a session',
+                            // ),
                             PlayState.waiting.name: (context, game) =>
                                 const WaitingRoomScreen(),
                             PlayState.gameOver.name: (context, game) =>

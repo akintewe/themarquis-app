@@ -1,5 +1,6 @@
 // import 'package:magic_sdk/magic_sdk.dart';
 import 'package:marquis_v2/models/app_state.dart';
+import 'package:marquis_v2/models/ludo_session.dart';
 import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
@@ -14,8 +15,11 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(AppStateDataImplAdapter());
   Hive.registerAdapter(UserDataImplAdapter());
+  Hive.registerAdapter(LudoSessionDataImplAdapter());
+  Hive.registerAdapter(LudoSessionUserStatusImplAdapter());
   await Hive.openBox<AppStateData>("appState");
   await Hive.openBox<UserData>("user");
+  await Hive.openBox<LudoSessionData>("ludoSession");
   runApp(const ProviderScope(child: MyApp()));
   // Magic.instance = Magic("pk_live_D38AAC9114F908B0");
 }

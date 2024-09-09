@@ -4,8 +4,9 @@ import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
-  const SplashScreen({super.key});
-
+  const SplashScreen({
+    super.key,
+  });
   @override
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
@@ -26,8 +27,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         //   ref.read(appStateProvider.notifier).setConnectivity(true);
         // }
         if (ref.read(appStateProvider).autoLoginResult == null) {
+          print("here1");
           await ref.read(appStateProvider.notifier).tryAutoLogin();
         }
+        print("here2");
+
         await ref.read(userProvider.notifier).getUser();
         // if (ref.read(userProvider) != null) {
         //   ref.read(appStateProvider.notifier).setAutoLogin(true);
