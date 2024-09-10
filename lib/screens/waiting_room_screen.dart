@@ -14,8 +14,8 @@ class WaitingRoomScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Top section with title and room ID
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20.0),
             child: Column(
               children: [
                 Text(
@@ -45,7 +45,7 @@ class WaitingRoomScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(
+                    SizedBox(
                       width: 35,
                     ),
                     Icon(
@@ -74,7 +74,7 @@ class WaitingRoomScreen extends StatelessWidget {
                   const SizedBox(
                     height: 30,
                   ),
-                  Text(
+                  const Text(
                     'VS',
                     style: TextStyle(
                       color: Colors.white,
@@ -82,7 +82,7 @@ class WaitingRoomScreen extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 30,
                   ),
                   //3 other profile
@@ -125,9 +125,8 @@ class WaitingRoomScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10),
               child: Text(
                 'Invite',
                 style: TextStyle(
@@ -141,12 +140,12 @@ class WaitingRoomScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Container(
-              padding: EdgeInsets.all(15),
+              padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
                 color: Colors.grey[900],
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Icon(

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
+import 'package:marquis_v2/screens/auth_screen.dart';
 
 class ProfilePath extends AppRoutePath {
   @override
@@ -23,7 +24,32 @@ class ProfileScreen extends ConsumerWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: user == null
-            ? const Text("No data...")
+            ? Center(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      width: 1.8,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(7.5),
+                    ),
+                  ),
+                  onPressed: () async {
+                    showDialog(
+                        context: context, builder: (ctx) => const AuthDialog());
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [

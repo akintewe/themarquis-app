@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/router/route_path.dart';
+import 'package:marquis_v2/screens/auth_screen.dart';
 
 class HomePath extends AppRoutePath {
   @override
@@ -77,6 +78,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       isActive: true,
                       isPopular: true,
                       onPlay: () {
+                        if (!ref.read(appStateProvider).isAuth) {
+                          showDialog(
+                              context: context,
+                              builder: (ctx) => const AuthDialog());
+                          return;
+                        }
                         ref.read(appStateProvider.notifier).selectGame("ludo");
                       },
                     ),

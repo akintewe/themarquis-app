@@ -1,5 +1,4 @@
 import 'package:marquis_v2/router/route_path.dart';
-import 'package:marquis_v2/screens/auth_screen.dart';
 import 'package:marquis_v2/screens/game_screen.dart';
 import 'package:marquis_v2/screens/home_screen.dart';
 import 'package:marquis_v2/screens/page_not_found_screen.dart';
@@ -17,10 +16,6 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
     } else {
       final first = uri.pathSegments[0];
       switch (first) {
-        case 'auth':
-          if (uri.pathSegments.length == 1) {
-            return AuthPath();
-          }
         // case 'signup':
         //   return SignUpPath();
         case 'profile':

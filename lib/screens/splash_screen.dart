@@ -19,7 +19,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       body: FutureBuilder(future: () async {
         if (isRun) return;
         isRun = true;
-        print("getting user");
         // final connectivityResult = await Connectivity().checkConnectivity();
         // if (connectivityResult == ConnectivityResult.none) {
         //   ref.read(appStateProvider.notifier).setConnectivity(false);
@@ -27,12 +26,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         //   ref.read(appStateProvider.notifier).setConnectivity(true);
         // }
         if (ref.read(appStateProvider).autoLoginResult == null) {
-          print("here1");
           await ref.read(appStateProvider.notifier).tryAutoLogin();
         }
-        print("here2");
-
-        await ref.read(userProvider.notifier).getUser();
+        if (ref.read(appStateProvider).isAuth) {
+          await ref.read(userProvider.notifier).getUser();
+        }
         // if (ref.read(userProvider) != null) {
         //   ref.read(appStateProvider.notifier).setAutoLogin(true);
         //   ref.read(appStateProvider.notifier).syncServer();
@@ -59,30 +57,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      width: 1.8,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(7.5),
-                    ),
-                  ),
-                  onPressed: () {
-                    ref.read(appStateProvider.notifier).logout();
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'Back To Login',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         );

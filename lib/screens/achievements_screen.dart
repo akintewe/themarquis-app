@@ -15,7 +15,7 @@ class AchievementsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text("Achievements"),
+        child: Text("Achievements\nComming Soon"),
       ),
     );
   }

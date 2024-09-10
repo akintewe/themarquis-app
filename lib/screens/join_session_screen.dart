@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
 class JoinSessionScreen extends StatelessWidget {
-  JoinSessionScreen({super.key, required this.game});
-  LudoGame game;
+  const JoinSessionScreen({super.key, required this.game});
+  final LudoGame game;
 
   @override
   Widget build(BuildContext context) {
     //27 30 34
     return Scaffold(
-      backgroundColor: Color.fromRGBO(27, 30, 34, 1),
+      backgroundColor: const Color.fromRGBO(27, 30, 34, 1),
       body: SizedBox(
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'OPEN SESSION',
               style: TextStyle(
                 color: Colors.white,
@@ -36,7 +36,7 @@ class JoinSessionScreen extends StatelessWidget {
               onPressed: () {
                 game.playState = PlayState.waiting;
               },
-              child: Text(
+              child: const Text(
                 "Join",
                 style: TextStyle(
                   fontSize: 50,
@@ -62,11 +62,13 @@ class JoinSessionScreen extends StatelessWidget {
             children: [
               Text(
                 roomName,
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w600),
+                style:
+                    const TextStyle(fontSize: 40, fontWeight: FontWeight.w600),
               ),
               Text(
-                "${noOfPlayers}/4 Players",
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w600),
+                "$noOfPlayers/4 Players",
+                style:
+                    const TextStyle(fontSize: 40, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -74,13 +76,13 @@ class JoinSessionScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               //four avatar
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.start,
               ),
               //join button
               TextButton(
                 onPressed: () {},
-                child: Text(
+                child: const Text(
                   "JOIN",
                   style: TextStyle(
                     fontSize: 38,

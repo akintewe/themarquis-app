@@ -58,6 +58,7 @@ class AppState extends _$AppState {
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
+    await ref.read(userProvider.notifier).getUser();
     await _hiveBox!.put("appState", state);
   }
 
@@ -78,6 +79,7 @@ class AppState extends _$AppState {
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
+    await ref.read(userProvider.notifier).getUser();
     await _hiveBox!.put("appState", state);
   }
 
@@ -94,6 +96,7 @@ class AppState extends _$AppState {
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
+    await ref.read(userProvider.notifier).getUser();
     await _hiveBox!.put("appState", state);
   }
 
@@ -103,7 +106,6 @@ class AppState extends _$AppState {
       navigatorIndex: 0,
       accessToken: null,
       refreshToken: null,
-      autoLoginResult: null,
       selectedGame: null,
     );
     _refreshTokenTimer?.cancel();
@@ -114,6 +116,7 @@ class AppState extends _$AppState {
 
   Future<bool> tryAutoLogin() async {
     if (state.accessToken == null) {
+      state = state.copyWith(autoLoginResult: true);
       return false;
     }
     // await refreshToken();

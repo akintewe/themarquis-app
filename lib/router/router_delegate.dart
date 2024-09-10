@@ -9,7 +9,6 @@ import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/router/fade_animation.dart';
 import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/screens/achievements_screen.dart';
-import 'package:marquis_v2/screens/auth_screen.dart';
 import 'package:marquis_v2/screens/game_screen.dart';
 import 'package:marquis_v2/screens/home_screen.dart';
 import 'package:marquis_v2/screens/page_not_found_screen.dart';
@@ -41,6 +40,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     _user = ref.read(userProvider);
     ref.listen(appStateProvider, (previous, next) {
       _appState = next;
+      print(_appState.autoLoginResult);
       notifyListeners();
     });
     ref.listen(userProvider, (previous, next) {
@@ -54,26 +54,20 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     if (_showPageNotFound == true) {
       return PageNotFoundPath();
     }
-    if (_appState.isAuth) {
-      if (_appState.selectedGame != null) {
-        return GamePath(_appState.selectedGame!);
-      }
-      switch (_appState.navigatorIndex) {
-        case 0:
-          return HomePath();
-        case 1:
-          return AchievementsPath();
-        case 2:
-          return ProfilePath();
-        default:
-          break;
-      }
-    } else {
-      // if (_isSignUp) {
-      //   return SignUpPath();
-      // }
-      return AuthPath();
+    if (_appState.selectedGame != null) {
+      return GamePath(_appState.selectedGame!);
     }
+    switch (_appState.navigatorIndex) {
+      case 0:
+        return HomePath();
+      case 1:
+        return AchievementsPath();
+      case 2:
+        return ProfilePath();
+      default:
+        break;
+    }
+
     return null;
   }
 
@@ -87,47 +81,29 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
           child: PageNotFoundScreen(),
         )
       ];
-    } else if (_appState.isAuth) {
-      if (_appState.autoLoginResult == null || _user == null) {
-        stack = [
-          const FadeAnimationPage(
-            key: ValueKey('SplashPage'),
-            child: SplashScreen(
-                // goToCreateBusiness: () {
-                //   _isSignUp = true;
-                //   notifyListeners();
-                // },
-                ),
-          ),
-          // if (_isSignUp)
-          //   const FadeAnimationPage(
-          //     child: CreateBusinessScreen(),
-          //     key: ValueKey('CreateBusinessPage'),
-          //   ),
-        ];
-      } else {
-        stack = [
-          const FadeAnimationPage(
-            child: AppShell(),
-            key: ValueKey('AppShell'),
-          ),
-        ];
-      }
+    } else if (_appState.autoLoginResult == null) {
+      stack = [
+        const FadeAnimationPage(
+          key: ValueKey('SplashPage'),
+          child: SplashScreen(
+              // goToCreateBusiness: () {
+              //   _isSignUp = true;
+              //   notifyListeners();
+              // },
+              ),
+        ),
+        // if (_isSignUp)
+        //   const FadeAnimationPage(
+        //     child: CreateBusinessScreen(),
+        //     key: ValueKey('CreateBusinessPage'),
+        //   ),
+      ];
     } else {
       stack = [
         const FadeAnimationPage(
-          key: ValueKey('LoginPage'),
-          child: AuthScreen(),
+          child: AppShell(),
+          key: ValueKey('AppShell'),
         ),
-        // if (_isSignUp)
-        //   FadeAnimationPage(
-        //     key: const ValueKey('SignUpPage'),
-        //     child: MainSignUpScreen(
-        //       email: _email,
-        //       token: _idToken,
-        //       signUpMode: _signUpMode,
-        //     ),
-        //   ),
       ];
     }
 
