@@ -1,4 +1,5 @@
 // import 'package:magic_sdk/magic_sdk.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:marquis_v2/models/app_state.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
 import 'package:marquis_v2/models/user.dart';
@@ -44,8 +45,8 @@ class MyApp extends ConsumerWidget {
           surface: const Color(0xffeeeeee),
           brightness: Brightness.dark,
         ),
-        // textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)
-        //   .apply(bodyColor: Colors.white),
+        textTheme: GoogleFonts.orbitronTextTheme(Theme.of(context).textTheme)
+            .apply(bodyColor: Colors.white),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       routeInformationParser: AppRouteInformationParser(),

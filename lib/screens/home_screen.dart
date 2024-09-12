@@ -78,12 +78,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       isActive: true,
                       isPopular: true,
                       onPlay: () {
-                        if (!ref.read(appStateProvider).isAuth) {
-                          showDialog(
-                              context: context,
-                              builder: (ctx) => const AuthDialog());
-                          return;
-                        }
+                        // if (!ref.read(appStateProvider).isAuth) {
+                        //   showDialog(
+                        //       context: context,
+                        //       builder: (ctx) => const AuthDialog());
+                        //   return;
+                        // }
                         ref.read(appStateProvider.notifier).selectGame("ludo");
                       },
                     ),

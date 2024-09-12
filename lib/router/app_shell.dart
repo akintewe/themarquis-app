@@ -43,32 +43,36 @@ class _AppShellState extends ConsumerState<AppShell> {
         routerDelegate: _routerDelegate,
         backButtonDispatcher: _backButtonDispatcher,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        elevation: 0.0,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.secondary,
-        items: const [
-          BottomNavigationBarItem(
-            // key: ValueKey("HomeBottomNavigationBarItem"),
-            icon: FaIcon(FontAwesomeIcons.house),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            // key: ValueKey("FeedsBottomNavigationBarItem"),
-            icon: FaIcon(FontAwesomeIcons.rss),
-            label: 'Achievements',
-          ),
-          BottomNavigationBarItem(
-            // key: ValueKey("AccountBottomNavigationBarItem"),
-            icon: FaIcon(FontAwesomeIcons.circleUser),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: appState.navigatorIndex,
-        onTap: (newIndex) {
-          ref.read(appStateProvider.notifier).changeNavigatorIndex(newIndex);
-        },
-      ),
+      bottomNavigationBar: appState.selectedGame != null
+          ? null
+          : BottomNavigationBar(
+              elevation: 0.0,
+              selectedItemColor: Theme.of(context).colorScheme.primary,
+              unselectedItemColor: Theme.of(context).colorScheme.secondary,
+              items: const [
+                BottomNavigationBarItem(
+                  // key: ValueKey("HomeBottomNavigationBarItem"),
+                  icon: FaIcon(FontAwesomeIcons.house),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  // key: ValueKey("FeedsBottomNavigationBarItem"),
+                  icon: FaIcon(FontAwesomeIcons.rss),
+                  label: 'Achievements',
+                ),
+                BottomNavigationBarItem(
+                  // key: ValueKey("AccountBottomNavigationBarItem"),
+                  icon: FaIcon(FontAwesomeIcons.circleUser),
+                  label: 'Profile',
+                ),
+              ],
+              currentIndex: appState.navigatorIndex,
+              onTap: (newIndex) {
+                ref
+                    .read(appStateProvider.notifier)
+                    .changeNavigatorIndex(newIndex);
+              },
+            ),
     );
   }
 }

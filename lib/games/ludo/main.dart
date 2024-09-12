@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
+import 'package:marquis_v2/games/ludo/screens/game_over_screen.dart';
 import 'package:marquis_v2/games/ludo/widgets/overlay_screen.dart';
 import 'package:marquis_v2/screens/join_session_screen.dart';
 import 'package:marquis_v2/screens/waiting_room_screen.dart';
@@ -71,16 +72,8 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                             // ),
                             PlayState.waiting.name: (context, game) =>
                                 const WaitingRoomScreen(),
-                            PlayState.gameOver.name: (context, game) =>
-                                const OverlayScreen(
-                                  title: 'G A M E   O V E R',
-                                  subtitle: 'Tap to Play Again',
-                                ),
-                            PlayState.won.name: (context, game) =>
-                                const OverlayScreen(
-                                  title: 'Y O U   W O N ! ! !',
-                                  subtitle: 'Tap to Play Again',
-                                ),
+                            PlayState.finished.name: (context, game) =>
+                                MatchResultsScreen(game: game),
                           },
                         ),
                       ),

@@ -16,7 +16,7 @@ import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
 
-enum PlayState { welcome, waiting, playing, gameOver, won }
+enum PlayState { welcome, waiting, playing, finished }
 
 class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   late Dice dice;
@@ -51,13 +51,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     switch (playState) {
       case PlayState.welcome:
       case PlayState.waiting:
-      case PlayState.gameOver:
-      case PlayState.won:
+      case PlayState.finished:
         overlays.add(playState.name);
       case PlayState.playing:
         overlays.remove(PlayState.welcome.name);
-        overlays.remove(PlayState.gameOver.name);
-        overlays.remove(PlayState.won.name);
+        overlays.remove(PlayState.waiting.name);
+        overlays.remove(PlayState.finished.name);
     }
   }
 
@@ -79,7 +78,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> onLoad() async {
     super.onLoad();
 
-    playState = PlayState.welcome;
+    playState = PlayState.finished;
 
     await Flame.images.load('spritesheet.png');
     await Flame.images.load('avatar_spritesheet.png');
