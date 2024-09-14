@@ -42,7 +42,7 @@ class MyApp extends ConsumerWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.cyan,
-          surface: const Color(0xffeeeeee),
+          surface: const Color(0xff0f1118),
           brightness: Brightness.dark,
         ),
         textTheme: GoogleFonts.orbitronTextTheme(Theme.of(context).textTheme)

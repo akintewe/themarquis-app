@@ -78,7 +78,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> onLoad() async {
     super.onLoad();
 
-    playState = PlayState.finished;
+    playState = PlayState.playing;
 
     await Flame.images.load('spritesheet.png');
     await Flame.images.load('avatar_spritesheet.png');
@@ -153,6 +153,103 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   @override
   Color backgroundColor() => const Color(0xff0f1118);
-
-  void addPinToBoard(PlayerPin pin) {}
 }
+
+const mockPlayerRouteMap = {
+  0: [
+    [6, 0], // Turn 1: Move first token out of base
+    [6, 1], // Turn 2: Move second token out of base
+    [4, 0], // Turn 3: Move first token forward
+    [5, 1], // Turn 4: Move second token forward
+    [6, 2], // Turn 5: Move third token out of base
+    [3, 0], // Turn 6: Move first token forward
+    [6, 3], // Turn 7: Move fourth token out of base
+    [1, 2], // Turn 8: Move third token forward
+    [2, 1], // Turn 9: Move second token forward
+    [4, 0], // Turn 10: Move first token forward (attack Blue at position 10)
+    [5, 1], // Turn 11: Move second token forward
+    [6, 0], // Turn 12: Move first token forward
+    [3, 1], // Turn 13: Move second token forward
+    [4, 0], // Turn 14: Move first token forward
+    [6, 1], // Turn 15: Move second token forward (attack Green at position 20)
+    [5, 2], // Turn 16: Move third token forward
+    [4, 0], // Turn 17: Move first token forward
+    [6, 0], // Turn 18: First token reaches home
+    [2, 2], // Turn 19: Move third token forward
+    [3, 3], // Turn 20: Move fourth token forward
+    [5, 2], // Turn 21: Move third token forward
+    [6, 1], // Turn 22: Move second token forward
+    [4, 3], // Turn 23: Move fourth token forward
+    [3, 1], // Turn 24: Second token reaches home
+    [5, 2], // Turn 25: Move third token forward
+    [6, 3], // Turn 26: Move fourth token forward (third token reaches home)
+    [4, 3], // Turn 27: Move fourth token forward
+    [3, 3] // Turn 28: Fourth token reaches home -> Red wins!
+  ],
+  1: [
+    [6, 0], // Turn 1: Move first token out of base
+    [3, 0], // Turn 2: Move first token forward
+    [6, 1], // Turn 3: Move second token out of base
+    [5, 0], // Turn 4: Move first token forward
+    [1, 1], // Turn 5: Move second token forward
+    [6, 2], // Turn 6: Move third token out of base
+    [2, 0], // Turn 7: Move first token forward
+    [6, 3], // Turn 8: Move fourth token out of base
+    [
+      4,
+      0
+    ], // Turn 9: Move first token forward (attacked by Red at position 10, sent back to base)
+    [5, 1], // Turn 10: Move second token forward
+    [3, 2], // Turn 11: Move third token forward
+    [6, 1], // Turn 12: Move second token forward
+    [4, 1], // Turn 13: Move second token forward
+    [6, 2], // Turn 14: Move third token forward
+    [3, 0], // Turn 15: Move first token forward again
+    [5, 2], // Turn 16: Move third token forward
+    [2, 1], // Turn 17: Move second token forward
+    [6, 0], // Turn 18: Move first token forward
+    [3, 2], // Turn 19: Move third token forward
+  ],
+  2: [
+    [6, 0], // Turn 1: Move first token out of base
+    [3, 0], // Turn 2: Move first token forward
+    [6, 1], // Turn 3: Move second token out of base
+    [5, 0], // Turn 4: Move first token forward
+    [4, 0], // Turn 5: Move first token forward
+    [6, 2], // Turn 6: Move third token out of base
+    [3, 0], // Turn 7: Move first token forward
+    [5, 1], // Turn 8: Move second token forward
+    [2, 0], // Turn 9: Move first token forward
+    [
+      4,
+      1
+    ], // Turn 10: Move second token forward (attacked by Red at position 20, sent back to base)
+    [5, 2], // Turn 11: Move third token forward
+    [6, 3], // Turn 12: Move fourth token out of base
+    [2, 0], // Turn 13: Move first token forward
+    [4, 2], // Turn 14: Move third token forward
+    [6, 1], // Turn 15: Move second token forward again
+    [3, 0], // Turn 16: Move first token forward
+    [5, 2], // Turn 17: Move third token forward
+    [6, 1], // Turn 18: Move second token forward
+  ],
+  3: [
+    [6, 0], // Turn 1: Move first token out of base
+    [5, 0], // Turn 2: Move first token forward
+    [3, 0], // Turn 3: Move first token forward
+    [2, 0], // Turn 4: Move first token forward
+    [6, 1], // Turn 5: Move second token out of base
+    [5, 0], // Turn 6: Move first token forward
+    [4, 1], // Turn 7: Move second token forward
+    [6, 1], // Turn 8: Move second token forward
+    [2, 0], // Turn 9: Move first token forward
+    [5, 1], // Turn 10: Move second token forward
+    [3, 0], // Turn 11: Move first token forward
+    [6, 1], // Turn 12: Move second token forward
+    [5, 1], // Turn 13: Move second token forward
+    [3, 0], // Turn 14: Move first token forward
+    [6, 1], // Turn 15: Move second token forward
+    [5, 1], // Turn 16: Move second token forward
+    [3, 0], // Turn 17: Move first token forward
+  ]
+};

@@ -118,13 +118,29 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     }
   }
 
+  PlayerPin? getPinAtPosition(int playerIndex, int positionIndex) {
+    for (var pin in children.whereType<PlayerPin>()) {
+      if (pin.playerIndex == playerIndex &&
+          pin.currentPosIndex == positionIndex) {
+        return pin;
+      }
+    }
+    return null;
+  }
+
+  void attackPin(PlayerPin pin) {
+    pin.currentPosIndex = -1;
+    final playerHome = game.playerHomes[pin.playerIndex];
+    playerHome.returnPin(pin);
+    remove(pin);
+  }
+
   void addPin(PlayerPin pin) {
     add(pin
-      ..currentPosIndex = 0
       ..movePin(0)
       ..onTap = (event, pin) {
         pin.movePin(null);
-        game.playerCanMove = false;
+        return true;
       });
   }
 }

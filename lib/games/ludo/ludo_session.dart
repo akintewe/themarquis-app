@@ -18,15 +18,15 @@ final wsUrl = environment['wsUrl'];
 class LudoSession extends _$LudoSession {
   //Details Declaration
   Box<LudoSessionData>? _hiveBox;
-  final WebSocketChannel _channel = WebSocketChannel.connect(
-    Uri.parse(wsUrl!),
-  );
+  // final WebSocketChannel _channel = WebSocketChannel.connect(
+  //   Uri.parse(wsUrl!),
+  // );
   String? _id;
 
   @override
   LudoSessionData? build() {
     _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
-    _channel.stream.listen((data) => print(data));
+    // _channel.stream.listen((data) => print(data));
     return null;
   }
 

@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
+import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
@@ -16,10 +18,12 @@ Map<int, List<double>> spriteLocationMap = {
 
 class PlayerPin extends SpriteComponent
     with TapCallbacks, HasGameReference<LudoGame> {
-  Function(TapUpEvent event, PlayerPin pin) onTap;
+  bool Function(TapUpEvent event, PlayerPin pin) onTap;
   final int playerIndex;
-  int currentPosIndex = -1;
-  PlayerPin(Vector2 position, this.playerIndex, this.onTap)
+  late final Vector2 _initialPositionAtHome;
+  final int homeIndex;
+  int currentPosIndex = -1; // Ensure this is set to -1 initially
+  PlayerPin(Vector2 position, this.playerIndex, this.homeIndex, this.onTap)
       : super(
           position: position,
           sprite: Sprite(
@@ -29,7 +33,9 @@ class PlayerPin extends SpriteComponent
             srcSize: Vector2(spriteLocationMap[playerIndex]![2],
                 spriteLocationMap[playerIndex]![3]),
           ),
-        );
+        ) {
+    _initialPositionAtHome = position;
+  }
 
   @override
   FutureOr<void> onLoad() {
@@ -40,8 +46,10 @@ class PlayerPin extends SpriteComponent
   @override
   void onTapUp(TapUpEvent event) {
     if (game.currentPlayer == playerIndex && game.playerCanMove) {
-      onTap(event, this);
-      game.nextPlayer();
+      if (onTap(event, this)) {
+        game.playerCanMove = false;
+        game.nextPlayer();
+      }
     }
   }
 
@@ -63,24 +71,99 @@ class PlayerPin extends SpriteComponent
     }
   }
 
+  void moveFromHome() {
+    currentPosIndex = 0;
+    Vector2 startPosition = routeIndexToPos(playerIndex, 0);
+    add(MoveEffect.to(
+      startPosition,
+      EffectController(duration: 0.3, curve: Curves.easeInOut),
+      onComplete: () {
+        position = startPosition;
+      },
+    ));
+  }
+
+  void returnToHome() {
+    currentPosIndex = -1;
+    add(MoveEffect.to(
+      _initialPositionAtHome,
+      EffectController(duration: 0.5, curve: Curves.easeInOut),
+      onComplete: () {
+        position = _initialPositionAtHome;
+      },
+    ));
+  }
+
   void movePin(int? index) {
-    if (index == null) {
-      currentPosIndex += game.dice.value;
-    } else {
-      currentPosIndex = index;
+    int startIndex = currentPosIndex;
+    int targetIndex;
+
+    // Handle initial move from home
+    if (startIndex == -1) {
+      if (game.dice.value == 6) {
+        moveFromHome();
+      }
+      return;
     }
-    if (currentPosIndex > 46) {
-      game.destination;
-      game.board.remove(this);
+
+    if (index == null) {
+      targetIndex = currentPosIndex + game.dice.value;
     } else {
-      position = routeIndexToPos(playerIndex, currentPosIndex);
+      targetIndex = index;
+    }
+
+    if (targetIndex > 46) {
+      game.destination.addPin(this);
+      game.board.remove(this);
+      return;
+    }
+
+    // Ensure we're actually moving
+    if (targetIndex <= startIndex) {
+      print(
+          "Invalid move: target index ($targetIndex) is not greater than start index ($startIndex)");
+      return;
+    }
+
+    currentPosIndex = targetIndex;
+
+    // Check for attack
+    PlayerPin? attackedPin =
+        game.board.getPinAtPosition(playerIndex, targetIndex);
+    if (attackedPin != null) {
+      game.board.attackPin(attackedPin);
+    }
+
+    // Create a list of move effects for each step
+    List<MoveEffect> moveEffects = [];
+    for (int i = startIndex + 1; i <= targetIndex; i++) {
+      final newPosition = routeIndexToPos(playerIndex, i);
+      moveEffects.add(
+        MoveEffect.to(
+          newPosition,
+          EffectController(
+            duration: 0.2,
+            curve: Curves.easeInOut,
+          ),
+        ),
+      );
+    }
+
+    if (moveEffects.isNotEmpty) {
+      moveEffects.last.onComplete = () {
+        position = moveEffects.last.target.position;
+      };
+      // Add sequential effect to combine all move effects
+      add(SequenceEffect(moveEffects));
+    } else {
+      print("No movement required: start and target positions are the same");
     }
   }
 
   Vector2 routeIndexToPos(int playerIndex, int positionIndex) {
     double x = 0, y = 0;
     final coords = playerRouteMap[playerIndex]![positionIndex];
-    print("moving to $coords");
+    print("Player $playerIndex moving to position $positionIndex: ($x, $y)");
     final index = coords[1];
     switch (coords[0]) {
       case 0:
