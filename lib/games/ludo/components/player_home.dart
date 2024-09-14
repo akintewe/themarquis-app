@@ -11,6 +11,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
   final int playerIndex;
   late TextComponent playerName;
   late List<PlayerPin?> _homePins;
+  late List<Vector2> _homePinLocations;
   late List<Vector2> _avatarPositions;
 
   bool get isHomeFull =>
@@ -18,6 +19,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       _homePins[1] != null &&
       _homePins[2] != null &&
       _homePins[3] != null;
+
+  List<PlayerPin?> get homePins => _homePins;
 
   PlayerHome(this.playerIndex, Vector2 position) : super(position: position);
   List<String> playerNames = [
@@ -31,12 +34,12 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     super.onLoad();
     size = Vector2(game.unitSize * 2.5, game.unitSize * 2.5);
 
-    // _homePinLocations = [
-    //   Vector2(game.unitSize * 1, game.unitSize * 1),
-    //   Vector2(game.unitSize * 2.5, game.unitSize * 1),
-    //   Vector2(game.unitSize * 1, game.unitSize * 2.2),
-    //   Vector2(game.unitSize * 2.5, game.unitSize * 2.2),
-    // ];
+    _homePinLocations = [
+      Vector2(game.unitSize * 1, game.unitSize * 1),
+      Vector2(game.unitSize * 2.5, game.unitSize * 1),
+      Vector2(game.unitSize * 1, game.unitSize * 2.2),
+      Vector2(game.unitSize * 2.5, game.unitSize * 2.2),
+    ];
     _homePins = [
       PlayerPin(
         Vector2(game.unitSize * 1, game.unitSize * 1),
@@ -103,8 +106,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     _avatarPositions = [
       Vector2(0, game.unitSize * -4.5), //top left
       Vector2(game.unitSize * 1.25, game.unitSize * -4.5), //top right
-      Vector2(0, game.unitSize * 5), //bottom left
       Vector2(game.unitSize * 1.25, game.unitSize * 5), //bottom right
+      Vector2(0, game.unitSize * 5), //bottom left
     ];
 
     //player name
@@ -115,8 +118,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
               ? Vector2(size.x / 2, size.y / -2)
               : Vector2(size.x / 0.95, size.y / -2)
           : (playerIndex % 2 == 0)
-              ? Vector2(size.x / 2, size.y / 0.295) //btm left
-              : Vector2(size.x / 0.95, size.y / 0.295), //btm right
+              ? Vector2(size.x / 0.95, size.y / 0.295) //btm right
+              : Vector2(size.x / 2, size.y / 0.295), //btm left
       anchor: Anchor.center,
       textRenderer: TextPaint(
         style: const TextStyle(
@@ -193,7 +196,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
           return false;
         }
       }
-      ..returnToHome();
+      ..returnToHome(_homePinLocations[pin.homeIndex]);
+    print("Player ${pin.playerIndex} pin ${pin.homeIndex} returned to home");
     add(_homePins[pin.homeIndex]!);
   }
 }

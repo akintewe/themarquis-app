@@ -1,13 +1,12 @@
-import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/games/ludo/ludo_game_test.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/screens/game_over_screen.dart';
-import 'package:marquis_v2/games/ludo/widgets/overlay_screen.dart';
-import 'package:marquis_v2/screens/join_session_screen.dart';
+import 'package:marquis_v2/games/ludo/screens/welcome_screen.dart';
 import 'package:marquis_v2/screens/waiting_room_screen.dart';
 
 void main() {
@@ -23,13 +22,13 @@ class LudoGameApp extends ConsumerStatefulWidget {
 }
 
 class _LudoGameAppState extends ConsumerState<LudoGameApp> {
-  final LudoGame _game = LudoGame();
+  final LudoGame _game = LudoGameTest();
   final GlobalKey<RiverpodAwareGameWidgetState<LudoGame>> _gameWidgetKey =
       GlobalKey<RiverpodAwareGameWidgetState<LudoGame>>();
 
   @override
   Widget build(BuildContext context) {
-    final session = ref.watch(ludoSessionProvider);
+    ref.watch(ludoSessionProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Ludo"),
@@ -65,7 +64,7 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                           game: _game,
                           overlayBuilderMap: {
                             PlayState.welcome.name: (context, game) =>
-                                JoinSessionScreen(game: game),
+                                LudoWelcomeScreen(game: game),
                             // const OverlayScreen(
                             //   title: 'Welcome',
                             //   subtitle: 'Please join a session',

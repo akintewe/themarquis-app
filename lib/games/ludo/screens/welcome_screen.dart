@@ -1,61 +1,168 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
-class JoinSessionScreen extends StatelessWidget {
-  JoinSessionScreen({super.key, required this.game});
+class LudoWelcomeScreen extends StatefulWidget {
+  const LudoWelcomeScreen({super.key, required this.game});
   final LudoGame game;
+
+  @override
+  State<LudoWelcomeScreen> createState() => _LudoWelcomeScreenState();
+}
+
+class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
   final _roomIdController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    //27 30 34
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    final deviceSize = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(27, 30, 34, 1),
-      body: SizedBox(
-        width: double.infinity,
-        child: Column(
-          children: [
-            TextButton(
-              onPressed: () {
-                openSessionDialog(ctx: context);
-              },
-              child: Text(
-                "Open Session",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+      backgroundColor: const Color(0xff0f1118),
+      body: Transform.scale(
+        scale: widget.game.height / deviceSize.height,
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: deviceSize.height * widget.game.width / widget.game.height,
+          height: deviceSize.height,
+          child: Center(
+            child: Column(
+              children: [
+                Container(
+                  width: deviceSize.height *
+                      widget.game.width /
+                      widget.game.height,
+                  height: deviceSize.height * 0.5,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: const AssetImage('assets/images/banner.png'),
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.5),
+                        BlendMode.darken,
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 128,
+                        ),
+                        Text(
+                          'LUDO',
+                          style: TextStyle(
+                            fontSize: 72,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 10.0,
+                                color: Colors.cyan,
+                                offset: Offset(0, 0),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          'MENU',
+                          style: TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                            letterSpacing: 8,
+                          ),
+                        ),
+                        SizedBox(height: 60),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                Expanded(child: _buildMenuOptions()),
+              ],
             ),
-            TextButton(
-              onPressed: () {
-                joinRoomDialog(ctx: context);
-              },
-              child: Text(
-                "Join Room",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                createRoomDialog(ctx: context);
-              },
-              child: Text(
-                "Create Room",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMenuOptions() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildMenuButton(
+            icon: Icons.add,
+            text: 'Create Game',
+            onTap: () {
+              createRoomDialog(ctx: context);
+            }),
+        const SizedBox(height: 36),
+        _buildMenuButton(
+            icon: Icons.group,
+            text: 'Join Game',
+            onTap: () {
+              joinRoomDialog(ctx: context);
+            }),
+        const SizedBox(height: 36),
+        _buildMenuButton(
+            icon: Icons.casino,
+            text: 'Open Sessions',
+            onTap: () {
+              openSessionDialog(ctx: context);
+            }),
+      ],
+    );
+  }
+
+  Widget _buildMenuButton(
+      {required IconData icon,
+      required String text,
+      required Function() onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Stack(
+        clipBehavior: Clip.none, // Allow children to be drawn outside the stack
+        children: [
+          Card(
+            child: Container(
+              width: 320,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 96), // Space for the overlapping icon
+                  Text(
+                    text,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: -5, // Adjust this value to control how much it extends out
+            top: -7, // Adjust this value to center vertically
+            child: ClipOval(
+              child: Container(
+                width: 64,
+                height: 64,
+                color: Colors.grey.withOpacity(0.3),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -71,7 +178,8 @@ class JoinSessionScreen extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: Color.fromARGB(255, 0, 236, 255), // Cyan border color
+                color:
+                    const Color.fromARGB(255, 0, 236, 255), // Cyan border color
                 width: 1, // Border thickness
               ),
               borderRadius: BorderRadius.circular(
@@ -81,7 +189,8 @@ class JoinSessionScreen extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.80,
               height: MediaQuery.of(context).size.height * 0.70,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -90,11 +199,11 @@ class JoinSessionScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: SizedBox(),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 3,
                           child: Center(
                             child: Text(
@@ -116,7 +225,7 @@ class JoinSessionScreen extends StatelessWidget {
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.cancel_outlined,
                                 color: Colors.white,
                               ),
@@ -126,7 +235,7 @@ class JoinSessionScreen extends StatelessWidget {
                       ],
                     ),
                     SingleChildScrollView(
-                      physics: AlwaysScrollableScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(),
                       child: SizedBox(
                         height: MediaQuery.of(context).size.height * 0.60,
                         child: Column(
@@ -169,7 +278,8 @@ class JoinSessionScreen extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: Color.fromARGB(255, 0, 236, 255), // Cyan border color
+                color:
+                    const Color.fromARGB(255, 0, 236, 255), // Cyan border color
                 width: 1, // Border thickness
               ),
               borderRadius: BorderRadius.circular(
@@ -181,7 +291,8 @@ class JoinSessionScreen extends StatelessWidget {
                   ? 280
                   : MediaQuery.of(context).size.height * 0.50,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -190,11 +301,11 @@ class JoinSessionScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: SizedBox(),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 3,
                           child: Center(
                             child: Text(
@@ -216,7 +327,7 @@ class JoinSessionScreen extends StatelessWidget {
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.cancel_outlined,
                                 color: Colors.white,
                               ),
@@ -228,8 +339,8 @@ class JoinSessionScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextField(
-                        decoration: InputDecoration(
-                          label: const Text("Room ID"),
+                        decoration: const InputDecoration(
+                          label: Text("Room ID"),
                           // errorText: _emailError,
                         ),
                         controller: _roomIdController,
@@ -237,7 +348,7 @@ class JoinSessionScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        game.playState = PlayState.waiting;
+                        widget.game.playState = PlayState.waiting;
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -245,12 +356,12 @@ class JoinSessionScreen extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Color.fromARGB(255, 0, 236, 255),
+                            color: const Color.fromARGB(255, 0, 236, 255),
                             width: 1.2,
                           ),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 8.0,
                           horizontal: 42.0,
                         ),
@@ -284,7 +395,8 @@ class JoinSessionScreen extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: Color.fromARGB(255, 0, 236, 255), // Cyan border color
+                color:
+                    const Color.fromARGB(255, 0, 236, 255), // Cyan border color
                 width: 1, // Border thickness
               ),
               borderRadius: BorderRadius.circular(
@@ -296,7 +408,8 @@ class JoinSessionScreen extends StatelessWidget {
                   ? 450
                   : MediaQuery.of(context).size.height * 0.50,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -305,11 +418,11 @@ class JoinSessionScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: SizedBox(),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 3,
                           child: Center(
                             child: Text(
@@ -331,7 +444,7 @@ class JoinSessionScreen extends StatelessWidget {
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.cancel_outlined,
                                 color: Colors.white,
                               ),
@@ -352,7 +465,7 @@ class JoinSessionScreen extends StatelessWidget {
                     // ),
                     TextButton(
                       onPressed: () {
-                        game.playState = PlayState.waiting;
+                        widget.game.playState = PlayState.waiting;
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -360,12 +473,12 @@ class JoinSessionScreen extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Color.fromARGB(255, 0, 236, 255),
+                            color: const Color.fromARGB(255, 0, 236, 255),
                             width: 1.2,
                           ),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 8.0,
                           horizontal: 42.0,
                         ),
@@ -434,7 +547,7 @@ class JoinSessionScreen extends StatelessWidget {
               //join button
               TextButton(
                 onPressed: () {
-                  game.playState = PlayState.waiting;
+                  widget.game.playState = PlayState.waiting;
                 },
                 style: TextButton.styleFrom(
                   padding: EdgeInsets
@@ -442,10 +555,11 @@ class JoinSessionScreen extends StatelessWidget {
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 0, 236, 255), // Background color
+                    color: const Color.fromARGB(
+                        255, 0, 236, 255), // Background color
                     borderRadius: BorderRadius.circular(8), // Rounded edges
                   ),
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     vertical: 10.0,
                     horizontal: 30.0,
                   ), // Padding inside the button

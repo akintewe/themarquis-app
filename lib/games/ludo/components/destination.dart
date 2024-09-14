@@ -133,8 +133,11 @@ class Destination extends PositionComponent with HasGameReference<LudoGame> {
   }
 
   void addPin(PlayerPin pin) {
-    _bars[pin.playerIndex]![(_players[pin.playerIndex]!..add(pin)).length]
-        .lightUp();
+    final index = (_players[pin.playerIndex]!..add(pin)).length - 1;
+    _bars[pin.playerIndex]![index].lightUp();
+    if (index == 3) {
+      game.playState = PlayState.finished;
+    }
   }
 }
 

@@ -7,8 +7,8 @@ import 'package:marquis_v2/games/ludo/ludo_game.dart';
 Map<int, List<double>> spriteLocationMap = {
   0: [1, 1, 2160, 2160], // x, y, w, h
   1: [2163, 1, 2160, 2160],
-  2: [1, 2163, 2160, 2160],
-  3: [2163, 2163, 2160, 2160],
+  3: [1, 2163, 2160, 2160],
+  2: [2163, 2163, 2160, 2160],
 };
 
 class PlayerAvatar extends SpriteComponent with HasGameReference<LudoGame> {

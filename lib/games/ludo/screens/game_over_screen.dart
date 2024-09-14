@@ -23,10 +23,10 @@ class MatchResultsScreen extends ConsumerWidget {
     return Scaffold(
         backgroundColor: Colors.grey[900],
         body: Transform.scale(
-          scale: game.width / deviceSize.width,
+          scale: game.height / deviceSize.height,
           alignment: Alignment.topLeft,
           child: SizedBox(
-            width: deviceSize.width,
+            width: deviceSize.height * game.width / game.height,
             height: deviceSize.height,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
