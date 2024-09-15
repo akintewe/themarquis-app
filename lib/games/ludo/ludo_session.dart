@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:hive/hive.dart';
 import 'package:marquis_v2/env.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
+import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
@@ -166,7 +167,10 @@ class LudoSession extends _$LudoSession {
         'color': color,
         'token_address': tokenAddress,
       }),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken,
+      },
     );
     if (response.statusCode != 201) {
       throw HttpException(
@@ -183,7 +187,10 @@ class LudoSession extends _$LudoSession {
     final response = await http.post(
       url,
       body: jsonEncode({'session_id': sessionId}),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken,
+      },
     );
     if (response.statusCode != 200) {
       throw HttpException(
