@@ -172,7 +172,7 @@ class GameCard extends StatelessWidget {
         elevation: 8,
         child: Container(
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
-          width: 200,
+          width: 220,
           clipBehavior: Clip.hardEdge,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -181,7 +181,7 @@ class GameCard extends StatelessWidget {
                 clipBehavior: Clip.hardEdge,
                 child: Image.asset(
                   imagePath,
-                  width: 200,
+                  width: 220,
                   height: 200,
                   fit: BoxFit.cover,
                 ),
@@ -307,17 +307,18 @@ class MyChip extends StatelessWidget {
               color: isLightColor
                   ? Theme.of(context).colorScheme.onPrimary
                   : Theme.of(context).colorScheme.onSurface,
-              size: 16,
+              size: 15,
             ),
           ),
           Text(
             title,
             style: TextStyle(
-                color: isLightColor
-                    ? Theme.of(context).colorScheme.onPrimary
-                    : Theme.of(context).colorScheme.onSurface,
-                fontSize: 12,
-                fontWeight: FontWeight.bold),
+              color: isLightColor
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : Theme.of(context).colorScheme.onSurface,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
