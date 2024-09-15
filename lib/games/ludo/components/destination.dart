@@ -137,6 +137,7 @@ class Destination extends PositionComponent with HasGameReference<LudoGame> {
     _bars[pin.playerIndex]![index].lightUp();
     if (index == 3) {
       game.playState = PlayState.finished;
+      game.winnerIndex = pin.playerIndex;
     }
   }
 }

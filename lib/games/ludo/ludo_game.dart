@@ -26,6 +26,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   int _currentPlayer = 0;
   bool playerCanMove = false;
   final int totalPlayers = 4;
+  int? winnerIndex;
   LudoSessionData? _sessionData;
 
   LudoGame()

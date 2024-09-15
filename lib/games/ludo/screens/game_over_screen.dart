@@ -108,12 +108,17 @@ class MatchResultsScreen extends ConsumerWidget {
   }
 
   Widget _buildResultsList() {
-    final results = [
-      {'rank': 1, 'score': 400, 'exp': 400},
-      {'rank': 2, 'score': 100, 'exp': 400},
-      {'rank': 3, 'score': 100, 'exp': 400},
-      {'rank': 4, 'score': 100, 'exp': 400},
-    ];
+    final results = List.generate(4, (index) {
+      final isWinner = index == game.winnerIndex;
+      return {
+        'rank': index + 1,
+        'score': isWinner ? 400 : -100,
+        'exp': 400, // Assuming all players get 400 EXP regardless of win/loss
+      };
+    });
+
+    // Sort the results by score (descending order)
+    results.sort((a, b) => b['score']!.compareTo(a['score']!));
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -221,7 +226,7 @@ class MatchResultsScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(16.0),
       child: TextButton(
         onPressed: () {
-          ref.read(appStateProvider.notifier).selectGame(null);
+          game.playState = PlayState.welcome;
         },
         child:
             const Text('Back to Menu', style: TextStyle(color: Colors.white)),
