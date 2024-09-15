@@ -498,8 +498,9 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                                     .joinSession(
                                       _roomIdController.text,
                                     );
-                                widget.game.playState = PlayState.waiting;
                                 Navigator.of(context).pop();
+
+                                widget.game.playState = PlayState.waiting;
                               },
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
@@ -845,7 +846,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
   int? _tokenBalance;
   String _selectedTokenAddress = '';
   final _tokenAmountController = TextEditingController();
-  int selectedIndex = 0; // To keep track of the selected color
+  int selectedColorIndex = 0; // To keep track of the selected color
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -960,7 +961,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                   (index) {
                                     return colorChoosingCard(
                                       index: index,
-                                      isPicked: selectedIndex == index,
+                                      isPicked: selectedColorIndex == index,
                                       stste: stste,
                                     );
                                   },
@@ -1081,8 +1082,9 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                           Text(
                                             'Max: ${_tokenBalance! / 1e18}',
                                             style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12),
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         ],
                                       );
@@ -1100,6 +1102,16 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                         padding: const EdgeInsets.all(8.0),
                         child: TextButton(
                           onPressed: () {
+                            print(_sliderValue.round().toString() +
+                                _tokenAmountController.text +
+                                _selectedTokenAddress);
+                            ref
+                                .read(ludoSessionProvider.notifier)
+                                .createSession(
+                                  _sliderValue.round().toString(),
+                                  selectedColorIndex.toString(),
+                                  _selectedTokenAddress,
+                                );
                             Navigator.of(context).pop();
 
                             widget.game.playState = PlayState.waiting;
@@ -1145,7 +1157,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
     return GestureDetector(
       onTap: () {
         stste(() {
-          selectedIndex = index;
+          selectedColorIndex = index;
         });
       },
       child: Padding(

@@ -152,7 +152,10 @@ class LudoSession extends _$LudoSession {
         'color': color,
         'token_address': tokenAddress,
       }),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken,
+      },
     );
     if (response.statusCode != 201) {
       throw HttpException(
