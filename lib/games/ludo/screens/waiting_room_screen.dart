@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
+import 'package:marquis_v2/models/ludo_session.dart';
 
 class WaitingRoomScreen extends ConsumerStatefulWidget {
   const WaitingRoomScreen({super.key, required this.game});
@@ -70,15 +71,13 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // _buildPlayerCard(
-                    //     'Yi Xuan', '100', 'assets/yi_xuan.png'), // Add your own asset
-                    //main profile
                     Column(
                       children: [
                         playerAvatarCard(
                           index: 0,
                           size: 350,
                           isSelf: true,
+                          player: session.sessionUserStatus[0],
                         ),
                         const SizedBox(
                           height: 30,
@@ -94,31 +93,21 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                         const SizedBox(
                           height: 30,
                         ),
-                        //3 other profile
-
                         Row(
                           children: [
-                            playerAvatarCard(
-                              index: 1,
-                              size: 210,
-                              isSelf: false,
-                            ),
-                            const SizedBox(
-                              width: 50,
-                            ),
-                            playerAvatarCard(
-                              index: 2,
-                              size: 210,
-                              isSelf: false,
-                            ),
-                            const SizedBox(
-                              width: 50,
-                            ),
-                            playerAvatarCard(
-                              index: 3,
-                              size: 210,
-                              isSelf: false,
-                            ),
+                            for (int i = 1;
+                                i < session.sessionUserStatus.length;
+                                i++)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 25),
+                                child: playerAvatarCard(
+                                  index: i,
+                                  size: 210,
+                                  isSelf: false,
+                                  player: session.sessionUserStatus[i],
+                                ),
+                              ),
                           ],
                         )
                       ],
@@ -188,6 +177,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
     required int index,
     required double size,
     required bool isSelf,
+    required LudoSessionUserStatus player,
   }) {
     const playerColors = [
       // Add this const
@@ -195,12 +185,6 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
       Color(0xff2fa9d0),
       Color(0xffb0d02f),
       Color(0xff2fd06f),
-    ];
-    List<String> playerNames = [
-      "Carlos",
-      "Mohdi",
-      "Yixuan",
-      "Jupeng",
     ];
     return Column(
       children: [
@@ -227,21 +211,23 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                 // heightFactor: 2160 / 4324,
                 widthFactor: 0.5,
                 heightFactor: 0.5,
-                child: Image.asset(
-                  'assets/images/avatar_spritesheet.png', // Path to your spritesheet
-                  width: 4324, // Full width of the sprite sheet
-                  height: 4324, // Full height of the sprite sheet
-                  fit: BoxFit.none, // Ensure no scaling occurs
-                ),
+                child: player.status == "PENDING"
+                    ? null
+                    : Image.asset(
+                        'assets/images/avatar_spritesheet.png', // Path to your spritesheet
+                        width: 4324, // Full width of the sprite sheet
+                        height: 4324, // Full height of the sprite sheet
+                        fit: BoxFit.none, // Ensure no scaling occurs
+                      ),
               ),
             ),
           ),
         ),
         Text(
-          playerNames[index],
+          player.email,
           style: TextStyle(
             color: Colors.white,
-            fontSize: isSelf ? 55 : 40,
+            fontSize: isSelf ? 48 : 24,
           ),
         ),
       ],

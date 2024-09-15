@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:hive/hive.dart';
 import 'package:marquis_v2/env.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
+import 'package:marquis_v2/providers/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -18,20 +19,23 @@ final wsUrl = environment['wsUrl'];
 class LudoSession extends _$LudoSession {
   //Details Declaration
   Box<LudoSessionData>? _hiveBox;
-  // final WebSocketChannel _channel = WebSocketChannel.connect(
-  //   Uri.parse(wsUrl!),
-  // );
+  final WebSocketChannel _channel = WebSocketChannel.connect(
+    Uri.parse(wsUrl!),
+  );
   String? _id;
 
   @override
   LudoSessionData? build() {
     _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
-    // _channel.stream.listen((data) => print(data));
+    _channel.stream.listen((data) => print(data));
     return null;
   }
 
   Future<void> getLudoSession() async {
-    if (_id == null) return;
+    if (_id == null) {
+      _id = ref.read(userProvider)?.sessionId;
+      if (_id == null) return;
+    }
     final url = Uri.parse('$baseUrl/game/session/$_id');
     final response = await http.get(
       url,
@@ -53,20 +57,31 @@ class LudoSession extends _$LudoSession {
       playToken: decodedResponse['play_token'],
       sessionUserStatus: [
         ...decodedResponse['session_user_status'].map(
-          (e) => LudoSessionUserStatus(
-            playerId: e['player_id'],
-            playerTokensPosition: e['player_tokens_position'],
-            playerWinningTokens: e['player_winning_tokens'],
-            userId: e['user_id'],
-            email: e['email'],
-            role: e['role'],
-            status: e['status'],
-            points: e['points'],
-          ),
+          (e) {
+            final List<String> playerTokensPosition =
+                (e['player_tokens_position'] as List<dynamic>)
+                    .map((e) => e.toString())
+                    .toList();
+            final List<bool> playerWinningTokens =
+                (e['player_winning_tokens'] as List<dynamic>)
+                    .map((e) => e as bool)
+                    .toList();
+            return LudoSessionUserStatus(
+              playerId: e['player_id'],
+              playerTokensPosition: playerTokensPosition,
+              playerWinningTokens: playerWinningTokens,
+              userId: e['user_id'],
+              email: e['email'],
+              role: e['role'],
+              status: e['status'],
+              points: e['points'],
+            );
+          },
         ),
       ],
       nextPlayerId: decodedResponse['next_player_id'],
-      createdAt: decodedResponse['created_at'],
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+          decodedResponse['created_at'] * 1000),
       creator: "",
       v: [],
       r: [],

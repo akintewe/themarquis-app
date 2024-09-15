@@ -96,6 +96,9 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                               icon: Icons.play_arrow,
                               text: 'Resume Game',
                               onTap: () {
+                                ref
+                                    .read(ludoSessionProvider.notifier)
+                                    .getLudoSession();
                                 widget.game.playState = PlayState.waiting;
                               }),
                         ),
