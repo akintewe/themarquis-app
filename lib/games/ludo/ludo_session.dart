@@ -208,19 +208,4 @@ class LudoSession extends _$LudoSession {
     //   fieldOfCareer: fieldOfCareer,
     // );
   }
-
-  Future<List<Map<String, String>>> getSupportedTokens() async {
-    final url = Uri.parse('$baseUrl/game/supported-tokens');
-    final response = await http.get(
-      url,
-      headers: {'Content-Type': 'application/json'},
-    );
-    if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
-    }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes))
-        as List<Map<String, String>>;
-    return decodedResponse;
-  }
 }
