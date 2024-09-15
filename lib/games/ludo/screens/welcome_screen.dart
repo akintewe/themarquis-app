@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
 
 class LudoWelcomeScreen extends ConsumerStatefulWidget {
@@ -13,12 +14,14 @@ class LudoWelcomeScreen extends ConsumerStatefulWidget {
 }
 
 class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
-  final _roomIdController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final deviceSize = MediaQuery.of(context).size;
+    final user = ref.read(userProvider);
+    if (user == null) {
+      return const Center(child: Text("Not Logged In"));
+    }
     return Scaffold(
       backgroundColor: const Color(0xff0f1118),
       body: Transform.scale(
@@ -81,49 +84,67 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                     ),
                   ),
                 ),
-                Expanded(child: _buildMenuOptions()),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (user.sessionId != null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.play_arrow,
+                              text: 'Resume Game',
+                              onTap: () {
+                                widget.game.playState = PlayState.waiting;
+                              }),
+                        ),
+                      if (user.sessionId == null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.add,
+                              text: 'Create Room',
+                              onTap: () {
+                                createRoomDialog(
+                                  ctx: context,
+                                  game: widget.game,
+                                );
+                              }),
+                        ),
+                      if (user.sessionId == null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.group,
+                              text: 'Join Room',
+                              onTap: () {
+                                joinRoomDialog(
+                                  ctx: context,
+                                  game: widget.game,
+                                );
+                              }),
+                        ),
+                      if (user.sessionId == null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.casino,
+                              text: 'Open Sessions',
+                              onTap: () {
+                                openSessionDialog(
+                                  ctx: context,
+                                  game: widget.game,
+                                );
+                              }),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildMenuOptions() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildMenuButton(
-            icon: Icons.add,
-            text: 'Create Room',
-            onTap: () {
-              createRoomDialog(
-                ctx: context,
-                game: widget.game,
-              );
-            }),
-        const SizedBox(height: 36),
-        _buildMenuButton(
-            icon: Icons.group,
-            text: 'Join Room',
-            onTap: () {
-              joinRoomDialog(
-                ctx: context,
-                game: widget.game,
-              );
-            }),
-        const SizedBox(height: 36),
-        _buildMenuButton(
-            icon: Icons.casino,
-            text: 'Open Sessions',
-            onTap: () {
-              openSessionDialog(
-                ctx: context,
-                game: widget.game,
-              );
-            }),
-      ],
     );
   }
 
@@ -220,9 +241,10 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
 }
 
 class JoinRoomDialog extends ConsumerStatefulWidget {
-  const JoinRoomDialog({super.key, required this.game});
+  const JoinRoomDialog({super.key, required this.game, this.roomId});
 
   final LudoGame game;
+  final String? roomId;
 
   @override
   ConsumerState<JoinRoomDialog> createState() => _JoinRoomDialogState();
@@ -235,6 +257,13 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
   List<Map<String, String>>? _tokens;
   final _roomIdController = TextEditingController();
   final _tokenAmountController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _roomIdController.text = widget.roomId!;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -504,100 +533,107 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: const Color.fromARGB(255, 0, 236, 255), // Cyan border color
-            width: 1, // Border thickness
+      child: FutureBuilder<List<dynamic>>(future: () async {
+        final rooms =
+            await ref.read(ludoSessionProvider.notifier).getOpenSessions();
+        return rooms;
+      }(), builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            width: 100,
+            height: 100,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasError) {
+          return Text(snapshot.error.toString());
+        }
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color:
+                  const Color.fromARGB(255, 0, 236, 255), // Cyan border color
+              width: 1, // Border thickness
+            ),
+            borderRadius: BorderRadius.circular(
+                12), // Ensure the border follows the shape of the dialog
           ),
-          borderRadius: BorderRadius.circular(
-              12), // Ensure the border follows the shape of the dialog
-        ),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.80,
-          height: MediaQuery.of(context).size.height * 0.70,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const Expanded(
-                      flex: 1,
-                      child: SizedBox(),
-                    ),
-                    const Expanded(
-                      flex: 3,
-                      child: Center(
-                        child: Text(
-                          'OPEN SESSION',
-                          style: TextStyle(
-                            color: Color.fromARGB(
-                              255,
-                              0,
-                              236,
-                              255,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.80,
+            height: MediaQuery.of(context).size.height * 0.70,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      const Expanded(
+                        flex: 1,
+                        child: SizedBox(),
+                      ),
+                      const Expanded(
+                        flex: 3,
+                        child: Center(
+                          child: Text(
+                            'OPEN SESSION',
+                            style: TextStyle(
+                              color: Color.fromARGB(
+                                255,
+                                0,
+                                236,
+                                255,
+                              ),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
                             ),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.all(0),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          icon: const Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.white,
-                            size: 22,
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.all(0),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: const Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.60,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        openSessionRoomCard(
-                          roomName: "ROOM P8U7",
-                          noOfPlayers: 3,
-                          context: context,
-                        ),
-                        openSessionRoomCard(
-                          roomName: "ROOM QW9K",
-                          noOfPlayers: 1,
-                          context: context,
-                        ),
-                        openSessionRoomCard(
-                          roomName: "ROOM CMB9",
-                          noOfPlayers: 2,
-                          context: context,
-                        ),
-                      ],
+                    ],
+                  ),
+                  SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.60,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          ...snapshot.data!.map((room) => openSessionRoomCard(
+                                roomName: room['id']!,
+                                noOfPlayers: room['players_joined']!.length,
+                                context: context,
+                              )),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -616,7 +652,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                roomName,
+                "ROOM $roomName",
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
@@ -647,9 +683,18 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
               ),
               //join button
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return JoinRoomDialog(
+                        game: widget.game,
+                        roomId: roomName,
+                      );
+                    },
+                  );
+                  if (!context.mounted) return;
                   Navigator.of(context).pop();
-                  widget.game.playState = PlayState.waiting;
                 },
                 style: TextButton.styleFrom(
                   padding: EdgeInsets

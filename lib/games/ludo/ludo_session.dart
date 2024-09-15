@@ -77,6 +77,21 @@ class LudoSession extends _$LudoSession {
     state = ludoSession;
   }
 
+  Future<List<dynamic>> getOpenSessions() async {
+    final url = Uri.parse('$baseUrl/session/get-open-sessions');
+    final response = await http.get(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 200) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
+    final decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    return decodedResponse;
+  }
+
   Future<void> generateMove() async {
     final url = Uri.parse('$baseUrl/game/session/$_id/generate-move');
     final response = await http.post(
