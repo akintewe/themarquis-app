@@ -104,8 +104,16 @@ class User extends _$User {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    return jsonDecode(utf8.decode(response.bodyBytes))
-        as List<Map<String, String>>;
+    final List<Map<String, String>> results = [];
+    final decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    for (var e in decodedResponse) {
+      results.add({
+        'tokenAddress': e['address'],
+        'tokenName': e['name'],
+      });
+    }
+    return results;
   }
 
   Future<int> getTokenBalance(String tokenAddress) async {
@@ -115,7 +123,10 @@ class User extends _$User {
       url,
       headers: {'Content-Type': 'application/json'},
     );
-
+    if (response.statusCode != 200) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     return int.parse(decodedResponse['balance']);
   }

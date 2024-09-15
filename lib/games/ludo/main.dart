@@ -7,7 +7,7 @@ import 'package:marquis_v2/games/ludo/ludo_game_test.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/screens/game_over_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/welcome_screen.dart';
-import 'package:marquis_v2/screens/waiting_room_screen.dart';
+import 'package:marquis_v2/games/ludo/screens/waiting_room_screen.dart';
 
 void main() {
   runApp(const LudoGameApp());
@@ -70,7 +70,9 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                             //   subtitle: 'Please join a session',
                             // ),
                             PlayState.waiting.name: (context, game) =>
-                                const WaitingRoomScreen(),
+                                WaitingRoomScreen(
+                                  game: game,
+                                ),
                             PlayState.finished.name: (context, game) =>
                                 MatchResultsScreen(game: game),
                           },

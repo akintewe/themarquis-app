@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
 
 class LudoWelcomeScreen extends ConsumerStatefulWidget {
@@ -14,13 +15,14 @@ class LudoWelcomeScreen extends ConsumerStatefulWidget {
 }
 
 class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
-  final _roomIdController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final deviceSize = MediaQuery.of(context).size;
-
+    final user = ref.read(userProvider);
+    if (user == null) {
+      return const Center(child: Text("Not Logged In"));
+    }
     return Scaffold(
       backgroundColor: const Color(0xff0f1118),
       body: Transform.scale(
@@ -83,49 +85,67 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                     ),
                   ),
                 ),
-                Expanded(child: _buildMenuOptions()),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (user.sessionId != null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.play_arrow,
+                              text: 'Resume Game',
+                              onTap: () {
+                                widget.game.playState = PlayState.waiting;
+                              }),
+                        ),
+                      if (user.sessionId == null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.add,
+                              text: 'Create Room',
+                              onTap: () {
+                                createRoomDialog(
+                                  ctx: context,
+                                  game: widget.game,
+                                );
+                              }),
+                        ),
+                      if (user.sessionId == null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.group,
+                              text: 'Join Room',
+                              onTap: () {
+                                joinRoomDialog(
+                                  ctx: context,
+                                  game: widget.game,
+                                );
+                              }),
+                        ),
+                      if (user.sessionId == null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.casino,
+                              text: 'Open Sessions',
+                              onTap: () {
+                                openSessionDialog(
+                                  ctx: context,
+                                  game: widget.game,
+                                );
+                              }),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildMenuOptions() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildMenuButton(
-            icon: Icons.add,
-            text: 'Create Room',
-            onTap: () {
-              createRoomDialog(
-                ctx: context,
-                game: widget.game,
-              );
-            }),
-        const SizedBox(height: 36),
-        _buildMenuButton(
-            icon: Icons.group,
-            text: 'Join Room',
-            onTap: () {
-              joinRoomDialog(
-                ctx: context,
-                game: widget.game,
-              );
-            }),
-        const SizedBox(height: 36),
-        _buildMenuButton(
-            icon: Icons.casino,
-            text: 'Open Sessions',
-            onTap: () {
-              openSessionDialog(
-                ctx: context,
-                game: widget.game,
-              );
-            }),
-      ],
     );
   }
 
@@ -222,9 +242,10 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
 }
 
 class JoinRoomDialog extends ConsumerStatefulWidget {
-  const JoinRoomDialog({super.key, required this.game});
+  const JoinRoomDialog({super.key, required this.game, this.roomId});
 
   final LudoGame game;
+  final String? roomId;
 
   @override
   ConsumerState<JoinRoomDialog> createState() => _JoinRoomDialogState();
@@ -234,15 +255,30 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
   double _sliderValue = 0;
   int? _tokenBalance;
   String _selectedTokenAddress = '';
+  List<Map<String, String>>? _tokens;
   final _roomIdController = TextEditingController();
+  final _tokenAmountController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _roomIdController.text = widget.roomId!;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: FutureBuilder<List<Map<String, String>>>(
-          future: ref.read(userProvider.notifier).getSupportedTokens(),
+      child: FutureBuilder(
+          future: _tokens == null
+              ? () async {
+                  _tokens = await ref
+                      .read(userProvider.notifier)
+                      .getSupportedTokens();
+                }()
+              : null,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox(
@@ -250,6 +286,9 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                 height: 100,
                 child: Center(child: CircularProgressIndicator()),
               );
+            }
+            if (snapshot.hasError) {
+              return Text(snapshot.error.toString());
             }
             return Container(
               decoration: BoxDecoration(
@@ -322,107 +361,149 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                           controller: _roomIdController,
                         ),
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: DropdownButtonFormField<String>(
-                              decoration: const InputDecoration(
-                                labelText: 'Token',
-                              ),
-                              items: snapshot.data!
-                                  .map((Map<String, String> value) {
-                                return DropdownMenuItem<String>(
-                                  value: value['tokenAddress']!,
-                                  child: Text(value['tokenName']!),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _selectedTokenAddress = newValue!;
-                                  _tokenBalance = null;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          const Expanded(
-                            flex: 3,
-                            child: TextField(
-                              decoration: InputDecoration(
-                                labelText: 'Token Amount',
-                              ),
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      FutureBuilder(
-                        future: _tokenBalance != null
-                            ? null
-                            : () async {
-                                final res = await ref
-                                    .read(userProvider.notifier)
-                                    .getTokenBalance(_selectedTokenAddress);
-                                _sliderValue = 0;
-                                _tokenBalance = res;
-                              }(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Select amount:',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              Slider(
-                                min: 0.0,
-                                max: _tokenBalance!
-                                    .toDouble(), // Convert int to double
-                                divisions: 100,
-                                label: '${_sliderValue.round()}',
-                                value: _sliderValue,
-                                onChanged: (double value) {
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: DropdownButtonFormField<String>(
+                                decoration: const InputDecoration(
+                                  labelText: 'Token',
+                                ),
+                                items:
+                                    _tokens!.map((Map<String, String> value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value['tokenAddress']!,
+                                    child: Text(value['tokenName']!),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
                                   setState(() {
-                                    _sliderValue = value;
+                                    _selectedTokenAddress = newValue!;
+                                    _tokenBalance = null;
                                   });
                                 },
                               ),
-                            ],
-                          );
-                        },
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-
-                          widget.game.playState = PlayState.waiting;
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 0, 236, 255),
-                              width: 1.2,
                             ),
-                            borderRadius: BorderRadius.circular(6),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 3,
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  labelText: 'Token Amount',
+                                ),
+                                controller: _tokenAmountController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d*\.?\d*$')),
+                                  TextInputFormatter.withFunction(
+                                      (oldValue, newValue) {
+                                    if (newValue.text.isEmpty) {
+                                      return newValue;
+                                    }
+                                    double? value =
+                                        double.tryParse(newValue.text);
+                                    if (value != null &&
+                                        _tokenBalance != null &&
+                                        value <= _tokenBalance! / 1e18) {
+                                      return newValue;
+                                    }
+                                    return oldValue;
+                                  }),
+                                ],
+                                onChanged: (value) {
+                                  if (value.isNotEmpty) {
+                                    setState(() {
+                                      _sliderValue = double.parse(value) * 1e18;
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_selectedTokenAddress != "")
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FutureBuilder(
+                            future: _tokenBalance != null
+                                ? null
+                                : () async {
+                                    final res = await ref
+                                        .read(userProvider.notifier)
+                                        .getTokenBalance(_selectedTokenAddress);
+                                    _sliderValue = 0;
+                                    _tokenBalance = res;
+                                  }(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              }
+                              if (snapshot.hasError) {
+                                return Text(snapshot.error.toString());
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Select amount:',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Slider(
+                                    min: 0.0,
+                                    max: _tokenBalance!.toDouble(),
+                                    divisions: 100,
+                                    label: '${_sliderValue.round() / 1e18}',
+                                    value: _sliderValue,
+                                    onChanged: (double value) {
+                                      setState(() {
+                                        _sliderValue = value;
+                                        _tokenAmountController.text =
+                                            (_sliderValue / 1e18).toString();
+                                      });
+                                    },
+                                  ),
+                                  Text(
+                                    'Max: ${_tokenBalance! / 1e18}',
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 12),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 42.0,
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextButton(
+                          onPressed: () {
+                            widget.game.playState = PlayState.waiting;
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
                           ),
-                          child: const Text(
-                            "Confirm",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 0, 236, 255),
+                                width: 1.2,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal: 42.0,
+                            ),
+                            child: const Text(
+                              "Confirm",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -453,100 +534,107 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: const Color.fromARGB(255, 0, 236, 255), // Cyan border color
-            width: 1, // Border thickness
+      child: FutureBuilder<List<dynamic>>(future: () async {
+        final rooms =
+            await ref.read(ludoSessionProvider.notifier).getOpenSessions();
+        return rooms;
+      }(), builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            width: 100,
+            height: 100,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasError) {
+          return Text(snapshot.error.toString());
+        }
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color:
+                  const Color.fromARGB(255, 0, 236, 255), // Cyan border color
+              width: 1, // Border thickness
+            ),
+            borderRadius: BorderRadius.circular(
+                12), // Ensure the border follows the shape of the dialog
           ),
-          borderRadius: BorderRadius.circular(
-              12), // Ensure the border follows the shape of the dialog
-        ),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.80,
-          height: MediaQuery.of(context).size.height * 0.70,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const Expanded(
-                      flex: 1,
-                      child: SizedBox(),
-                    ),
-                    const Expanded(
-                      flex: 3,
-                      child: Center(
-                        child: Text(
-                          'OPEN SESSION',
-                          style: TextStyle(
-                            color: Color.fromARGB(
-                              255,
-                              0,
-                              236,
-                              255,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.80,
+            height: MediaQuery.of(context).size.height * 0.70,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      const Expanded(
+                        flex: 1,
+                        child: SizedBox(),
+                      ),
+                      const Expanded(
+                        flex: 3,
+                        child: Center(
+                          child: Text(
+                            'OPEN SESSION',
+                            style: TextStyle(
+                              color: Color.fromARGB(
+                                255,
+                                0,
+                                236,
+                                255,
+                              ),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
                             ),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.all(0),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          icon: const Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.white,
-                            size: 22,
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.all(0),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: const Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.60,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        openSessionRoomCard(
-                          roomName: "ROOM P8U7",
-                          noOfPlayers: 3,
-                          context: context,
-                        ),
-                        openSessionRoomCard(
-                          roomName: "ROOM QW9K",
-                          noOfPlayers: 1,
-                          context: context,
-                        ),
-                        openSessionRoomCard(
-                          roomName: "ROOM CMB9",
-                          noOfPlayers: 2,
-                          context: context,
-                        ),
-                      ],
+                    ],
+                  ),
+                  SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.60,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          ...snapshot.data!.map((room) => openSessionRoomCard(
+                                roomName: room['id']!,
+                                noOfPlayers: room['players_joined']!.length,
+                                context: context,
+                              )),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -565,7 +653,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                roomName,
+                "ROOM $roomName",
                 style:
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
@@ -596,9 +684,18 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
               ),
               //join button
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return JoinRoomDialog(
+                        game: widget.game,
+                        roomId: roomName,
+                      );
+                    },
+                  );
+                  if (!context.mounted) return;
                   Navigator.of(context).pop();
-                  widget.game.playState = PlayState.waiting;
                 },
                 style: TextButton.styleFrom(
                   padding: EdgeInsets
