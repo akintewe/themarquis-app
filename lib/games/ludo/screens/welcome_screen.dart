@@ -262,7 +262,7 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
   @override
   void initState() {
     super.initState();
-    _roomIdController.text = widget.roomId!;
+    _roomIdController.text = widget.roomId ?? "";
   }
 
   @override
@@ -327,7 +327,11 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                                 'JOIN ROOM',
                                 style: TextStyle(
                                   color: Color.fromARGB(
-                                      255, 0, 236, 255), // Cyan border color
+                                    255,
+                                    0,
+                                    236,
+                                    255,
+                                  ), // Cyan border color
                                   fontSize: 20,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -477,6 +481,9 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                             },
                           ),
                         ),
+                      const SizedBox(
+                        height: 8,
+                      ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: TextButton(
@@ -820,17 +827,11 @@ class CreateRoomDialog extends ConsumerStatefulWidget {
 }
 
 class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
-  int selectedIndex = 0; // To keep track of the selected color
   double _sliderValue = 0;
   int? _tokenBalance;
   String _selectedTokenAddress = '';
-  // A function to handle color selection
-  void onColorPicked(int index) {
-    setState(() {
-      selectedIndex = index;
-    });
-  }
-
+  final _tokenAmountController = TextEditingController();
+  int selectedIndex = 0; // To keep track of the selected color
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -916,15 +917,43 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                           ),
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          4,
-                          (index) {
-                            return colorChoosingCard(
-                                index: index, isPicked: selectedIndex == index);
-                          },
+                      const SizedBox(
+                        height: 22,
+                      ),
+                      const Text(
+                        "Please Select Your Color",
+                        style: TextStyle(
+                          color: Color.fromARGB(
+                            255,
+                            0,
+                            236,
+                            255,
+                          ), // Cyan border color
+                          fontSize: 12, fontWeight: FontWeight.w400,
                         ),
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      StatefulBuilder(
+                        builder: (ctx, stste) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              4,
+                              (index) {
+                                return colorChoosingCard(
+                                  index: index,
+                                  isPicked: selectedIndex == index,
+                                  stste: stste,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(
+                        height: 14,
                       ),
                       Row(
                         children: [
@@ -950,83 +979,128 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          const Expanded(
+                          Expanded(
                             flex: 3,
                             child: TextField(
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'Token Amount',
                               ),
+                              controller: _tokenAmountController,
                               keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*\.?\d*$')),
+                                TextInputFormatter.withFunction(
+                                    (oldValue, newValue) {
+                                  if (newValue.text.isEmpty) {
+                                    return newValue;
+                                  }
+                                  double? value =
+                                      double.tryParse(newValue.text);
+                                  if (value != null &&
+                                      _tokenBalance != null &&
+                                      value <= _tokenBalance! / 1e18) {
+                                    return newValue;
+                                  }
+                                  return oldValue;
+                                }),
+                              ],
+                              onChanged: (value) {
+                                if (value.isNotEmpty) {
+                                  setState(() {
+                                    _sliderValue = double.parse(value) * 1e18;
+                                  });
+                                }
+                              },
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      FutureBuilder(
-                        future: _tokenBalance != null
-                            ? null
-                            : () async {
-                                final res = await ref
-                                    .read(userProvider.notifier)
-                                    .getTokenBalance(_selectedTokenAddress);
-                                _sliderValue = 0;
-                                _tokenBalance = res;
-                              }(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Select amount:',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              Slider(
-                                min: 0.0,
-                                max: _tokenBalance!
-                                    .toDouble(), // Convert int to double
-                                divisions: 100,
-                                label: '${_sliderValue.round()}',
-                                value: _sliderValue,
-                                onChanged: (double value) {
-                                  setState(() {
-                                    _sliderValue = value;
-                                  });
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-
-                          widget.game.playState = PlayState.waiting;
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
+                      if (_selectedTokenAddress != "")
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FutureBuilder(
+                            future: _tokenBalance != null
+                                ? null
+                                : () async {
+                                    final res = await ref
+                                        .read(userProvider.notifier)
+                                        .getTokenBalance(_selectedTokenAddress);
+                                    _sliderValue = 0;
+                                    _tokenBalance = res;
+                                  }(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              }
+                              if (snapshot.hasError) {
+                                return Text(snapshot.error.toString());
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Select amount:',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Slider(
+                                    min: 0.0,
+                                    max: _tokenBalance!
+                                        .toDouble(), // Convert int to double
+                                    divisions: 100,
+                                    label: '${_sliderValue.round()}',
+                                    value: _sliderValue,
+                                    onChanged: (double value) {
+                                      setState(() {
+                                        _sliderValue = value;
+                                        _tokenAmountController.text =
+                                            (_sliderValue / 1e18).toString();
+                                      });
+                                    },
+                                  ),
+                                  Text(
+                                    'Max: ${_tokenBalance! / 1e18}',
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 12),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 0, 236, 255),
-                              width: 1.2,
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+
+                            widget.game.playState = PlayState.waiting;
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 0, 236, 255),
+                                width: 1.2,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 42.0,
-                          ),
-                          child: const Text(
-                            "Create",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal: 42.0,
+                            ),
+                            child: const Text(
+                              "Create",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -1040,9 +1114,16 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
     );
   }
 
-  Widget colorChoosingCard({required int index, required bool isPicked}) {
+  Widget colorChoosingCard(
+      {required int index,
+      required bool isPicked,
+      required void Function(void Function()) stste}) {
     return GestureDetector(
-      onTap: () => onColorPicked(index),
+      onTap: () {
+        stste(() {
+          selectedIndex = index;
+        });
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Opacity(
