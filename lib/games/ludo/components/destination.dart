@@ -141,19 +141,21 @@ class Destination extends PositionComponent with HasGameReference<LudoGame> {
   }
 }
 
-class BarComponent extends PositionComponent {
+class BarComponent extends PositionComponent with HasPaint {
   final int playerIndex;
   BarComponent({
     required this.playerIndex,
     required Vector2 position,
     required Vector2 size,
-  }) : super(position: position, size: size, anchor: Anchor.center);
+  }) : super(position: position, size: size, anchor: Anchor.center) {
+    paint = Paint()..color = const Color(0xff3a3a3a);
+  }
 
   @override
   void render(Canvas canvas) {
     canvas.drawRRect(
         RRect.fromRectAndRadius(size.toRect(), const Radius.circular(5)),
-        Paint()..color = const Color(0xff3a3a3a));
+        paint);
   }
 
   void lightUp() {

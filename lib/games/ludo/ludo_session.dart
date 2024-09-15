@@ -28,7 +28,7 @@ class LudoSession extends _$LudoSession {
   @override
   LudoSessionData? build() {
     _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
-    _channel.stream.listen((data) => print(data));
+    _channel.stream.listen((data) => print("WS: $data"));
     return null;
   }
 

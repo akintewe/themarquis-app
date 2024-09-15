@@ -256,12 +256,7 @@ class JoinRoomDialog extends ConsumerStatefulWidget {
 }
 
 class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
-  double _sliderValue = 0;
-  int? _tokenBalance;
-  String _selectedTokenAddress = '';
-  List<Map<String, String>>? _tokens;
   final _roomIdController = TextEditingController();
-  final _tokenAmountController = TextEditingController();
 
   @override
   void initState() {
@@ -275,270 +270,126 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: FutureBuilder(
-          future: _tokens == null
-              ? () async {
-                  _tokens = await ref
-                      .read(userProvider.notifier)
-                      .getSupportedTokens();
-                }()
-              : null,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(
-                width: 100,
-                height: 100,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            if (snapshot.hasError) {
-              return Text(snapshot.error.toString());
-            }
-            return Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color.fromARGB(
-                      255, 0, 236, 255), // Cyan border color
-                  width: 1, // Border thickness
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: const Color.fromARGB(255, 0, 236, 255), // Cyan border color
+            width: 1, // Border thickness
+          ),
+          borderRadius: BorderRadius.circular(
+              12), // Ensure the border follows the shape of the dialog
+        ),
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.80,
+          height: MediaQuery.of(context).size.height * 0.50 < 280
+              ? 280
+              : MediaQuery.of(context).size.height * 0.50,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    const Expanded(
+                      flex: 1,
+                      child: SizedBox(),
+                    ),
+                    const Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Text(
+                          'JOIN ROOM',
+                          style: TextStyle(
+                            color: Color.fromARGB(
+                              255,
+                              0,
+                              236,
+                              255,
+                            ), // Cyan border color
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(
+                            Icons.cancel_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(
-                    12), // Ensure the border follows the shape of the dialog
-              ),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.80,
-                height: MediaQuery.of(context).size.height * 0.50 < 280
-                    ? 280
-                    : MediaQuery.of(context).size.height * 0.50,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Expanded(
-                            flex: 1,
-                            child: SizedBox(),
-                          ),
-                          const Expanded(
-                            flex: 3,
-                            child: Center(
-                              child: Text(
-                                'JOIN ROOM',
-                                style: TextStyle(
-                                  color: Color.fromARGB(
-                                    255,
-                                    0,
-                                    236,
-                                    255,
-                                  ), // Cyan border color
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: IconButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                icon: const Icon(
-                                  Icons.cancel_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            label: Text("Room ID"),
-                            // errorText: _emailError,
-                          ),
-                          controller: _roomIdController,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: DropdownButtonFormField<String>(
-                                decoration: const InputDecoration(
-                                  labelText: 'Token',
-                                ),
-                                items:
-                                    _tokens!.map((Map<String, String> value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value['tokenAddress']!,
-                                    child: Text(value['tokenName']!),
-                                  );
-                                }).toList(),
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    _selectedTokenAddress = newValue!;
-                                    _tokenBalance = null;
-                                  });
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              flex: 3,
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  labelText: 'Token Amount',
-                                ),
-                                controller: _tokenAmountController,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d*\.?\d*$')),
-                                  TextInputFormatter.withFunction(
-                                      (oldValue, newValue) {
-                                    if (newValue.text.isEmpty) {
-                                      return newValue;
-                                    }
-                                    double? value =
-                                        double.tryParse(newValue.text);
-                                    if (value != null &&
-                                        _tokenBalance != null &&
-                                        value <= _tokenBalance! / 1e18) {
-                                      return newValue;
-                                    }
-                                    return oldValue;
-                                  }),
-                                ],
-                                onChanged: (value) {
-                                  if (value.isNotEmpty) {
-                                    setState(() {
-                                      _sliderValue = double.parse(value) * 1e18;
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (_selectedTokenAddress != "")
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: FutureBuilder(
-                            future: _tokenBalance != null
-                                ? null
-                                : () async {
-                                    final res = await ref
-                                        .read(userProvider.notifier)
-                                        .getTokenBalance(_selectedTokenAddress);
-                                    _sliderValue = 0;
-                                    _tokenBalance = res;
-                                  }(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              }
-                              if (snapshot.hasError) {
-                                return Text(snapshot.error.toString());
-                              }
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Select amount:',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Slider(
-                                    min: 0.0,
-                                    max: _tokenBalance!.toDouble(),
-                                    divisions: 100,
-                                    label: '${_sliderValue.round() / 1e18}',
-                                    value: _sliderValue,
-                                    onChanged: (double value) {
-                                      setState(() {
-                                        _sliderValue = value;
-                                        _tokenAmountController.text =
-                                            (_sliderValue / 1e18).toString();
-                                      });
-                                    },
-                                  ),
-                                  Text(
-                                    'Max: ${_tokenBalance! / 1e18}',
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 12),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      StatefulBuilder(
-                        builder: (context, stste) {
-                          bool _isLoading = false;
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextButton(
-                              onPressed: () {
-                                //session = room
-                                ref
-                                    .read(ludoSessionProvider.notifier)
-                                    .joinSession(
-                                      _roomIdController.text,
-                                    );
-                                Navigator.of(context).pop();
-
-                                widget.game.playState = PlayState.waiting;
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color:
-                                        const Color.fromARGB(255, 0, 236, 255),
-                                    width: 1.2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0,
-                                  horizontal: 42.0,
-                                ),
-                                child: const Text(
-                                  "Confirm",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      label: Text("Room ID"),
+                      // errorText: _emailError,
+                    ),
+                    controller: _roomIdController,
                   ),
                 ),
-              ),
-            );
-          }),
+                StatefulBuilder(
+                  builder: (context, stste) {
+                    bool _isLoading = false;
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextButton(
+                        onPressed: () {
+                          //session = room
+                          ref.read(ludoSessionProvider.notifier).joinSession(
+                                _roomIdController.text,
+                              );
+                          Navigator.of(context).pop();
+
+                          widget.game.playState = PlayState.waiting;
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 0, 236, 255),
+                              width: 1.2,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                            horizontal: 42.0,
+                          ),
+                          child: const Text(
+                            "Confirm",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
