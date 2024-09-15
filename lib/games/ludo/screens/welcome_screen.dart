@@ -951,138 +951,148 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                       ),
                       StatefulBuilder(
                         builder: (ctx, stste) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              4,
-                              (index) {
-                                return colorChoosingCard(
-                                  index: index,
-                                  isPicked: selectedIndex == index,
-                                  stste: stste,
-                                );
-                              },
-                            ),
+                          return Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  4,
+                                  (index) {
+                                    return colorChoosingCard(
+                                      index: index,
+                                      isPicked: selectedIndex == index,
+                                      stste: stste,
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 14,
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: DropdownButtonFormField<String>(
+                                      decoration: const InputDecoration(
+                                        labelText: 'Token',
+                                      ),
+                                      items: snapshot.data!
+                                          .map((Map<String, String> value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value['tokenAddress']!,
+                                          child: Text(value['tokenName']!),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        stste(() {
+                                          _selectedTokenAddress = newValue!;
+                                          _tokenBalance = null;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    flex: 3,
+                                    child: TextField(
+                                      decoration: const InputDecoration(
+                                        labelText: 'Token Amount',
+                                      ),
+                                      controller: _tokenAmountController,
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp(r'^\d*\.?\d*$')),
+                                        TextInputFormatter.withFunction(
+                                            (oldValue, newValue) {
+                                          if (newValue.text.isEmpty) {
+                                            return newValue;
+                                          }
+                                          double? value =
+                                              double.tryParse(newValue.text);
+                                          if (value != null &&
+                                              _tokenBalance != null &&
+                                              value <= _tokenBalance! / 1e18) {
+                                            return newValue;
+                                          }
+                                          return oldValue;
+                                        }),
+                                      ],
+                                      onChanged: (value) {
+                                        if (value.isNotEmpty) {
+                                          stste(() {
+                                            _sliderValue =
+                                                double.parse(value) * 1e18;
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (_selectedTokenAddress != "")
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: FutureBuilder(
+                                    future: _tokenBalance != null
+                                        ? null
+                                        : () async {
+                                            final res = await ref
+                                                .read(userProvider.notifier)
+                                                .getTokenBalance(
+                                                    _selectedTokenAddress);
+                                            _sliderValue = 0;
+                                            _tokenBalance = res;
+                                          }(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const CircularProgressIndicator();
+                                      }
+                                      if (snapshot.hasError) {
+                                        return Text(snapshot.error.toString());
+                                      }
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Select amount:',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          Slider(
+                                            min: 0.0,
+                                            max: _tokenBalance!
+                                                .toDouble(), // Convert int to double
+                                            divisions: 100,
+                                            label: '${_sliderValue.round()}',
+                                            value: _sliderValue,
+                                            onChanged: (double value) {
+                                              stste(() {
+                                                _sliderValue = value;
+                                                _tokenAmountController.text =
+                                                    (_sliderValue / 1e18)
+                                                        .toString();
+                                              });
+                                            },
+                                          ),
+                                          Text(
+                                            'Max: ${_tokenBalance! / 1e18}',
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
                           );
                         },
                       ),
-                      const SizedBox(
-                        height: 14,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: DropdownButtonFormField<String>(
-                              decoration: const InputDecoration(
-                                labelText: 'Token',
-                              ),
-                              items: snapshot.data!
-                                  .map((Map<String, String> value) {
-                                return DropdownMenuItem<String>(
-                                  value: value['tokenAddress']!,
-                                  child: Text(value['tokenName']!),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _selectedTokenAddress = newValue!;
-                                  _tokenBalance = null;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            flex: 3,
-                            child: TextField(
-                              decoration: const InputDecoration(
-                                labelText: 'Token Amount',
-                              ),
-                              controller: _tokenAmountController,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d*\.?\d*$')),
-                                TextInputFormatter.withFunction(
-                                    (oldValue, newValue) {
-                                  if (newValue.text.isEmpty) {
-                                    return newValue;
-                                  }
-                                  double? value =
-                                      double.tryParse(newValue.text);
-                                  if (value != null &&
-                                      _tokenBalance != null &&
-                                      value <= _tokenBalance! / 1e18) {
-                                    return newValue;
-                                  }
-                                  return oldValue;
-                                }),
-                              ],
-                              onChanged: (value) {
-                                if (value.isNotEmpty) {
-                                  setState(() {
-                                    _sliderValue = double.parse(value) * 1e18;
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_selectedTokenAddress != "")
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: FutureBuilder(
-                            future: _tokenBalance != null
-                                ? null
-                                : () async {
-                                    final res = await ref
-                                        .read(userProvider.notifier)
-                                        .getTokenBalance(_selectedTokenAddress);
-                                    _sliderValue = 0;
-                                    _tokenBalance = res;
-                                  }(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              }
-                              if (snapshot.hasError) {
-                                return Text(snapshot.error.toString());
-                              }
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Select amount:',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Slider(
-                                    min: 0.0,
-                                    max: _tokenBalance!
-                                        .toDouble(), // Convert int to double
-                                    divisions: 100,
-                                    label: '${_sliderValue.round()}',
-                                    value: _sliderValue,
-                                    onChanged: (double value) {
-                                      setState(() {
-                                        _sliderValue = value;
-                                        _tokenAmountController.text =
-                                            (_sliderValue / 1e18).toString();
-                                      });
-                                    },
-                                  ),
-                                  Text(
-                                    'Max: ${_tokenBalance! / 1e18}',
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 12),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
                       const SizedBox(
                         height: 8,
                       ),
