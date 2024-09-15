@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/providers/user.dart';
 
@@ -19,6 +20,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final deviceSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: const Color(0xff0f1118),
       body: Transform.scale(
@@ -721,121 +723,315 @@ class CreateRoomDialog extends ConsumerStatefulWidget {
 }
 
 class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
+  int selectedIndex = 0; // To keep track of the selected color
+  double _sliderValue = 0;
+  int? _tokenBalance;
+  String _selectedTokenAddress = '';
+  // A function to handle color selection
+  void onColorPicked(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: const Color.fromARGB(255, 0, 236, 255), // Cyan border color
-            width: 1, // Border thickness
-          ),
-          borderRadius: BorderRadius.circular(
-              12), // Ensure the border follows the shape of the dialog
-        ),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.80,
-          height: MediaQuery.of(context).size.height * 0.50 < 450
-              ? 450
-              : MediaQuery.of(context).size.height * 0.50,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const Expanded(
-                      flex: 1,
-                      child: SizedBox(),
-                    ),
-                    const Expanded(
-                      flex: 3,
-                      child: Center(
-                        child: Text(
-                          'CREATE ROOM',
-                          style: TextStyle(
-                            color: Color.fromARGB(
-                              255,
-                              0,
-                              236,
-                              255,
-                            ), // Cyan border color
-                            fontSize: 18,
-
-                            fontWeight: FontWeight.w500,
+      child: FutureBuilder<List<Map<String, String>>>(
+          future: ref.read(userProvider.notifier).getSupportedTokens(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                width: 100,
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: const Color.fromARGB(
+                      255, 0, 236, 255), // Cyan border color
+                  width: 1, // Border thickness
+                ),
+                borderRadius: BorderRadius.circular(
+                    12), // Ensure the border follows the shape of the dialog
+              ),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.80,
+                height: MediaQuery.of(context).size.height * 0.50 < 450
+                    ? 450
+                    : MediaQuery.of(context).size.height * 0.50,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          const Expanded(
+                            flex: 1,
+                            child: SizedBox(),
                           ),
-                        ),
+                          const Expanded(
+                            flex: 3,
+                            child: Center(
+                              child: Text(
+                                'CREATE ROOM',
+                                style: TextStyle(
+                                  color: Color.fromARGB(
+                                    255,
+                                    0,
+                                    236,
+                                    255,
+                                  ), // Cyan border color
+                                  fontSize: 18,
+
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.all(0),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                icon: const Icon(
+                                  Icons.cancel_outlined,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.all(0),
-                          onPressed: () {
-                            Navigator.of(context).pop();
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          4,
+                          (index) {
+                            return colorChoosingCard(
+                                index: index, isPicked: selectedIndex == index);
                           },
-                          icon: const Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.white,
-                            size: 22,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                labelText: 'Token',
+                              ),
+                              items: snapshot.data!
+                                  .map((Map<String, String> value) {
+                                return DropdownMenuItem<String>(
+                                  value: value['tokenAddress']!,
+                                  child: Text(value['tokenName']!),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedTokenAddress = newValue!;
+                                  _tokenBalance = null;
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          const Expanded(
+                            flex: 3,
+                            child: TextField(
+                              decoration: InputDecoration(
+                                labelText: 'Token Amount',
+                              ),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      FutureBuilder(
+                        future: _tokenBalance != null
+                            ? null
+                            : () async {
+                                final res = await ref
+                                    .read(userProvider.notifier)
+                                    .getTokenBalance(_selectedTokenAddress);
+                                _sliderValue = 0;
+                                _tokenBalance = res;
+                              }(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Select amount:',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Slider(
+                                min: 0.0,
+                                max: _tokenBalance!
+                                    .toDouble(), // Convert int to double
+                                divisions: 100,
+                                label: '${_sliderValue.round()}',
+                                value: _sliderValue,
+                                onChanged: (double value) {
+                                  setState(() {
+                                    _sliderValue = value;
+                                  });
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+
+                          widget.game.playState = PlayState.waiting;
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 0, 236, 255),
+                              width: 1.2,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                            horizontal: 42.0,
+                          ),
+                          child: const Text(
+                            "Create",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                // Padding(
-                //   padding: const EdgeInsets.all(8.0),
-                //   child: TextField(
-                //     decoration: InputDecoration(
-                //       label: const Text("Room ID"),
-                //       // errorText: _emailError,
-                //     ),
-                //     controller: _roomIdController,
-                //   ),
-                // ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
+              ),
+            );
+          }),
+    );
+  }
 
-                    widget.game.playState = PlayState.waiting;
-                  },
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color.fromARGB(255, 0, 236, 255),
-                        width: 1.2,
-                      ),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 42.0,
-                    ),
-                    child: const Text(
-                      "Create",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+  Widget colorChoosingCard({required int index, required bool isPicked}) {
+    return GestureDetector(
+      onTap: () => onColorPicked(index),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Opacity(
+          opacity: isPicked ? 1 : 0.6,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 52,
+                height: 52,
+                child: SvgPicture.asset(
+                  "assets/svg/chess-and-bg/${_getColorBackground(index)}.svg",
                 ),
-              ],
-            ),
+              ),
+              SizedBox(
+                width: 30,
+                height: 30,
+                child: SvgPicture.asset(
+                  "assets/svg/chess-and-bg/${_getColorChess(index)}.svg",
+                ),
+              ),
+              if (isPicked) _buildCornerBorder(top: 0, left: 0),
+              if (isPicked) _buildCornerBorder(top: 0, right: 0),
+              if (isPicked) _buildCornerBorder(bottom: 0, left: 0),
+              if (isPicked) _buildCornerBorder(bottom: 0, right: 0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getColorBackground(int index) {
+    switch (index) {
+      case 0:
+        return "blue_bg";
+      case 1:
+        return "red_bg";
+      case 2:
+        return "green_bg";
+      case 3:
+        return "yellow_bg";
+      default:
+        return "blue_bg";
+    }
+  }
+
+  String _getColorChess(int index) {
+    switch (index) {
+      case 0:
+        return "blue_chess";
+      case 1:
+        return "red_chess";
+      case 2:
+        return "green_chess";
+      case 3:
+        return "yellow_chess";
+      default:
+        return "blue_chess";
+    }
+  }
+
+  Widget _buildCornerBorder(
+      {double? top, double? left, double? right, double? bottom}) {
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(
+          border: Border(
+            top: top != null
+                ? BorderSide(width: 2, color: Colors.white)
+                : BorderSide.none,
+            left: left != null
+                ? BorderSide(width: 2, color: Colors.white)
+                : BorderSide.none,
+            right: right != null
+                ? BorderSide(width: 2, color: Colors.white)
+                : BorderSide.none,
+            bottom: bottom != null
+                ? BorderSide(width: 2, color: Colors.white)
+                : BorderSide.none,
           ),
         ),
       ),
