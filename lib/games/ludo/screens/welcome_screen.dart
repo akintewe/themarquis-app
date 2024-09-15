@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/providers/user.dart';
 
@@ -12,6 +13,8 @@ class LudoWelcomeScreen extends ConsumerStatefulWidget {
 }
 
 class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
+  final _roomIdController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
@@ -95,21 +98,30 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
             icon: Icons.add,
             text: 'Create Room',
             onTap: () {
-              createRoomDialog(ctx: context);
+              createRoomDialog(
+                ctx: context,
+                game: widget.game,
+              );
             }),
         const SizedBox(height: 36),
         _buildMenuButton(
             icon: Icons.group,
             text: 'Join Room',
             onTap: () {
-              joinRoomDialog(ctx: context);
+              joinRoomDialog(
+                ctx: context,
+                game: widget.game,
+              );
             }),
         const SizedBox(height: 36),
         _buildMenuButton(
             icon: Icons.casino,
             text: 'Open Sessions',
             onTap: () {
-              openSessionDialog(ctx: context);
+              openSessionDialog(
+                ctx: context,
+                game: widget.game,
+              );
             }),
       ],
     );
@@ -166,353 +178,373 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
     );
   }
 
-  Future openSessionDialog({required BuildContext ctx}) {
+  Future openSessionDialog({
+    required BuildContext ctx,
+    required LudoGame game,
+  }) {
     return showDialog(
       context: ctx,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color:
-                    const Color.fromARGB(255, 0, 236, 255), // Cyan border color
-                width: 1, // Border thickness
+        return OpenSessionDialog(
+          game: widget.game,
+        );
+      },
+    );
+  }
+
+  Future joinRoomDialog({
+    required BuildContext ctx,
+    required LudoGame game,
+  }) {
+    return showDialog(
+      context: ctx,
+      builder: (BuildContext context) {
+        return JoinRoomDialog(
+          game: game,
+        );
+      },
+    );
+  }
+
+  Future createRoomDialog({
+    required BuildContext ctx,
+    required LudoGame game,
+  }) {
+    return showDialog(
+      context: ctx,
+      builder: (BuildContext context) {
+        return CreateRoomDialog(game: game);
+      },
+    );
+  }
+}
+
+class JoinRoomDialog extends ConsumerStatefulWidget {
+  const JoinRoomDialog({super.key, required this.game});
+
+  final LudoGame game;
+
+  @override
+  ConsumerState<JoinRoomDialog> createState() => _JoinRoomDialogState();
+}
+
+class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
+  double _sliderValue = 0;
+  int? _tokenBalance;
+  String _selectedTokenAddress = '';
+  final _roomIdController = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: FutureBuilder<List<Map<String, String>>>(
+          future: ref.read(userProvider.notifier).getSupportedTokens(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                width: 100,
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: const Color.fromARGB(
+                      255, 0, 236, 255), // Cyan border color
+                  width: 1, // Border thickness
+                ),
+                borderRadius: BorderRadius.circular(
+                    12), // Ensure the border follows the shape of the dialog
               ),
-              borderRadius: BorderRadius.circular(
-                  12), // Ensure the border follows the shape of the dialog
-            ),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.80,
-              height: MediaQuery.of(context).size.height * 0.70,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        const Expanded(
-                          flex: 1,
-                          child: SizedBox(),
-                        ),
-                        const Expanded(
-                          flex: 3,
-                          child: Center(
-                            child: Text(
-                              'OPEN SESSION',
-                              style: TextStyle(
-                                color: Color.fromARGB(
-                                  255,
-                                  0,
-                                  236,
-                                  255,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.80,
+                height: MediaQuery.of(context).size.height * 0.50 < 280
+                    ? 280
+                    : MediaQuery.of(context).size.height * 0.50,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          const Expanded(
+                            flex: 1,
+                            child: SizedBox(),
+                          ),
+                          const Expanded(
+                            flex: 3,
+                            child: Center(
+                              child: Text(
+                                'JOIN ROOM',
+                                style: TextStyle(
+                                  color: Color.fromARGB(
+                                      255, 0, 236, 255), // Cyan border color
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: IconButton(
-                              visualDensity: VisualDensity.compact,
-                              padding: EdgeInsets.all(0),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              icon: const Icon(
-                                Icons.cancel_outlined,
-                                color: Colors.white,
-                                size: 22,
+                          Expanded(
+                            flex: 1,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                icon: const Icon(
+                                  Icons.cancel_outlined,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.60,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            openSessionRoomCard(
-                              roomName: "ROOM P8U7",
-                              noOfPlayers: 3,
-                              context: context,
-                            ),
-                            openSessionRoomCard(
-                              roomName: "ROOM QW9K",
-                              noOfPlayers: 1,
-                              context: context,
-                            ),
-                            openSessionRoomCard(
-                              roomName: "ROOM CMB9",
-                              noOfPlayers: 2,
-                              context: context,
-                            ),
-                          ],
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            label: Text("Room ID"),
+                            // errorText: _emailError,
+                          ),
+                          controller: _roomIdController,
                         ),
                       ),
-                    ),
-                  ],
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                labelText: 'Token',
+                              ),
+                              items: snapshot.data!
+                                  .map((Map<String, String> value) {
+                                return DropdownMenuItem<String>(
+                                  value: value['tokenAddress']!,
+                                  child: Text(value['tokenName']!),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedTokenAddress = newValue!;
+                                  _tokenBalance = null;
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          const Expanded(
+                            flex: 3,
+                            child: TextField(
+                              decoration: InputDecoration(
+                                labelText: 'Token Amount',
+                              ),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      FutureBuilder(
+                        future: _tokenBalance != null
+                            ? null
+                            : () async {
+                                final res = await ref
+                                    .read(userProvider.notifier)
+                                    .getTokenBalance(_selectedTokenAddress);
+                                _sliderValue = 0;
+                                _tokenBalance = res;
+                              }(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Select amount:',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Slider(
+                                min: 0.0,
+                                max: _tokenBalance!
+                                    .toDouble(), // Convert int to double
+                                divisions: 100,
+                                label: '${_sliderValue.round()}',
+                                value: _sliderValue,
+                                onChanged: (double value) {
+                                  setState(() {
+                                    _sliderValue = value;
+                                  });
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+
+                          widget.game.playState = PlayState.waiting;
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 0, 236, 255),
+                              width: 1.2,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                            horizontal: 42.0,
+                          ),
+                          child: const Text(
+                            "Confirm",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
+            );
+          }),
     );
   }
+}
 
-  Future joinRoomDialog({required BuildContext ctx}) {
-    return showDialog(
-      context: ctx,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+class OpenSessionDialog extends ConsumerStatefulWidget {
+  const OpenSessionDialog({super.key, required this.game});
+
+  final LudoGame game;
+
+  @override
+  ConsumerState<OpenSessionDialog> createState() => _OpenSessionDialogState();
+}
+
+class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: const Color.fromARGB(255, 0, 236, 255), // Cyan border color
+            width: 1, // Border thickness
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color:
-                    const Color.fromARGB(255, 0, 236, 255), // Cyan border color
-                width: 1, // Border thickness
-              ),
-              borderRadius: BorderRadius.circular(
-                  12), // Ensure the border follows the shape of the dialog
-            ),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.80,
-              height: MediaQuery.of(context).size.height * 0.50 < 280
-                  ? 280
-                  : MediaQuery.of(context).size.height * 0.50,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+          borderRadius: BorderRadius.circular(
+              12), // Ensure the border follows the shape of the dialog
+        ),
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.80,
+          height: MediaQuery.of(context).size.height * 0.70,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        const Expanded(
-                          flex: 1,
-                          child: SizedBox(),
-                        ),
-                        const Expanded(
-                          flex: 3,
-                          child: Center(
-                            child: Text(
-                              'JOIN ROOM',
-                              style: TextStyle(
-                                color: Color.fromARGB(
-                                    255, 0, 236, 255), // Cyan border color
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: IconButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              icon: const Icon(
-                                Icons.cancel_outlined,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    const Expanded(
+                      flex: 1,
+                      child: SizedBox(),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          label: Text("Room ID"),
-                          // errorText: _emailError,
-                        ),
-                        controller: _roomIdController,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        widget.game.playState = PlayState.waiting;
-                      },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 0, 236, 255),
-                            width: 1.2,
-                          ),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8.0,
-                          horizontal: 42.0,
-                        ),
-                        child: const Text(
-                          "Confirm",
+                    const Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Text(
+                          'OPEN SESSION',
                           style: TextStyle(
-                            fontSize: 14,
+                            color: Color.fromARGB(
+                              255,
+                              0,
+                              236,
+                              255,
+                            ),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.all(0),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(
+                            Icons.cancel_outlined,
                             color: Colors.white,
+                            size: 22,
                           ),
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future createRoomDialog({required BuildContext ctx}) {
-    return showDialog(
-      context: ctx,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color:
-                    const Color.fromARGB(255, 0, 236, 255), // Cyan border color
-                width: 1, // Border thickness
-              ),
-              borderRadius: BorderRadius.circular(
-                  12), // Ensure the border follows the shape of the dialog
-            ),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.80,
-              height: MediaQuery.of(context).size.height * 0.50 < 450
-                  ? 450
-                  : MediaQuery.of(context).size.height * 0.50,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.60,
+                    child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        const Expanded(
-                          flex: 1,
-                          child: SizedBox(),
+                        openSessionRoomCard(
+                          roomName: "ROOM P8U7",
+                          noOfPlayers: 3,
+                          context: context,
                         ),
-                        const Expanded(
-                          flex: 3,
-                          child: Center(
-                            child: Text(
-                              'CREATE ROOM',
-                              style: TextStyle(
-                                color: Color.fromARGB(
-                                  255,
-                                  0,
-                                  236,
-                                  255,
-                                ), // Cyan border color
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
+                        openSessionRoomCard(
+                          roomName: "ROOM QW9K",
+                          noOfPlayers: 1,
+                          context: context,
                         ),
-                        Expanded(
-                          flex: 1,
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: IconButton(
-                              visualDensity: VisualDensity.compact,
-                              padding: EdgeInsets.all(0),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              icon: const Icon(
-                                Icons.cancel_outlined,
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                            ),
-                          ),
+                        openSessionRoomCard(
+                          roomName: "ROOM CMB9",
+                          noOfPlayers: 2,
+                          context: context,
                         ),
                       ],
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(8.0),
-                    //   child: TextField(
-                    //     decoration: InputDecoration(
-                    //       label: const Text("Room ID"),
-                    //       // errorText: _emailError,
-                    //     ),
-                    //     controller: _roomIdController,
-                    //   ),
-                    // ),
-                    TextButton(
-                      onPressed: () {
-                        widget.game.playState = PlayState.waiting;
-                      },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 0, 236, 255),
-                            width: 1.2,
-                          ),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8.0,
-                          horizontal: 42.0,
-                        ),
-                        child: const Text(
-                          "Create",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -679,212 +711,134 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
   }
 }
 
-class JoinRoomDialog extends ConsumerStatefulWidget {
-  const JoinRoomDialog({super.key, required this.game});
+class CreateRoomDialog extends ConsumerStatefulWidget {
+  const CreateRoomDialog({super.key, required this.game});
 
   final LudoGame game;
 
   @override
-  ConsumerState<JoinRoomDialog> createState() => _JoinRoomDialogState();
+  ConsumerState<CreateRoomDialog> createState() => _CreateRoomDialogState();
 }
 
-class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
-  double _sliderValue = 0;
-  int? _tokenBalance;
-  String _selectedTokenAddress = '';
-  final _roomIdController = TextEditingController();
+class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: FutureBuilder<List<Map<String, String>>>(
-          future: ref.read(userProvider.notifier).getSupportedTokens(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
-            return Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color.fromARGB(
-                      255, 0, 236, 255), // Cyan border color
-                  width: 1, // Border thickness
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: const Color.fromARGB(255, 0, 236, 255), // Cyan border color
+            width: 1, // Border thickness
+          ),
+          borderRadius: BorderRadius.circular(
+              12), // Ensure the border follows the shape of the dialog
+        ),
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.80,
+          height: MediaQuery.of(context).size.height * 0.50 < 450
+              ? 450
+              : MediaQuery.of(context).size.height * 0.50,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    const Expanded(
+                      flex: 1,
+                      child: SizedBox(),
+                    ),
+                    const Expanded(
+                      flex: 3,
+                      child: Center(
+                        child: Text(
+                          'CREATE ROOM',
+                          style: TextStyle(
+                            color: Color.fromARGB(
+                              255,
+                              0,
+                              236,
+                              255,
+                            ), // Cyan border color
+                            fontSize: 18,
+
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.all(0),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(
+                            Icons.cancel_outlined,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(
-                    12), // Ensure the border follows the shape of the dialog
-              ),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.80,
-                height: MediaQuery.of(context).size.height * 0.50 < 280
-                    ? 280
-                    : MediaQuery.of(context).size.height * 0.50,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Expanded(
-                            flex: 1,
-                            child: SizedBox(),
-                          ),
-                          const Expanded(
-                            flex: 3,
-                            child: Center(
-                              child: Text(
-                                'JOIN ROOM',
-                                style: TextStyle(
-                                  color: Color.fromARGB(
-                                      255, 0, 236, 255), // Cyan border color
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: IconButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                icon: const Icon(
-                                  Icons.cancel_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                // Padding(
+                //   padding: const EdgeInsets.all(8.0),
+                //   child: TextField(
+                //     decoration: InputDecoration(
+                //       label: const Text("Room ID"),
+                //       // errorText: _emailError,
+                //     ),
+                //     controller: _roomIdController,
+                //   ),
+                // ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+
+                    widget.game.playState = PlayState.waiting;
+                  },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color.fromARGB(255, 0, 236, 255),
+                        width: 1.2,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            label: Text("Room ID"),
-                            // errorText: _emailError,
-                          ),
-                          controller: _roomIdController,
-                        ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 42.0,
+                    ),
+                    child: const Text(
+                      "Create",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: DropdownButtonFormField<String>(
-                              decoration: const InputDecoration(
-                                labelText: 'Token',
-                              ),
-                              items: snapshot.data!
-                                  .map((Map<String, String> value) {
-                                return DropdownMenuItem<String>(
-                                  value: value['tokenAddress']!,
-                                  child: Text(value['tokenName']!),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _selectedTokenAddress = newValue!;
-                                  _tokenBalance = null;
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          const Expanded(
-                            flex: 3,
-                            child: TextField(
-                              decoration: InputDecoration(
-                                labelText: 'Token Amount',
-                              ),
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      FutureBuilder(
-                        future: _tokenBalance != null
-                            ? null
-                            : () async {
-                                final res = await ref
-                                    .read(userProvider.notifier)
-                                    .getTokenBalance(_selectedTokenAddress);
-                                _sliderValue = 0;
-                                _tokenBalance = res;
-                              }(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Select amount:',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              Slider(
-                                min: 0.0,
-                                max: _tokenBalance!
-                                    .toDouble(), // Convert int to double
-                                divisions: 100,
-                                label: '${_sliderValue.round()}',
-                                value: _sliderValue,
-                                onChanged: (double value) {
-                                  setState(() {
-                                    _sliderValue = value;
-                                  });
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          widget.game.playState = PlayState.waiting;
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 0, 236, 255),
-                              width: 1.2,
-                            ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 42.0,
-                          ),
-                          child: const Text(
-                            "Confirm",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
