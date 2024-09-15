@@ -59,7 +59,7 @@ class PlayerPin extends SpriteComponent
         (currentPosIndex >= 0 || game.dice.value == 6) &&
         (currentPosIndex + game.dice.value <= 47)) {
       final paint = Paint()
-        ..color = playerColors[playerIndex]
+        ..color = game.listOfColors[playerIndex]
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.0;
       final radius = size.x * 0.85;

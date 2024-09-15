@@ -142,7 +142,8 @@ class Destination extends PositionComponent with HasGameReference<LudoGame> {
   }
 }
 
-class BarComponent extends PositionComponent with HasPaint {
+class BarComponent extends PositionComponent
+    with HasPaint, HasGameReference<LudoGame> {
   final int playerIndex;
   BarComponent({
     required this.playerIndex,
@@ -162,7 +163,7 @@ class BarComponent extends PositionComponent with HasPaint {
   void lightUp() {
     add(
       ColorEffect(
-        playerColors[playerIndex],
+        game.listOfColors[playerIndex],
         EffectController(
           duration: 1,
         ),

@@ -1,8 +1,18 @@
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
+import 'package:marquis_v2/games/ludo/config.dart';
 
 part 'ludo_session.g.dart';
 part 'ludo_session.freezed.dart';
+
+const playerColors = [
+  // Add this const
+  Color(0xffd04c2f),
+  Color(0xff2fa9d0),
+  Color(0xff2fd06f),
+  Color(0xffb0d02f),
+];
 
 @freezed
 class LudoSessionData extends HiveObject with _$LudoSessionData {
@@ -27,6 +37,13 @@ class LudoSessionData extends HiveObject with _$LudoSessionData {
     @HiveField(14) required List<String> s,
     @HiveField(15) required List<String> randomNumbers,
   }) = _LudoSessionData;
+
+  List<Color> get getListOfColors =>
+      playerColors.sublist(int.parse(color)) +
+      playerColors.sublist(0, int.parse(color));
+//find index of that color
+//sub list, [0, target][target, 3]
+//return it
 
   factory LudoSessionData.fromJson(Map<String, dynamic> json) =>
       _$LudoSessionDataFromJson(json);

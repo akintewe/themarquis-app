@@ -36,14 +36,15 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       canvas.drawRRect(
         rrect,
         Paint()
-          ..color =
-              coloredBox.contains(i) ? playerColors[0] : const Color(0xff606060)
+          ..color = coloredBox.contains(i)
+              ? game.listOfColors[0]
+              : const Color(0xff606060)
           ..style = PaintingStyle.stroke,
       );
       if (coloredBox.contains(i)) {
         canvas.drawRRect(
           rrect,
-          Paint()..color = playerColors[0].withOpacity(0.2),
+          Paint()..color = game.listOfColors[0].withOpacity(0.2),
         );
       }
     }
@@ -59,14 +60,15 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       canvas.drawRRect(
         rrect,
         Paint()
-          ..color =
-              coloredBox.contains(i) ? playerColors[1] : const Color(0xff606060)
+          ..color = coloredBox.contains(i)
+              ? game.listOfColors[1]
+              : const Color(0xff606060)
           ..style = PaintingStyle.stroke,
       );
       if (coloredBox.contains(i)) {
         canvas.drawRRect(
           rrect,
-          Paint()..color = playerColors[1].withOpacity(0.2),
+          Paint()..color = game.listOfColors[1].withOpacity(0.2),
         );
       }
     }
@@ -81,14 +83,15 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       canvas.drawRRect(
         rrect,
         Paint()
-          ..color =
-              coloredBox.contains(i) ? playerColors[2] : const Color(0xff606060)
+          ..color = coloredBox.contains(i)
+              ? game.listOfColors[2]
+              : const Color(0xff606060)
           ..style = PaintingStyle.stroke,
       );
       if (coloredBox.contains(i)) {
         canvas.drawRRect(
           rrect,
-          Paint()..color = playerColors[2].withOpacity(0.2),
+          Paint()..color = game.listOfColors[2].withOpacity(0.2),
         );
       }
     }
@@ -104,14 +107,15 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       canvas.drawRRect(
         rrect,
         Paint()
-          ..color =
-              coloredBox.contains(i) ? playerColors[3] : const Color(0xff606060)
+          ..color = coloredBox.contains(i)
+              ? game.listOfColors[3]
+              : const Color(0xff606060)
           ..style = PaintingStyle.stroke,
       );
       if (coloredBox.contains(i)) {
         canvas.drawRRect(
           rrect,
-          Paint()..color = playerColors[3].withOpacity(0.2),
+          Paint()..color = game.listOfColors[3].withOpacity(0.2),
         );
       }
     }

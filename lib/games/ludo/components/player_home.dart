@@ -141,7 +141,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     final rrect = RRect.fromLTRBR(0, 0, game.unitSize * 4, game.unitSize * 4,
         const Radius.circular(16.0));
     final paint = Paint()
-      ..color = playerColors[playerIndex]
+      ..color = game.listOfColors[playerIndex]
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
     canvas.drawRRect(
@@ -164,7 +164,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     );
 
     final avatarBgPaint = Paint()
-      ..color = playerColors[playerIndex]
+      ..color = game.listOfColors[playerIndex]
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
     canvas.drawRRect(
