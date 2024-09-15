@@ -20,6 +20,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final deviceSize = MediaQuery.of(context).size;
     final user = ref.read(userProvider);
+    final ludoSession = ref.read(ludoSessionProvider.notifier);
     if (user == null) {
       return const Center(child: Text("Not Logged In"));
     }
@@ -484,36 +485,49 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                       const SizedBox(
                         height: 8,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextButton(
-                          onPressed: () {
-                            widget.game.playState = PlayState.waiting;
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: const Color.fromARGB(255, 0, 236, 255),
-                                width: 1.2,
+                      StatefulBuilder(
+                        builder: (context, stste) {
+                          bool _isLoading = false;
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextButton(
+                              onPressed: () {
+                                //session = room
+                                ref
+                                    .read(ludoSessionProvider.notifier)
+                                    .joinSession(
+                                      _roomIdController.text,
+                                    );
+                                widget.game.playState = PlayState.waiting;
+                                Navigator.of(context).pop();
+                              },
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
                               ),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 8.0,
-                              horizontal: 42.0,
-                            ),
-                            child: const Text(
-                              "Confirm",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color:
+                                        const Color.fromARGB(255, 0, 236, 255),
+                                    width: 1.2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: 42.0,
+                                ),
+                                child: const Text(
+                                  "Confirm",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ],
                   ),
