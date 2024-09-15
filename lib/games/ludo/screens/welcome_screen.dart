@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
 class LudoWelcomeScreen extends StatefulWidget {
@@ -94,14 +95,14 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
       children: [
         _buildMenuButton(
             icon: Icons.add,
-            text: 'Create Game',
+            text: 'Create Room',
             onTap: () {
               createRoomDialog(ctx: context);
             }),
         const SizedBox(height: 36),
         _buildMenuButton(
             icon: Icons.group,
-            text: 'Join Game',
+            text: 'Join Room',
             onTap: () {
               joinRoomDialog(ctx: context);
             }),
@@ -210,24 +211,30 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
                               'OPEN SESSION',
                               style: TextStyle(
                                 color: Color.fromARGB(
-                                    255, 0, 236, 255), // Cyan border color
-                                fontSize: 20,
+                                  255,
+                                  0,
+                                  236,
+                                  255,
+                                ),
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                         ),
                         Expanded(
-                          flex: 1,
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: IconButton(
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.all(0),
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
                               icon: const Icon(
                                 Icons.cancel_outlined,
                                 color: Colors.white,
+                                size: 22,
                               ),
                             ),
                           ),
@@ -244,14 +251,17 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
                             openSessionRoomCard(
                               roomName: "ROOM P8U7",
                               noOfPlayers: 3,
+                              context: context,
                             ),
                             openSessionRoomCard(
                               roomName: "ROOM QW9K",
                               noOfPlayers: 1,
+                              context: context,
                             ),
                             openSessionRoomCard(
                               roomName: "ROOM CMB9",
                               noOfPlayers: 2,
+                              context: context,
                             ),
                           ],
                         ),
@@ -312,8 +322,12 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
                               'JOIN ROOM',
                               style: TextStyle(
                                 color: Color.fromARGB(
-                                    255, 0, 236, 255), // Cyan border color
-                                fontSize: 20,
+                                  255,
+                                  0,
+                                  236,
+                                  255,
+                                ), // Cyan border color
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -324,12 +338,15 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: IconButton(
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.all(0),
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
                               icon: const Icon(
                                 Icons.cancel_outlined,
                                 color: Colors.white,
+                                size: 22,
                               ),
                             ),
                           ),
@@ -429,8 +446,12 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
                               'CREATE ROOM',
                               style: TextStyle(
                                 color: Color.fromARGB(
-                                    255, 0, 236, 255), // Cyan border color
-                                fontSize: 20,
+                                  255,
+                                  0,
+                                  236,
+                                  255,
+                                ), // Cyan border color
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -441,12 +462,15 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: IconButton(
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.all(0),
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
                               icon: const Icon(
                                 Icons.cancel_outlined,
                                 color: Colors.white,
+                                size: 22,
                               ),
                             ),
                           ),
@@ -504,6 +528,7 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
   Widget openSessionRoomCard({
     required String roomName,
     required int noOfPlayers,
+    required BuildContext context,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -517,7 +542,7 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
               Text(
                 roomName,
                 style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
               Text(
                 "$noOfPlayers/4 Players",
@@ -547,6 +572,7 @@ class _LudoWelcomeScreenState extends State<LudoWelcomeScreen> {
               //join button
               TextButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   widget.game.playState = PlayState.waiting;
                 },
                 style: TextButton.styleFrom(
