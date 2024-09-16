@@ -44,6 +44,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   int get currentPlayer => _currentPlayer;
 
+  Future<int> generateMove() async {
+    return ref.read(ludoSessionProvider.notifier).generateMove();
+  }
+
   late PlayState _playState;
   PlayState get playState => _playState;
   set playState(PlayState playState) {

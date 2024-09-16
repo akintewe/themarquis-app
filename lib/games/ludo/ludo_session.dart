@@ -108,7 +108,7 @@ class LudoSession extends _$LudoSession {
     return decodedResponse;
   }
 
-  Future<void> generateMove() async {
+  Future<int> generateMove() async {
     final url = Uri.parse('$baseUrl/game/session/$_id/generate-move');
     final response = await http.post(
       url,
@@ -118,8 +118,8 @@ class LudoSession extends _$LudoSession {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    print(decodedResponse);
+    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as List;
+    return decodedResponse[0] as int;
   }
 
   Future<void> playMove(String tokenId) async {

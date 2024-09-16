@@ -34,8 +34,8 @@ class Dice extends RectangleComponent
             size.y / 2 - textPainter.height / 2));
   }
 
-  void roll() {
-    value = random.nextInt(6) + 1;
+  void roll() async {
+    value = await game.generateMove();
   }
 
   @override
