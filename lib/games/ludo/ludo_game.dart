@@ -19,6 +19,7 @@ import 'package:marquis_v2/providers/user.dart';
 enum PlayState { welcome, waiting, playing, finished }
 
 class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
+  bool isInit = false;
   late Dice dice;
   late Board board;
   late TextComponent turnText;
@@ -97,14 +98,14 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     playState = PlayState.welcome;
     _sessionData = ref.read(ludoSessionProvider);
     addToGameWidgetBuild(() {
-      ref.listen(ludoSessionProvider, (prev, next) {
+      ref.listen(ludoSessionProvider, (prev, next) async {
         _sessionData = next;
         if (_sessionData != null) {
           if (_playState == PlayState.welcome) {
             playState = PlayState.waiting;
           }
           // Update pin locations
-          if (_playState == PlayState.playing) {
+          if (_playState == PlayState.playing && isInit) {
             for (var player in _sessionData!.sessionUserStatus) {
               final pinLocations = player.playerTokensPosition;
               final currentPinLocations = playerPinLocations[player.playerId];
@@ -116,7 +117,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                 if (currentPinLocations[i] != pinLocation) {
                   if (currentPinLocations[i] == 0 && pinLocation != 0) {
                     final pin = playerHome.homePins[i];
-                    board.addPin(
+                    await board.addPin(
                         playerHome.removePin(pin!, i)
                           ..position = pin.position + playerHome.position,
                         location: pinLocation - player.playerId * 11);
@@ -134,6 +135,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             }
             _currentPlayer = _sessionData!.nextPlayerIndex;
             updateTurnText();
+            // TODO: update dice state
+            // TODO: update destination state
           }
         }
       });
@@ -187,6 +190,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     );
     add(turnText);
 
+    await mounted;
+
     for (var player in _sessionData!.sessionUserStatus) {
       final pinLocations = player.playerTokensPosition;
       playerPinLocations[player.playerId] =
@@ -204,6 +209,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       }
     }
     updateTurnText();
+    isInit = true;
   }
 
   void updateTurnText() {
