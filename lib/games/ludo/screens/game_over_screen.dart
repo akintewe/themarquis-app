@@ -111,7 +111,7 @@ class MatchResultsScreen extends ConsumerWidget {
     final results = List.generate(4, (index) {
       final isWinner = index == game.winnerIndex;
       return {
-        'rank': index + 1,
+        'index': index,
         'score': isWinner ? 400 : -100,
         'exp': 400, // Assuming all players get 400 EXP regardless of win/loss
       };
@@ -119,6 +119,9 @@ class MatchResultsScreen extends ConsumerWidget {
 
     // Sort the results by score (descending order)
     results.sort((a, b) => b['score']!.compareTo(a['score']!));
+    for (int i = 0; i < results.length; i++) {
+      results[i]['rank'] = i + 1;
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -130,13 +133,13 @@ class MatchResultsScreen extends ConsumerWidget {
               children: [
                 _buildRankIndicator(result['rank'] as int),
                 const SizedBox(width: 16),
-                const Text('YIXUAN',
-                    style: TextStyle(color: Colors.white, fontSize: 20)),
+                Text(game.playerNames[result['index'] as int],
+                    style: const TextStyle(color: Colors.white, fontSize: 20)),
                 const Spacer(),
                 Text(
-                  '${result['rank'] == 0 ? '+' : '-'} ${result['score']}',
+                  '${result['rank'] == 1 ? '+' : '-'} ${result['score']}',
                   style: TextStyle(
-                      color: result['rank'] == 0 ? Colors.yellow : Colors.red,
+                      color: result['rank'] == 1 ? Colors.yellow : Colors.red,
                       fontSize: 18),
                 ),
                 const SizedBox(width: 8),

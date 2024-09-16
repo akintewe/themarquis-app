@@ -28,7 +28,18 @@ class LudoSession extends _$LudoSession {
   @override
   LudoSessionData? build() {
     _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
-    _channel.stream.listen((data) => print("WS: $data"));
+    _channel.stream.listen((data) async {
+      final decodedResponse = jsonDecode(data) as Map;
+      switch (decodedResponse['event']) {
+        case 'play_move':
+        case 'player_joined':
+          if (decodedResponse["data"]["session_id"] == _id) {
+            await getLudoSession();
+          }
+          break;
+      }
+      print("WS: $data");
+    });
     return null;
   }
 
@@ -40,7 +51,10 @@ class LudoSession extends _$LudoSession {
     final url = Uri.parse('$baseUrl/game/session/$_id');
     final response = await http.get(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken,
+      },
     );
     if (response.statusCode != 200) {
       throw HttpException(
@@ -108,39 +122,47 @@ class LudoSession extends _$LudoSession {
     return decodedResponse;
   }
 
-  Future<int> generateMove() async {
+  Future<List<int>> generateMove() async {
     final url = Uri.parse('$baseUrl/game/session/$_id/generate-move');
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken,
+      },
     );
     if (response.statusCode != 200) {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as List;
-    return decodedResponse[0] as int;
+    final decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    return decodedResponse.map((e) => e as int).toList();
   }
 
   Future<void> playMove(String tokenId) async {
     final url = Uri.parse('$baseUrl/game/session/$_id/play-move/$tokenId');
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken,
+      },
     );
     if (response.statusCode != 200) {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    print(decodedResponse);
   }
 
   Future<Map<String, dynamic>> getTransactions() async {
     final url = Uri.parse('$baseUrl/game/session/$_id/transactions');
     final response = await http.get(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken,
+      },
     );
     if (response.statusCode != 200) {
       throw HttpException(

@@ -22,7 +22,7 @@ class LudoGameApp extends ConsumerStatefulWidget {
 }
 
 class _LudoGameAppState extends ConsumerState<LudoGameApp> {
-  final LudoGame _game = LudoGameTest();
+  final LudoGame _game = LudoGame();
   final GlobalKey<RiverpodAwareGameWidgetState<LudoGame>> _gameWidgetKey =
       GlobalKey<RiverpodAwareGameWidgetState<LudoGame>>();
 

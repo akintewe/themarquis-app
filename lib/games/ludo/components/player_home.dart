@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import 'package:marquis_v2/games/ludo/components/player_avatar.dart';
 import 'package:marquis_v2/games/ludo/components/player_pin.dart';
-import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/models/ludo_session.dart';
 
 class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
   final int playerIndex;
+  final LudoSessionUserStatus userStatus;
   late TextComponent playerName;
   late List<PlayerPin?> _homePins;
   late List<Vector2> _homePinLocations;
@@ -22,13 +23,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
 
   List<PlayerPin?> get homePins => _homePins;
 
-  PlayerHome(this.playerIndex, Vector2 position) : super(position: position);
-  List<String> playerNames = [
-    "Carlos",
-    "Mohdi",
-    "Yixuan",
-    "Jupeng",
-  ];
+  PlayerHome(this.playerIndex, this.userStatus, Vector2 position)
+      : super(position: position);
+
   @override
   FutureOr<void> onLoad() async {
     super.onLoad();
@@ -47,8 +44,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         0,
         (event, pin) {
           if (game.dice.value == 6) {
-            game.board
-                .addPin(removePin(pin, 0)..position = pin.position + position);
+            game.board.addPin(
+                removePin(pin, 0)..position = pin.position + position,
+                location: game.pendingMoves);
             return true;
           } else {
             return false;
@@ -61,8 +59,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         1,
         (event, pin) {
           if (game.dice.value == 6) {
-            game.board
-                .addPin(removePin(pin, 1)..position = pin.position + position);
+            game.board.addPin(
+                removePin(pin, 1)..position = pin.position + position,
+                location: game.pendingMoves);
             return true;
           } else {
             return false;
@@ -75,8 +74,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         2,
         (event, pin) {
           if (game.dice.value == 6) {
-            game.board
-                .addPin(removePin(pin, 2)..position = pin.position + position);
+            game.board.addPin(
+                removePin(pin, 2)..position = pin.position + position,
+                location: game.pendingMoves);
             return true;
           } else {
             return false;
@@ -89,8 +89,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         3,
         (event, pin) {
           if (game.dice.value == 6) {
-            game.board
-                .addPin(removePin(pin, 3)..position = pin.position + position);
+            game.board.addPin(
+                removePin(pin, 3)..position = pin.position + position,
+                location: game.pendingMoves);
             return true;
           } else {
             return false;
@@ -112,7 +113,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
 
     //player name
     playerName = TextComponent(
-      text: playerNames[playerIndex],
+      text: userStatus.email,
       position: (playerIndex == 0 || playerIndex == 1)
           ? (playerIndex % 2 == 0)
               ? Vector2(size.x / 2, size.y / -2)
@@ -123,7 +124,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       anchor: Anchor.center,
       textRenderer: TextPaint(
         style: const TextStyle(
-          fontSize: 30,
+          fontSize: 18,
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
@@ -171,12 +172,14 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       avatarBgRRect,
       avatarBgPaint,
     );
-    canvas.drawRRect(
-      avatarBgRRect,
-      avatarBgPaint
-        ..strokeWidth = 3
-        ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 15),
-    );
+    if (game.userIndex == playerIndex) {
+      canvas.drawRRect(
+        avatarBgRRect,
+        avatarBgPaint
+          ..strokeWidth = 5
+          ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 15),
+      );
+    }
   }
 
   PlayerPin removePin(PlayerPin pin, int homePinIndex) {

@@ -44,6 +44,8 @@ class LudoSessionData extends HiveObject with _$LudoSessionData {
 //find index of that color
 //sub list, [0, target][target, 3]
 //return it
+  int get nextPlayerIndex =>
+      sessionUserStatus.indexWhere((user) => user.playerId == nextPlayerId);
 
   factory LudoSessionData.fromJson(Map<String, dynamic> json) =>
       _$LudoSessionDataFromJson(json);

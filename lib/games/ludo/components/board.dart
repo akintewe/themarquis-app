@@ -164,9 +164,9 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     playerHome.returnPin(pin);
   }
 
-  void addPin(PlayerPin pin) {
+  void addPin(PlayerPin pin, {int location = 0}) {
     add(pin
-      ..movePin(0)
+      ..movePin(location)
       ..onTap = (event, pin) {
         if ((pin.currentPosIndex >= 0 || game.dice.value == 6) &&
             (pin.currentPosIndex + game.dice.value <= 47)) {

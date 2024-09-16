@@ -14,6 +14,7 @@ import 'package:marquis_v2/games/ludo/components/player_home.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
+import 'package:marquis_v2/providers/user.dart';
 
 enum PlayState { welcome, waiting, playing, finished }
 
@@ -23,11 +24,19 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   late TextComponent turnText;
   late Destination destination;
   final List<PlayerHome> playerHomes = [];
+  final List<List<int>> playerPinLocations = [
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+  ];
   int _currentPlayer = 0;
+  int _userIndex = -1;
   bool playerCanMove = false;
   final int totalPlayers = 4;
   int? winnerIndex;
   LudoSessionData? _sessionData;
+  int pendingMoves = 0;
 
   LudoGame()
       : super(
@@ -51,9 +60,16 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         Color(0xff2fd06f),
         Color(0xffb0d02f),
       ];
+  int get userIndex => _userIndex;
+  List<String> get playerNames =>
+      _sessionData!.sessionUserStatus.map((user) => user.email).toList();
 
-  Future<int> generateMove() async {
+  Future<List<int>> generateMove() async {
     return ref.read(ludoSessionProvider.notifier).generateMove();
+  }
+
+  Future<void> playMove(int index) async {
+    return ref.read(ludoSessionProvider.notifier).playMove(index.toString());
   }
 
   late PlayState _playState;
@@ -69,34 +85,62 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         overlays.remove(PlayState.welcome.name);
         overlays.remove(PlayState.waiting.name);
         overlays.remove(PlayState.finished.name);
-    }
-  }
-
-  @override
-  void onMount() {
-    _sessionData = ref.read(ludoSessionProvider);
-    addToGameWidgetBuild(() {
-      ref.listen(ludoSessionProvider, (prev, next) {
-        _sessionData = next;
-        if (_sessionData != null && _playState == PlayState.welcome) {
-          playState = PlayState.waiting;
+        if (_sessionData != null) {
+          initGame();
         }
-      });
-    });
-    super.onMount();
+    }
   }
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-
     playState = PlayState.welcome;
+    _sessionData = ref.read(ludoSessionProvider);
+    addToGameWidgetBuild(() {
+      ref.listen(ludoSessionProvider, (prev, next) {
+        _sessionData = next;
+        if (_sessionData != null) {
+          if (_playState == PlayState.welcome) {
+            playState = PlayState.waiting;
+          }
+          // Update pin locations
+          if (_playState == PlayState.playing) {
+            for (var player in _sessionData!.sessionUserStatus) {
+              final pinLocations = player.playerTokensPosition;
+              final currentPinLocations = playerPinLocations[player.playerId];
+              final playerHome = playerHomes[player.playerId];
+              for (int i = 0; i < pinLocations.length; i++) {
+                final pinLocation = int.parse(pinLocations[i]);
+                if (currentPinLocations[i] != pinLocation) {
+                  final pin = playerHome.homePins[i];
+                  if (currentPinLocations[i] == 0 && pinLocation != 0) {
+                    board.addPin(
+                        playerHome.removePin(pin!, i)
+                          ..position = pin.position + playerHome.position,
+                        location: pinLocation);
+                  } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
+                    board.attackPin(pin!);
+                  } else {
+                    pin!.movePin(pinLocation);
+                  }
+                  playerPinLocations[player.playerId][i] = pinLocation;
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+  }
 
+  Future<void> initGame() async {
     await Flame.images.load('spritesheet.png');
     await Flame.images.load('avatar_spritesheet.png');
 
     camera.viewfinder.anchor = Anchor.topLeft;
-
+    _userIndex = _sessionData!.sessionUserStatus.indexWhere(
+        (user) => user.userId.toString() == ref.read(userProvider)?.id);
+    _currentPlayer = _sessionData!.nextPlayerIndex;
     board = Board();
     add(board);
     final positions = [
@@ -110,7 +154,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           center.y + unitSize * 2.25), // Bottom-left corner (Player 4)
     ];
     for (int i = 0; i < positions.length; i++) {
-      playerHomes.add(PlayerHome(i, positions[i]));
+      playerHomes
+          .add(PlayerHome(i, _sessionData!.sessionUserStatus[i], positions[i]));
       add(playerHomes.last);
     }
 
@@ -129,21 +174,37 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         style: TextStyle(
           fontSize: 34,
           fontWeight: FontWeight.w600,
-          color: playerColors[_currentPlayer],
+          color: _sessionData!.getListOfColors[_currentPlayer],
         ),
       ),
     );
     add(turnText);
+
+    for (var player in _sessionData!.sessionUserStatus) {
+      final pinLocations = player.playerTokensPosition;
+      playerPinLocations[player.playerId] =
+          pinLocations.map((e) => int.parse(e)).toList();
+      final playerHome = playerHomes[player.playerId];
+      for (int i = 0; i < pinLocations.length; i++) {
+        var pinLocation = pinLocations[i];
+        if (pinLocation != '0') {
+          final pin = playerHome.homePins[i];
+          board.addPin(
+              playerHome.removePin(pin!, i)
+                ..position = pin.position + playerHome.position,
+              location: int.parse(pinLocation));
+        }
+      }
+    }
   }
 
   Future<void> rollDice() async {
     if (playerCanMove) return;
-    dice.roll();
-    dice.animate();
+    await dice.roll();
 
-    await Future.delayed(const Duration(milliseconds: 500));
     playerCanMove = !playerHomes[_currentPlayer].isHomeFull || dice.value == 6;
     if (!playerCanMove) {
+      await ref.read(ludoSessionProvider.notifier).playMove("0");
       nextPlayer();
     }
   }
@@ -156,11 +217,16 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   void render(Canvas canvas) {
     super.render(canvas);
 
+    if (_sessionData == null) {
+      return;
+    }
+
     turnText.text =
         'Player ${_currentPlayer + 1}\'s ${playerCanMove ? 'move turn' : 'roll dice'}';
     turnText.textRenderer = TextPaint(
         style: TextStyle(
-            fontSize: unitSize * 0.8, color: playerColors[_currentPlayer]));
+            fontSize: unitSize * 0.8,
+            color: _sessionData!.getListOfColors[_currentPlayer]));
   }
 
   @override
