@@ -109,24 +109,31 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
               final pinLocations = player.playerTokensPosition;
               final currentPinLocations = playerPinLocations[player.playerId];
               final playerHome = playerHomes[player.playerId];
+
               for (int i = 0; i < pinLocations.length; i++) {
                 final pinLocation = int.parse(pinLocations[i]);
+
                 if (currentPinLocations[i] != pinLocation) {
-                  final pin = playerHome.homePins[i];
                   if (currentPinLocations[i] == 0 && pinLocation != 0) {
+                    final pin = playerHome.homePins[i];
                     board.addPin(
                         playerHome.removePin(pin!, i)
                           ..position = pin.position + playerHome.position,
-                        location: pinLocation);
+                        location: pinLocation - player.playerId * 11);
                   } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
+                    final pin = board.getPinWithIndex(player.playerId, i);
                     board.attackPin(pin!);
                   } else {
-                    pin!.movePin(pinLocation);
+                    final pin = board.getPinWithIndex(player.playerId, i);
+                    pin!.movePin(pinLocation - player.playerId * 11);
                   }
+
                   playerPinLocations[player.playerId][i] = pinLocation;
                 }
               }
             }
+            _currentPlayer = _sessionData!.nextPlayerIndex;
+            updateTurnText();
           }
         }
       });
@@ -192,10 +199,20 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           board.addPin(
               playerHome.removePin(pin!, i)
                 ..position = pin.position + playerHome.position,
-              location: int.parse(pinLocation));
+              location: int.parse(pinLocation) - player.playerId * 11);
         }
       }
     }
+    updateTurnText();
+  }
+
+  void updateTurnText() {
+    turnText.text =
+        '${_currentPlayer == _userIndex ? 'Your' : 'Player ${playerNames[_currentPlayer]}'} ${playerCanMove ? 'move turn' : 'roll dice'}';
+    turnText.textRenderer = TextPaint(
+        style: TextStyle(
+            fontSize: unitSize * 0.8,
+            color: _sessionData!.getListOfColors[_currentPlayer]));
   }
 
   Future<void> rollDice() async {
@@ -211,22 +228,6 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   void nextPlayer() {
     _currentPlayer = (_currentPlayer + 1) % totalPlayers;
-  }
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-
-    if (_sessionData == null) {
-      return;
-    }
-
-    turnText.text =
-        'Player ${_currentPlayer + 1}\'s ${playerCanMove ? 'move turn' : 'roll dice'}';
-    turnText.textRenderer = TextPaint(
-        style: TextStyle(
-            fontSize: unitSize * 0.8,
-            color: _sessionData!.getListOfColors[_currentPlayer]));
   }
 
   @override

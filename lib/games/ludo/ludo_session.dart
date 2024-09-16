@@ -29,16 +29,20 @@ class LudoSession extends _$LudoSession {
   LudoSessionData? build() {
     _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
     _channel.stream.listen((data) async {
+      print("WS: $data");
       final decodedResponse = jsonDecode(data) as Map;
       switch (decodedResponse['event']) {
         case 'play_move':
         case 'player_joined':
-          if (decodedResponse["data"]["session_id"] == _id) {
+          final dataStr = decodedResponse['data'] as String;
+          print('Data String ${dataStr}');
+          final data = jsonDecode(dataStr) as Map;
+          print('Data $data');
+          if (data["session_id"] == _id) {
             await getLudoSession();
           }
           break;
       }
-      print("WS: $data");
     });
     return null;
   }

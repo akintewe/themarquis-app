@@ -44,9 +44,10 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         0,
         (event, pin) {
           if (game.dice.value == 6) {
-            game.board.addPin(
-                removePin(pin, 0)..position = pin.position + position,
-                location: game.pendingMoves);
+            // Move in websockets handler
+            // game.board.addPin(
+            //     removePin(pin, 0)..position = pin.position + position,
+            //     location: game.pendingMoves);
             return true;
           } else {
             return false;
@@ -59,9 +60,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         1,
         (event, pin) {
           if (game.dice.value == 6) {
-            game.board.addPin(
-                removePin(pin, 1)..position = pin.position + position,
-                location: game.pendingMoves);
+            // game.board.addPin(
+            //     removePin(pin, 1)..position = pin.position + position,
+            //     location: game.pendingMoves);
             return true;
           } else {
             return false;
@@ -74,9 +75,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         2,
         (event, pin) {
           if (game.dice.value == 6) {
-            game.board.addPin(
-                removePin(pin, 2)..position = pin.position + position,
-                location: game.pendingMoves);
+            // game.board.addPin(
+            //     removePin(pin, 2)..position = pin.position + position,
+            //     location: game.pendingMoves);
             return true;
           } else {
             return false;
@@ -89,9 +90,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         3,
         (event, pin) {
           if (game.dice.value == 6) {
-            game.board.addPin(
-                removePin(pin, 3)..position = pin.position + position,
-                location: game.pendingMoves);
+            // game.board.addPin(
+            //     removePin(pin, 3)..position = pin.position + position,
+            //     location: game.pendingMoves);
             return true;
           } else {
             return false;

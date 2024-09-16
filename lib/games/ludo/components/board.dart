@@ -170,9 +170,10 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       ..onTap = (event, pin) {
         if ((pin.currentPosIndex >= 0 || game.dice.value == 6) &&
             (pin.currentPosIndex + game.dice.value <= 47)) {
-          pin.movePin(null);
+          // pin.movePin(null);
+          return true;
         }
-        return true;
+        return false;
       });
   }
 }

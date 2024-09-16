@@ -41,11 +41,11 @@ class PlayerPin extends SpriteComponent
   }
 
   @override
-  void onTapUp(TapUpEvent event) {
+  void onTapUp(TapUpEvent event) async {
     if (game.currentPlayer == playerIndex && game.playerCanMove) {
       if (onTap(event, this)) {
-        game.playMove(homeIndex);
         game.playerCanMove = false;
+        await game.playMove(homeIndex);
         game.nextPlayer();
       }
     }
@@ -70,18 +70,6 @@ class PlayerPin extends SpriteComponent
     }
   }
 
-  void moveFromHome() {
-    currentPosIndex = 0;
-    Vector2 startPosition = routeIndexToPos(playerIndex, 0);
-    add(MoveEffect.to(
-      startPosition,
-      EffectController(duration: 0.3, curve: Curves.easeInOut),
-      onComplete: () {
-        position = startPosition;
-      },
-    ));
-  }
-
   void returnToHome(Vector2 homePosition) {
     currentPosIndex = -1;
     add(MoveEffect.to(
@@ -97,15 +85,24 @@ class PlayerPin extends SpriteComponent
     int startIndex = currentPosIndex;
     int targetIndex;
 
+    List<MoveEffect> moveEffects = [];
+
     // Handle initial move from home
     if (startIndex == -1) {
       if (game.dice.value == 6) {
-        moveFromHome();
+        currentPosIndex = 0;
+        Vector2 startPosition = routeIndexToPos(playerIndex, 0);
+        moveEffects.add(MoveEffect.to(
+          startPosition,
+          EffectController(duration: 0.3, curve: Curves.easeInOut),
+          onComplete: () {
+            position = startPosition;
+          },
+        ));
+        startIndex = 0;
       }
-      return;
-    }
-
-    if (index == null) {
+      targetIndex = index ?? 0;
+    } else if (index == null) {
       targetIndex = currentPosIndex + game.dice.value;
     } else {
       targetIndex = index;
@@ -129,23 +126,30 @@ class PlayerPin extends SpriteComponent
     currentPosIndex = targetIndex;
 
     // Check for attack
-    final pinsAtTarget = game.board.getPinsAtPosition(playerIndex, targetIndex);
-    PlayerPin? attackedPin = pinsAtTarget.isEmpty ? null : pinsAtTarget.first;
+    // final pinsAtTarget = game.board.getPinsAtPosition(playerIndex, targetIndex);
+    // PlayerPin? attackedPin = pinsAtTarget.isEmpty ? null : pinsAtTarget.first;
 
-    if (attackedPin != null && attackedPin.playerIndex != playerIndex) {
-      game.board.attackPin(attackedPin);
-      print(
-          "Player $playerIndex attacked player ${attackedPin.playerIndex} at position $targetIndex");
-    }
+    // if (attackedPin != null && attackedPin.playerIndex != playerIndex) {
+    //   game.board.attackPin(attackedPin);
+    //   print(
+    //       "Player $playerIndex attacked player ${attackedPin.playerIndex} at position $targetIndex");
+    // }
+    // if (pinsAtTarget.isNotEmpty) {
+    //   for (var attackedPin in pinsAtTarget) {
+    //     game.board.attackPin(attackedPin);
+    //     print(
+    //         "Player $playerIndex attacked player ${attackedPin.playerIndex} at position $targetIndex");
+    //   }
+    // }
 
     // Create a list of move effects for each step
-    List<MoveEffect> moveEffects = [];
+
     for (int i = startIndex + 1; i <= targetIndex; i++) {
-      final pinsAtTarget = game.board.getPinsAtPosition(playerIndex, i);
-      if (pinsAtTarget.length > 1) {
-        currentPosIndex = i;
-        break;
-      }
+      // final pinsAtTarget = game.board.getPinsAtPosition(playerIndex, i);
+      // if (pinsAtTarget.length > 1) {
+      //   currentPosIndex = i;
+      //   break;
+      // }
       final newPosition = routeIndexToPos(playerIndex, i);
       moveEffects.add(
         MoveEffect.to(
