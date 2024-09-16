@@ -20,7 +20,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final deviceSize = MediaQuery.of(context).size;
     final user = ref.read(userProvider);
-    final ludoSession = ref.read(ludoSessionProvider.notifier);
+    // final ludoSession = ref.read(ludoSessionProvider.notifier);
     if (user == null) {
       return const Center(child: Text("Not Logged In"));
     }
@@ -345,7 +345,6 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                 ),
                 StatefulBuilder(
                   builder: (context, stste) {
-                    bool _isLoading = false;
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextButton(
@@ -956,9 +955,8 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                         padding: const EdgeInsets.all(8.0),
                         child: TextButton(
                           onPressed: () {
-                            print(_sliderValue.round().toString() +
-                                _tokenAmountController.text +
-                                _selectedTokenAddress);
+                            print(
+                                "${_sliderValue.round()}   ${_tokenAmountController.text}   $_selectedTokenAddress");
                             ref
                                 .read(ludoSessionProvider.notifier)
                                 .createSession(
@@ -1049,9 +1047,10 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
   String _getColorBackground(int index) {
     switch (index) {
       case 0:
-        return "blue_bg";
-      case 1:
         return "red_bg";
+      case 1:
+        return "blue_bg";
+
       case 2:
         return "green_bg";
       case 3:
@@ -1064,9 +1063,11 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
   String _getColorChess(int index) {
     switch (index) {
       case 0:
-        return "blue_chess";
-      case 1:
         return "red_chess";
+
+      case 1:
+        return "blue_chess";
+
       case 2:
         return "green_chess";
       case 3:

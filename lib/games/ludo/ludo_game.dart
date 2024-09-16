@@ -43,6 +43,14 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Vector2 get center => size / 2;
 
   int get currentPlayer => _currentPlayer;
+  List<Color> get listOfColors =>
+      _sessionData?.getListOfColors ??
+      const [
+        Color(0xffd04c2f),
+        Color(0xff2fa9d0),
+        Color(0xff2fd06f),
+        Color(0xffb0d02f),
+      ];
 
   Future<int> generateMove() async {
     return ref.read(ludoSessionProvider.notifier).generateMove();

@@ -217,6 +217,7 @@ class GameCard extends StatelessWidget {
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           child: Text(
@@ -229,7 +230,7 @@ class GameCard extends StatelessWidget {
                         ),
                         if (isActive)
                           const Padding(
-                            padding: EdgeInsets.all(8.0),
+                            padding: EdgeInsets.only(left: 8.0),
                             child: MyChip(
                               title: '300+ Players',
                               icon: Icons.people,
