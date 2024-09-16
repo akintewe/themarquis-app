@@ -3,25 +3,40 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
+import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
-class Dice extends RectangleComponent
+class Dice extends PositionComponent
     with TapCallbacks, HasGameReference<LudoGame> {
   int value = 6;
   bool _isLoading = false;
+  late SpriteSheet diceSpriteSheet;
+  Sprite? currentSprite;
+
   final Random random = Random();
 
   Dice({required Vector2 size, required Vector2 position})
       : super(
-            size: size,
-            position: position,
-            paint: Paint()..color = Colors.white,
-            anchor: Anchor.center);
+          size: size,
+          position: position,
+          // paint: Paint()..color = Colors.white,
+          anchor: Anchor.center,
+        );
+  @override
+  Future<void> onLoad() async {
+    super.onLoad();
+    diceSpriteSheet = SpriteSheet(
+      image: await game.images.load('dice_interface.png'),
+      srcSize: Vector2(267, 267), //1602 * 267
+    );
+    currentSprite = diceSpriteSheet.getSprite(0, 0); // Start with face 1
+  }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+
     if (_isLoading) {
       final center = Offset(size.x / 2, size.y / 2);
       final radius = min(size.x, size.y) / 4;
@@ -40,17 +55,12 @@ class Dice extends RectangleComponent
         paint,
       );
     } else {
-      final textPainter = TextPainter(
-        text: TextSpan(
-            text: value.toString(),
-            style: const TextStyle(fontSize: 50, color: Colors.black)),
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout();
-      textPainter.paint(
+      if (currentSprite != null) {
+        currentSprite!.render(
           canvas,
-          Offset(size.x / 2 - textPainter.width / 2,
-              size.y / 2 - textPainter.height / 2));
+          size: size, // Draw sprite to fill the dice component's size
+        );
+      }
     }
   }
 
@@ -67,6 +77,8 @@ class Dice extends RectangleComponent
     } catch (e) {
       print(e);
     }
+    currentSprite =
+        diceSpriteSheet.getSprite(0, value - 1); // value between 1 and 6
 
     _isLoading = false;
     // Request another redraw to show the new value
@@ -76,6 +88,7 @@ class Dice extends RectangleComponent
   @override
   void onTapUp(TapUpEvent event) {
     super.onTapUp(event);
+
     if (game.currentPlayer == game.userIndex) {
       game.rollDice();
     }

@@ -146,6 +146,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> initGame() async {
     await Flame.images.load('spritesheet.png');
     await Flame.images.load('avatar_spritesheet.png');
+    await Flame.images.load('dice_interface.png');
 
     camera.viewfinder.anchor = Anchor.topLeft;
     _userIndex = _sessionData!.sessionUserStatus.indexWhere(
