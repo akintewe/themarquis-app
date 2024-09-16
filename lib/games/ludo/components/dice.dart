@@ -58,11 +58,14 @@ class Dice extends RectangleComponent
     _isLoading = true;
     // Request a redraw to show the loading state
     game.update(0);
-
-    final moveResults = await game.generateMove();
-    value = moveResults[0];
-    if (moveResults.length > 1) {
-      game.pendingMoves = moveResults.reduce((a, b) => a + b) - value;
+    try {
+      final moveResults = await game.generateMove();
+      value = moveResults[0];
+      if (moveResults.length > 1) {
+        game.pendingMoves = moveResults.reduce((a, b) => a + b) - value;
+      }
+    } catch (e) {
+      print(e);
     }
 
     _isLoading = false;

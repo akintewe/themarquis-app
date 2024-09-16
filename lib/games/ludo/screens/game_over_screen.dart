@@ -72,7 +72,7 @@ class MatchResultsScreen extends ConsumerWidget {
               context: context,
               builder: (ctx) => AlertDialog(
                 title: const Text('Transactions'),
-                content: FutureBuilder<Map<String, dynamic>>(
+                content: FutureBuilder<List<Map>>(
                   future: () async {
                     return await ref
                         .read(ludoSessionProvider.notifier)
@@ -81,8 +81,10 @@ class MatchResultsScreen extends ConsumerWidget {
                   builder: (context, snapshot) =>
                       snapshot.connectionState == ConnectionState.waiting
                           ? const CircularProgressIndicator()
-                          : Text(
-                              snapshot.data.toString(),
+                          : Column(
+                              children: snapshot.data!
+                                  .map((e) => Text(e.toString()))
+                                  .toList(),
                             ),
                 ),
               ),

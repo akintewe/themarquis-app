@@ -159,7 +159,7 @@ class LudoSession extends _$LudoSession {
     }
   }
 
-  Future<Map<String, dynamic>> getTransactions() async {
+  Future<List<Map>> getTransactions() async {
     final url = Uri.parse('$baseUrl/game/session/$_id/transactions');
     final response = await http.get(
       url,
@@ -173,9 +173,9 @@ class LudoSession extends _$LudoSession {
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse =
-        jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
     print(decodedResponse);
-    return decodedResponse;
+    return decodedResponse.map((e) => e as Map).toList();
   }
 
   Future<void> clearData() async {
