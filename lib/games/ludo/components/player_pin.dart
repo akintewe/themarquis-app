@@ -45,8 +45,12 @@ class PlayerPin extends SpriteComponent
     if (game.currentPlayer == playerIndex && game.playerCanMove) {
       if (onTap(event, this)) {
         game.playerCanMove = false;
-        await game.playMove(homeIndex);
-        game.nextPlayer();
+        try {
+          await game.playMove(homeIndex);
+          game.nextPlayer();
+        } catch (e) {
+          game.playerCanMove = true;
+        }
       }
     }
   }
