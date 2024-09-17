@@ -55,7 +55,6 @@ class LudoGameTest extends LudoGame {
       }
 
       // Move to the next player
-      nextPlayer();
     });
   }
 
@@ -98,13 +97,13 @@ class LudoGameTest extends LudoGame {
       if (pinToMove != null) {
         pinToMove.movePin(null);
         playerTurns[currentPlayer] = playerTurns[currentPlayer]! + 1;
-        nextPlayer();
+        // nextPlayer();
       } else {
         if (dice.value == 6) {
           final playerHome = playerHomes[currentPlayer];
           board.addPin(playerHome.removePin(move[1]));
           playerTurns[currentPlayer] = playerTurns[currentPlayer]! + 1;
-          nextPlayer();
+          // nextPlayer();
         } else {
           print("Error: Pin not found for move $move player $currentPlayer");
           timer.cancel();
