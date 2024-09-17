@@ -183,18 +183,19 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     }
   }
 
-  PlayerPin removePin(PlayerPin pin, int homePinIndex) {
-    remove(pin);
+  PlayerPin removePin(int homePinIndex) {
+    if (_homePins[homePinIndex]!.isMounted) {
+      remove(_homePins[homePinIndex]!);
+    }
+    final result = _homePins[homePinIndex]!..position += position;
     _homePins[homePinIndex] = null;
-    return pin;
+    return result;
   }
 
   void returnPin(PlayerPin pin) {
     _homePins[pin.homeIndex] = pin
       ..onTap = (event, pin) {
         if (game.dice.value == 6 && game.currentPlayer == pin.playerIndex) {
-          game.board.addPin(removePin(pin, pin.homeIndex)
-            ..position = pin.position + position);
           return true;
         } else {
           return false;

@@ -50,8 +50,7 @@ class LudoGameTest extends LudoGame {
           final randomHomePin =
               availableHomePins[dice.random.nextInt(availableHomePins.length)];
           final homeIndex = playerHome.homePins.indexOf(randomHomePin);
-          board.addPin(playerHome.removePin(randomHomePin!, homeIndex)
-            ..position += playerHome.position);
+          board.addPin(playerHome.removePin(homeIndex));
         }
       }
 
@@ -103,9 +102,7 @@ class LudoGameTest extends LudoGame {
       } else {
         if (dice.value == 6) {
           final playerHome = playerHomes[currentPlayer];
-          board.addPin(
-              playerHome.removePin(playerHome.homePins[move[1]]!, move[1])
-                ..position += playerHome.position);
+          board.addPin(playerHome.removePin(move[1]));
           playerTurns[currentPlayer] = playerTurns[currentPlayer]! + 1;
           nextPlayer();
         } else {

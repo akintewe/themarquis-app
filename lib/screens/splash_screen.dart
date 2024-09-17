@@ -28,9 +28,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         if (ref.read(appStateProvider).autoLoginResult == null) {
           await ref.read(appStateProvider.notifier).tryAutoLogin();
         }
-        if (ref.read(appStateProvider).isAuth) {
-          await ref.read(userProvider.notifier).getUser();
-        }
         // if (ref.read(userProvider) != null) {
         //   ref.read(appStateProvider.notifier).setAutoLogin(true);
         //   ref.read(appStateProvider.notifier).syncServer();

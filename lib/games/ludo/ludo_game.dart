@@ -106,7 +106,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           }
           // Update pin locations
           if (_playState == PlayState.playing && isInit) {
-            for (var player in _sessionData!.sessionUserStatus) {
+            for (final player in _sessionData!.sessionUserStatus) {
               final pinLocations = player.playerTokensPosition;
               final currentPinLocations = playerPinLocations[player.playerId];
               final playerHome = playerHomes[player.playerId];
@@ -116,17 +116,15 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
                 if (currentPinLocations[i] != pinLocation) {
                   if (currentPinLocations[i] == 0 && pinLocation != 0) {
-                    final pin = playerHome.homePins[i];
-                    await board.addPin(
-                        playerHome.removePin(pin!, i)
-                          ..position = pin.position + playerHome.position,
-                        location: pinLocation - player.playerId * 11 - 1);
+                    await board.addPin(playerHome.removePin(i),
+                        location:
+                            (pinLocation - player.playerId * 13 - 1) % 52);
                   } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
                     final pin = board.getPinWithIndex(player.playerId, i);
                     board.attackPin(pin!);
                   } else {
                     final pin = board.getPinWithIndex(player.playerId, i);
-                    pin!.movePin(pinLocation - player.playerId * 11 - 1);
+                    pin!.movePin((pinLocation - player.playerId * 13 - 1) % 52);
                   }
 
                   playerPinLocations[player.playerId][i] = pinLocation;
@@ -201,11 +199,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       for (int i = 0; i < pinLocations.length; i++) {
         var pinLocation = pinLocations[i];
         if (pinLocation != '0') {
-          final pin = playerHome.homePins[i];
-          board.addPin(
-              playerHome.removePin(pin!, i)
-                ..position = pin.position + playerHome.position,
-              location: int.parse(pinLocation) - player.playerId * 11 - 1);
+          board.addPin(playerHome.removePin(i),
+              location:
+                  (int.parse(pinLocation) - player.playerId * 13 - 1) % 52);
         }
       }
     }
