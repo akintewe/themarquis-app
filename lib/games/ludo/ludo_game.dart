@@ -131,16 +131,22 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                       final pin = playerHome.removePin(i);
                       print('Adding pin');
                       await board.addPin(pin,
-                          location:
-                              (pinLocation - player.playerId * 13 - 1) % 52);
+                          location: (pinLocation +
+                                  (player.playerTokensCircled[i] ? 52 : 0) -
+                                  player.playerId * 13 -
+                                  1) %
+                              52);
                     } else if (currentPinLocations[i] != 0 &&
                         pinLocation == 0) {
                       final pin = board.getPinWithIndex(player.playerId, i);
                       board.attackPin(pin!);
                     } else {
                       final pin = board.getPinWithIndex(player.playerId, i);
-                      pin!.movePin(
-                          (pinLocation - player.playerId * 13 - 1) % 52);
+                      pin!.movePin((pinLocation +
+                              (player.playerTokensCircled[i] ? 52 : 0) -
+                              player.playerId * 13 -
+                              1) %
+                          52);
                     }
 
                     playerPinLocations[player.playerId][i] = pinLocation;
@@ -220,8 +226,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         var pinLocation = pinLocations[i];
         if (pinLocation != '0') {
           board.addPin(playerHome.removePin(i),
-              location:
-                  (int.parse(pinLocation) - player.playerId * 13 - 1) % 52);
+              location: (int.parse(pinLocation) +
+                  (player.playerTokensCircled[i] ? 52 : 0) -
+                  player.playerId * 13 -
+                  1));
         }
       }
     }

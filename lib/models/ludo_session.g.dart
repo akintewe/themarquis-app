@@ -18,7 +18,6 @@ class LudoSessionDataImplAdapter extends TypeAdapter<_$LudoSessionDataImpl> {
     };
     return _$LudoSessionDataImpl(
       id: fields[0] as String,
-      playerCount: fields[1] as int,
       status: fields[2] as String,
       nextPlayer: fields[3] as String,
       nonce: fields[4] as String,
@@ -29,21 +28,15 @@ class LudoSessionDataImplAdapter extends TypeAdapter<_$LudoSessionDataImpl> {
       nextPlayerId: fields[9] as int,
       creator: fields[10] as String,
       createdAt: fields[11] as DateTime,
-      v: (fields[12] as List).cast<String>(),
-      r: (fields[13] as List).cast<String>(),
-      s: (fields[14] as List).cast<String>(),
-      randomNumbers: (fields[15] as List).cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, _$LudoSessionDataImpl obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
-      ..writeByte(1)
-      ..write(obj.playerCount)
       ..writeByte(2)
       ..write(obj.status)
       ..writeByte(3)
@@ -63,15 +56,7 @@ class LudoSessionDataImplAdapter extends TypeAdapter<_$LudoSessionDataImpl> {
       ..writeByte(11)
       ..write(obj.createdAt)
       ..writeByte(8)
-      ..write(obj.sessionUserStatus)
-      ..writeByte(12)
-      ..write(obj.v)
-      ..writeByte(13)
-      ..write(obj.r)
-      ..writeByte(14)
-      ..write(obj.s)
-      ..writeByte(15)
-      ..write(obj.randomNumbers);
+      ..write(obj.sessionUserStatus);
   }
 
   @override
@@ -106,13 +91,14 @@ class LudoSessionUserStatusImplAdapter
       status: fields[6] as String,
       profileImageUrl: fields[7] as String?,
       points: fields[8] as int,
+      playerTokensCircled: (fields[9] as List).cast<bool>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, _$LudoSessionUserStatusImpl obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.playerId)
       ..writeByte(3)
@@ -130,7 +116,9 @@ class LudoSessionUserStatusImplAdapter
       ..writeByte(1)
       ..write(obj.playerTokensPosition)
       ..writeByte(2)
-      ..write(obj.playerWinningTokens);
+      ..write(obj.playerWinningTokens)
+      ..writeByte(9)
+      ..write(obj.playerTokensCircled);
   }
 
   @override
@@ -152,7 +140,6 @@ _$LudoSessionDataImpl _$$LudoSessionDataImplFromJson(
         Map<String, dynamic> json) =>
     _$LudoSessionDataImpl(
       id: json['id'] as String,
-      playerCount: (json['playerCount'] as num).toInt(),
       status: json['status'] as String,
       nextPlayer: json['nextPlayer'] as String,
       nonce: json['nonce'] as String,
@@ -165,19 +152,12 @@ _$LudoSessionDataImpl _$$LudoSessionDataImplFromJson(
       nextPlayerId: (json['nextPlayerId'] as num).toInt(),
       creator: json['creator'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      v: (json['v'] as List<dynamic>).map((e) => e as String).toList(),
-      r: (json['r'] as List<dynamic>).map((e) => e as String).toList(),
-      s: (json['s'] as List<dynamic>).map((e) => e as String).toList(),
-      randomNumbers: (json['randomNumbers'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
     );
 
 Map<String, dynamic> _$$LudoSessionDataImplToJson(
         _$LudoSessionDataImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'playerCount': instance.playerCount,
       'status': instance.status,
       'nextPlayer': instance.nextPlayer,
       'nonce': instance.nonce,
@@ -188,10 +168,6 @@ Map<String, dynamic> _$$LudoSessionDataImplToJson(
       'nextPlayerId': instance.nextPlayerId,
       'creator': instance.creator,
       'createdAt': instance.createdAt.toIso8601String(),
-      'v': instance.v,
-      'r': instance.r,
-      's': instance.s,
-      'randomNumbers': instance.randomNumbers,
     };
 
 _$LudoSessionUserStatusImpl _$$LudoSessionUserStatusImplFromJson(
@@ -210,6 +186,9 @@ _$LudoSessionUserStatusImpl _$$LudoSessionUserStatusImplFromJson(
       status: json['status'] as String,
       profileImageUrl: json['profileImageUrl'] as String?,
       points: (json['points'] as num).toInt(),
+      playerTokensCircled: (json['playerTokensCircled'] as List<dynamic>)
+          .map((e) => e as bool)
+          .toList(),
     );
 
 Map<String, dynamic> _$$LudoSessionUserStatusImplToJson(
@@ -224,4 +203,5 @@ Map<String, dynamic> _$$LudoSessionUserStatusImplToJson(
       'status': instance.status,
       'profileImageUrl': instance.profileImageUrl,
       'points': instance.points,
+      'playerTokensCircled': instance.playerTokensCircled,
     };

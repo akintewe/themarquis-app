@@ -68,11 +68,10 @@ class LudoSession extends _$LudoSession {
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     final ludoSession = LudoSessionData(
       id: _id!,
-      playerCount: decodedResponse['player_count'],
       status: decodedResponse['status'],
       nextPlayer: decodedResponse['next_player'],
       nonce: decodedResponse['nonce'],
-      color: decodedResponse['color'],
+      color: decodedResponse['color'] ?? "0",
       playAmount: decodedResponse['play_amount'],
       playToken: decodedResponse['play_token'],
       sessionUserStatus: [
@@ -86,10 +85,15 @@ class LudoSession extends _$LudoSession {
                 (e['player_winning_tokens'] as List<dynamic>)
                     .map((e) => e as bool)
                     .toList();
+            final List<bool> playerTokensCircled =
+                (e['player_tokens_circled'] as List<dynamic>)
+                    .map((e) => e as bool)
+                    .toList();
             return LudoSessionUserStatus(
               playerId: e['player_id'],
               playerTokensPosition: playerTokensPosition,
               playerWinningTokens: playerWinningTokens,
+              playerTokensCircled: playerTokensCircled,
               userId: e['user_id'],
               email: e['email'],
               role: e['role'],
@@ -103,10 +107,6 @@ class LudoSession extends _$LudoSession {
       createdAt: DateTime.fromMillisecondsSinceEpoch(
           decodedResponse['created_at'] * 1000),
       creator: "",
-      v: [],
-      r: [],
-      s: [],
-      randomNumbers: [],
     );
     await _hiveBox!.put(_id, ludoSession);
     state = ludoSession;

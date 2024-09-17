@@ -22,8 +22,6 @@ LudoSessionData _$LudoSessionDataFromJson(Map<String, dynamic> json) {
 mixin _$LudoSessionData {
   @HiveField(0)
   String get id => throw _privateConstructorUsedError;
-  @HiveField(1)
-  int get playerCount => throw _privateConstructorUsedError;
   @HiveField(2)
   String get status => throw _privateConstructorUsedError;
   @HiveField(3)
@@ -45,17 +43,13 @@ mixin _$LudoSessionData {
   String get creator => throw _privateConstructorUsedError;
   @HiveField(11)
   DateTime get createdAt => throw _privateConstructorUsedError;
-  @HiveField(12)
-  List<String> get v => throw _privateConstructorUsedError;
-  @HiveField(13)
-  List<String> get r => throw _privateConstructorUsedError;
-  @HiveField(14)
-  List<String> get s => throw _privateConstructorUsedError;
-  @HiveField(15)
-  List<String> get randomNumbers => throw _privateConstructorUsedError;
 
+  /// Serializes this LudoSessionData to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of LudoSessionData
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $LudoSessionDataCopyWith<LudoSessionData> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -68,7 +62,6 @@ abstract class $LudoSessionDataCopyWith<$Res> {
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) int playerCount,
       @HiveField(2) String status,
       @HiveField(3) String nextPlayer,
       @HiveField(4) String nonce,
@@ -78,11 +71,7 @@ abstract class $LudoSessionDataCopyWith<$Res> {
       @HiveField(8) List<LudoSessionUserStatus> sessionUserStatus,
       @HiveField(9) int nextPlayerId,
       @HiveField(10) String creator,
-      @HiveField(11) DateTime createdAt,
-      @HiveField(12) List<String> v,
-      @HiveField(13) List<String> r,
-      @HiveField(14) List<String> s,
-      @HiveField(15) List<String> randomNumbers});
+      @HiveField(11) DateTime createdAt});
 }
 
 /// @nodoc
@@ -95,11 +84,12 @@ class _$LudoSessionDataCopyWithImpl<$Res, $Val extends LudoSessionData>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of LudoSessionData
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? id = null,
-    Object? playerCount = null,
     Object? status = null,
     Object? nextPlayer = null,
     Object? nonce = null,
@@ -110,20 +100,12 @@ class _$LudoSessionDataCopyWithImpl<$Res, $Val extends LudoSessionData>
     Object? nextPlayerId = null,
     Object? creator = null,
     Object? createdAt = null,
-    Object? v = null,
-    Object? r = null,
-    Object? s = null,
-    Object? randomNumbers = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      playerCount: null == playerCount
-          ? _value.playerCount
-          : playerCount // ignore: cast_nullable_to_non_nullable
-              as int,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -164,22 +146,6 @@ class _$LudoSessionDataCopyWithImpl<$Res, $Val extends LudoSessionData>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      v: null == v
-          ? _value.v
-          : v // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      r: null == r
-          ? _value.r
-          : r // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      s: null == s
-          ? _value.s
-          : s // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      randomNumbers: null == randomNumbers
-          ? _value.randomNumbers
-          : randomNumbers // ignore: cast_nullable_to_non_nullable
-              as List<String>,
     ) as $Val);
   }
 }
@@ -194,7 +160,6 @@ abstract class _$$LudoSessionDataImplCopyWith<$Res>
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) int playerCount,
       @HiveField(2) String status,
       @HiveField(3) String nextPlayer,
       @HiveField(4) String nonce,
@@ -204,11 +169,7 @@ abstract class _$$LudoSessionDataImplCopyWith<$Res>
       @HiveField(8) List<LudoSessionUserStatus> sessionUserStatus,
       @HiveField(9) int nextPlayerId,
       @HiveField(10) String creator,
-      @HiveField(11) DateTime createdAt,
-      @HiveField(12) List<String> v,
-      @HiveField(13) List<String> r,
-      @HiveField(14) List<String> s,
-      @HiveField(15) List<String> randomNumbers});
+      @HiveField(11) DateTime createdAt});
 }
 
 /// @nodoc
@@ -219,11 +180,12 @@ class __$$LudoSessionDataImplCopyWithImpl<$Res>
       _$LudoSessionDataImpl _value, $Res Function(_$LudoSessionDataImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of LudoSessionData
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? id = null,
-    Object? playerCount = null,
     Object? status = null,
     Object? nextPlayer = null,
     Object? nonce = null,
@@ -234,20 +196,12 @@ class __$$LudoSessionDataImplCopyWithImpl<$Res>
     Object? nextPlayerId = null,
     Object? creator = null,
     Object? createdAt = null,
-    Object? v = null,
-    Object? r = null,
-    Object? s = null,
-    Object? randomNumbers = null,
   }) {
     return _then(_$LudoSessionDataImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      playerCount: null == playerCount
-          ? _value.playerCount
-          : playerCount // ignore: cast_nullable_to_non_nullable
-              as int,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -288,22 +242,6 @@ class __$$LudoSessionDataImplCopyWithImpl<$Res>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      v: null == v
-          ? _value._v
-          : v // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      r: null == r
-          ? _value._r
-          : r // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      s: null == s
-          ? _value._s
-          : s // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      randomNumbers: null == randomNumbers
-          ? _value._randomNumbers
-          : randomNumbers // ignore: cast_nullable_to_non_nullable
-              as List<String>,
     ));
   }
 }
@@ -314,7 +252,6 @@ class __$$LudoSessionDataImplCopyWithImpl<$Res>
 class _$LudoSessionDataImpl extends _LudoSessionData {
   _$LudoSessionDataImpl(
       {@HiveField(0) required this.id,
-      @HiveField(1) required this.playerCount,
       @HiveField(2) required this.status,
       @HiveField(3) required this.nextPlayer,
       @HiveField(4) required this.nonce,
@@ -325,16 +262,8 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
       required final List<LudoSessionUserStatus> sessionUserStatus,
       @HiveField(9) required this.nextPlayerId,
       @HiveField(10) required this.creator,
-      @HiveField(11) required this.createdAt,
-      @HiveField(12) required final List<String> v,
-      @HiveField(13) required final List<String> r,
-      @HiveField(14) required final List<String> s,
-      @HiveField(15) required final List<String> randomNumbers})
+      @HiveField(11) required this.createdAt})
       : _sessionUserStatus = sessionUserStatus,
-        _v = v,
-        _r = r,
-        _s = s,
-        _randomNumbers = randomNumbers,
         super._();
 
   factory _$LudoSessionDataImpl.fromJson(Map<String, dynamic> json) =>
@@ -343,9 +272,6 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
   @override
   @HiveField(0)
   final String id;
-  @override
-  @HiveField(1)
-  final int playerCount;
   @override
   @HiveField(2)
   final String status;
@@ -383,45 +309,10 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
   @override
   @HiveField(11)
   final DateTime createdAt;
-  final List<String> _v;
-  @override
-  @HiveField(12)
-  List<String> get v {
-    if (_v is EqualUnmodifiableListView) return _v;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_v);
-  }
-
-  final List<String> _r;
-  @override
-  @HiveField(13)
-  List<String> get r {
-    if (_r is EqualUnmodifiableListView) return _r;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_r);
-  }
-
-  final List<String> _s;
-  @override
-  @HiveField(14)
-  List<String> get s {
-    if (_s is EqualUnmodifiableListView) return _s;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_s);
-  }
-
-  final List<String> _randomNumbers;
-  @override
-  @HiveField(15)
-  List<String> get randomNumbers {
-    if (_randomNumbers is EqualUnmodifiableListView) return _randomNumbers;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_randomNumbers);
-  }
 
   @override
   String toString() {
-    return 'LudoSessionData(id: $id, playerCount: $playerCount, status: $status, nextPlayer: $nextPlayer, nonce: $nonce, color: $color, playAmount: $playAmount, playToken: $playToken, sessionUserStatus: $sessionUserStatus, nextPlayerId: $nextPlayerId, creator: $creator, createdAt: $createdAt, v: $v, r: $r, s: $s, randomNumbers: $randomNumbers)';
+    return 'LudoSessionData(id: $id, status: $status, nextPlayer: $nextPlayer, nonce: $nonce, color: $color, playAmount: $playAmount, playToken: $playToken, sessionUserStatus: $sessionUserStatus, nextPlayerId: $nextPlayerId, creator: $creator, createdAt: $createdAt)';
   }
 
   @override
@@ -430,8 +321,6 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
         (other.runtimeType == runtimeType &&
             other is _$LudoSessionDataImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.playerCount, playerCount) ||
-                other.playerCount == playerCount) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.nextPlayer, nextPlayer) ||
                 other.nextPlayer == nextPlayer) &&
@@ -447,20 +336,14 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
                 other.nextPlayerId == nextPlayerId) &&
             (identical(other.creator, creator) || other.creator == creator) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            const DeepCollectionEquality().equals(other._v, _v) &&
-            const DeepCollectionEquality().equals(other._r, _r) &&
-            const DeepCollectionEquality().equals(other._s, _s) &&
-            const DeepCollectionEquality()
-                .equals(other._randomNumbers, _randomNumbers));
+                other.createdAt == createdAt));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
       id,
-      playerCount,
       status,
       nextPlayer,
       nonce,
@@ -470,13 +353,11 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
       const DeepCollectionEquality().hash(_sessionUserStatus),
       nextPlayerId,
       creator,
-      createdAt,
-      const DeepCollectionEquality().hash(_v),
-      const DeepCollectionEquality().hash(_r),
-      const DeepCollectionEquality().hash(_s),
-      const DeepCollectionEquality().hash(_randomNumbers));
+      createdAt);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of LudoSessionData
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LudoSessionDataImplCopyWith<_$LudoSessionDataImpl> get copyWith =>
@@ -494,7 +375,6 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
 abstract class _LudoSessionData extends LudoSessionData {
   factory _LudoSessionData(
           {@HiveField(0) required final String id,
-          @HiveField(1) required final int playerCount,
           @HiveField(2) required final String status,
           @HiveField(3) required final String nextPlayer,
           @HiveField(4) required final String nonce,
@@ -505,11 +385,7 @@ abstract class _LudoSessionData extends LudoSessionData {
           required final List<LudoSessionUserStatus> sessionUserStatus,
           @HiveField(9) required final int nextPlayerId,
           @HiveField(10) required final String creator,
-          @HiveField(11) required final DateTime createdAt,
-          @HiveField(12) required final List<String> v,
-          @HiveField(13) required final List<String> r,
-          @HiveField(14) required final List<String> s,
-          @HiveField(15) required final List<String> randomNumbers}) =
+          @HiveField(11) required final DateTime createdAt}) =
       _$LudoSessionDataImpl;
   _LudoSessionData._() : super._();
 
@@ -519,9 +395,6 @@ abstract class _LudoSessionData extends LudoSessionData {
   @override
   @HiveField(0)
   String get id;
-  @override
-  @HiveField(1)
-  int get playerCount;
   @override
   @HiveField(2)
   String get status;
@@ -552,20 +425,11 @@ abstract class _LudoSessionData extends LudoSessionData {
   @override
   @HiveField(11)
   DateTime get createdAt;
+
+  /// Create a copy of LudoSessionData
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @HiveField(12)
-  List<String> get v;
-  @override
-  @HiveField(13)
-  List<String> get r;
-  @override
-  @HiveField(14)
-  List<String> get s;
-  @override
-  @HiveField(15)
-  List<String> get randomNumbers;
-  @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LudoSessionDataImplCopyWith<_$LudoSessionDataImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -595,9 +459,15 @@ mixin _$LudoSessionUserStatus {
   String? get profileImageUrl => throw _privateConstructorUsedError;
   @HiveField(8)
   int get points => throw _privateConstructorUsedError;
+  @HiveField(9)
+  List<bool> get playerTokensCircled => throw _privateConstructorUsedError;
 
+  /// Serializes this LudoSessionUserStatus to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of LudoSessionUserStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $LudoSessionUserStatusCopyWith<LudoSessionUserStatus> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -617,7 +487,8 @@ abstract class $LudoSessionUserStatusCopyWith<$Res> {
       @HiveField(5) String role,
       @HiveField(6) String status,
       @HiveField(7) String? profileImageUrl,
-      @HiveField(8) int points});
+      @HiveField(8) int points,
+      @HiveField(9) List<bool> playerTokensCircled});
 }
 
 /// @nodoc
@@ -631,6 +502,8 @@ class _$LudoSessionUserStatusCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of LudoSessionUserStatus
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -643,6 +516,7 @@ class _$LudoSessionUserStatusCopyWithImpl<$Res,
     Object? status = null,
     Object? profileImageUrl = freezed,
     Object? points = null,
+    Object? playerTokensCircled = null,
   }) {
     return _then(_value.copyWith(
       playerId: null == playerId
@@ -681,6 +555,10 @@ class _$LudoSessionUserStatusCopyWithImpl<$Res,
           ? _value.points
           : points // ignore: cast_nullable_to_non_nullable
               as int,
+      playerTokensCircled: null == playerTokensCircled
+          ? _value.playerTokensCircled
+          : playerTokensCircled // ignore: cast_nullable_to_non_nullable
+              as List<bool>,
     ) as $Val);
   }
 }
@@ -703,7 +581,8 @@ abstract class _$$LudoSessionUserStatusImplCopyWith<$Res>
       @HiveField(5) String role,
       @HiveField(6) String status,
       @HiveField(7) String? profileImageUrl,
-      @HiveField(8) int points});
+      @HiveField(8) int points,
+      @HiveField(9) List<bool> playerTokensCircled});
 }
 
 /// @nodoc
@@ -715,6 +594,8 @@ class __$$LudoSessionUserStatusImplCopyWithImpl<$Res>
       $Res Function(_$LudoSessionUserStatusImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of LudoSessionUserStatus
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -727,6 +608,7 @@ class __$$LudoSessionUserStatusImplCopyWithImpl<$Res>
     Object? status = null,
     Object? profileImageUrl = freezed,
     Object? points = null,
+    Object? playerTokensCircled = null,
   }) {
     return _then(_$LudoSessionUserStatusImpl(
       playerId: null == playerId
@@ -765,6 +647,10 @@ class __$$LudoSessionUserStatusImplCopyWithImpl<$Res>
           ? _value.points
           : points // ignore: cast_nullable_to_non_nullable
               as int,
+      playerTokensCircled: null == playerTokensCircled
+          ? _value._playerTokensCircled
+          : playerTokensCircled // ignore: cast_nullable_to_non_nullable
+              as List<bool>,
     ));
   }
 }
@@ -782,9 +668,11 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
       @HiveField(5) required this.role,
       @HiveField(6) required this.status,
       @HiveField(7) this.profileImageUrl,
-      @HiveField(8) required this.points})
+      @HiveField(8) required this.points,
+      @HiveField(9) required final List<bool> playerTokensCircled})
       : _playerTokensPosition = playerTokensPosition,
         _playerWinningTokens = playerWinningTokens,
+        _playerTokensCircled = playerTokensCircled,
         super._();
 
   factory _$LudoSessionUserStatusImpl.fromJson(Map<String, dynamic> json) =>
@@ -831,10 +719,19 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
   @override
   @HiveField(8)
   final int points;
+  final List<bool> _playerTokensCircled;
+  @override
+  @HiveField(9)
+  List<bool> get playerTokensCircled {
+    if (_playerTokensCircled is EqualUnmodifiableListView)
+      return _playerTokensCircled;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_playerTokensCircled);
+  }
 
   @override
   String toString() {
-    return 'LudoSessionUserStatus(playerId: $playerId, playerTokensPosition: $playerTokensPosition, playerWinningTokens: $playerWinningTokens, userId: $userId, email: $email, role: $role, status: $status, profileImageUrl: $profileImageUrl, points: $points)';
+    return 'LudoSessionUserStatus(playerId: $playerId, playerTokensPosition: $playerTokensPosition, playerWinningTokens: $playerWinningTokens, userId: $userId, email: $email, role: $role, status: $status, profileImageUrl: $profileImageUrl, points: $points, playerTokensCircled: $playerTokensCircled)';
   }
 
   @override
@@ -854,10 +751,12 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.profileImageUrl, profileImageUrl) ||
                 other.profileImageUrl == profileImageUrl) &&
-            (identical(other.points, points) || other.points == points));
+            (identical(other.points, points) || other.points == points) &&
+            const DeepCollectionEquality()
+                .equals(other._playerTokensCircled, _playerTokensCircled));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -869,9 +768,12 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
       role,
       status,
       profileImageUrl,
-      points);
+      points,
+      const DeepCollectionEquality().hash(_playerTokensCircled));
 
-  @JsonKey(ignore: true)
+  /// Create a copy of LudoSessionUserStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LudoSessionUserStatusImplCopyWith<_$LudoSessionUserStatusImpl>
@@ -888,15 +790,17 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
 
 abstract class _LudoSessionUserStatus extends LudoSessionUserStatus {
   factory _LudoSessionUserStatus(
-      {@HiveField(0) required final int playerId,
-      @HiveField(1) required final List<String> playerTokensPosition,
-      @HiveField(2) required final List<bool> playerWinningTokens,
-      @HiveField(3) required final int userId,
-      @HiveField(4) required final String email,
-      @HiveField(5) required final String role,
-      @HiveField(6) required final String status,
-      @HiveField(7) final String? profileImageUrl,
-      @HiveField(8) required final int points}) = _$LudoSessionUserStatusImpl;
+          {@HiveField(0) required final int playerId,
+          @HiveField(1) required final List<String> playerTokensPosition,
+          @HiveField(2) required final List<bool> playerWinningTokens,
+          @HiveField(3) required final int userId,
+          @HiveField(4) required final String email,
+          @HiveField(5) required final String role,
+          @HiveField(6) required final String status,
+          @HiveField(7) final String? profileImageUrl,
+          @HiveField(8) required final int points,
+          @HiveField(9) required final List<bool> playerTokensCircled}) =
+      _$LudoSessionUserStatusImpl;
   _LudoSessionUserStatus._() : super._();
 
   factory _LudoSessionUserStatus.fromJson(Map<String, dynamic> json) =
@@ -930,7 +834,13 @@ abstract class _LudoSessionUserStatus extends LudoSessionUserStatus {
   @HiveField(8)
   int get points;
   @override
-  @JsonKey(ignore: true)
+  @HiveField(9)
+  List<bool> get playerTokensCircled;
+
+  /// Create a copy of LudoSessionUserStatus
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LudoSessionUserStatusImplCopyWith<_$LudoSessionUserStatusImpl>
       get copyWith => throw _privateConstructorUsedError;
 }

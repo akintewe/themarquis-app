@@ -21,7 +21,6 @@ class LudoSessionData extends HiveObject with _$LudoSessionData {
   @HiveType(typeId: 2)
   factory LudoSessionData({
     @HiveField(0) required String id,
-    @HiveField(1) required int playerCount,
     @HiveField(2) required String status,
     @HiveField(3) required String nextPlayer,
     @HiveField(4) required String nonce,
@@ -32,10 +31,6 @@ class LudoSessionData extends HiveObject with _$LudoSessionData {
     @HiveField(9) required int nextPlayerId,
     @HiveField(10) required String creator,
     @HiveField(11) required DateTime createdAt,
-    @HiveField(12) required List<String> v,
-    @HiveField(13) required List<String> r,
-    @HiveField(14) required List<String> s,
-    @HiveField(15) required List<String> randomNumbers,
   }) = _LudoSessionData;
 
   List<Color> get getListOfColors =>
@@ -66,6 +61,7 @@ class LudoSessionUserStatus extends HiveObject with _$LudoSessionUserStatus {
     @HiveField(6) required String status,
     @HiveField(7) String? profileImageUrl,
     @HiveField(8) required int points,
+    @HiveField(9) required List<bool> playerTokensCircled,
   }) = _LudoSessionUserStatus;
 
   factory LudoSessionUserStatus.fromJson(Map<String, dynamic> json) =>
