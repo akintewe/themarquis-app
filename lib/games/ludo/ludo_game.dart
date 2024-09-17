@@ -127,7 +127,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
                   if (currentPinLocations[i] != pinLocation) {
                     if (currentPinLocations[i] == 0 && pinLocation != 0) {
-                      await board.addPin(playerHome.removePin(i),
+                      print('Removing pin');
+                      final pin = playerHome.removePin(i);
+                      print('Adding pin');
+                      await board.addPin(pin,
                           location:
                               (pinLocation - player.playerId * 13 - 1) % 52);
                     } else if (currentPinLocations[i] != 0 &&
@@ -145,6 +148,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                 }
               }
               _currentPlayer = _sessionData!.nextPlayerIndex;
+              playerCanMove = false;
               updateTurnText();
               // TODO: update dice state
               // TODO: update destination state
@@ -241,12 +245,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     playerCanMove = !playerHomes[_currentPlayer].isHomeFull || dice.value == 6;
     if (!playerCanMove) {
       await ref.read(ludoSessionProvider.notifier).playMove("0");
-      nextPlayer();
     }
-  }
-
-  void nextPlayer() {
-    _currentPlayer = (_currentPlayer + 1) % totalPlayers;
   }
 
   void showErrorDialog(String errorMessage) {

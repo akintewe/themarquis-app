@@ -9,7 +9,7 @@ import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
 class Dice extends PositionComponent
     with TapCallbacks, HasGameReference<LudoGame> {
-  int value = 6;
+  int value = 1;
   bool _isLoading = false;
   late SpriteSheet diceSpriteSheet;
   Sprite? currentSprite;

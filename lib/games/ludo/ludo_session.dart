@@ -34,6 +34,7 @@ class LudoSession extends _$LudoSession {
       switch (decodedResponse['event']) {
         case 'play_move':
         case 'player_joined':
+        case 'play_move_failed':
           final dataStr = decodedResponse['data'] as String;
           print('Data String ${dataStr}');
           final data = jsonDecode(dataStr) as Map;

@@ -56,7 +56,6 @@ class PlayerPin extends SpriteComponent
         game.playerCanMove = false;
         try {
           await game.playMove(homeIndex);
-          game.nextPlayer();
         } catch (e) {
           game.playerCanMove = true;
         }
