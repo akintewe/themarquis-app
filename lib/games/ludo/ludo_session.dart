@@ -207,6 +207,7 @@ class LudoSession extends _$LudoSession {
     print(decodedResponse);
     _id = decodedResponse['id'];
     await getLudoSession();
+    await ref.read(userProvider.notifier).getUser();
   }
 
   Future<void> joinSession(String sessionId) async {
@@ -227,6 +228,7 @@ class LudoSession extends _$LudoSession {
     print(decodedResponse);
     _id = sessionId;
     await getLudoSession();
+    await ref.read(userProvider.notifier).getUser();
   }
 
   Future<void> closeSession(String tokenId) async {
@@ -242,6 +244,7 @@ class LudoSession extends _$LudoSession {
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     print(decodedResponse);
+    await ref.read(userProvider.notifier).getUser();
   }
 
   Future<void> editLudoSession(
