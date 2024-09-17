@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
-Map<int, List<double>> spriteLocationMap = {
-  0: [1, 1, 366, 590], // x, y, w, h
-  1: [369, 1, 366, 590],
-  3: [737, 431, 290, 472],
-  2: [737, 1, 266, 428],
+Map<Color, List<double>> spriteLocationMap = {
+  const Color(0xffd04c2f): [1, 1, 366, 590], // x, y, w, h
+  const Color(0xff2fa9d0): [369, 1, 366, 590],
+  const Color(0xff2fd06f): [737, 431, 290, 472],
+  const Color(0xffb0d02f): [737, 1, 266, 428],
 };
 
 class PlayerPin extends SpriteComponent
@@ -27,12 +27,21 @@ class PlayerPin extends SpriteComponent
           position: position,
           sprite: Sprite(
             Flame.images.fromCache('spritesheet.png'),
-            srcPosition: Vector2(spriteLocationMap[playerIndex]![0],
-                spriteLocationMap[playerIndex]![1]),
-            srcSize: Vector2(spriteLocationMap[playerIndex]![2],
-                spriteLocationMap[playerIndex]![3]),
+            // srcPosition: Vector2(spriteLocationMap[playerIndex]![0],
+            //     spriteLocationMap[playerIndex]![1]),
+            // srcSize: Vector2(spriteLocationMap[playerIndex]![2],
+            //     spriteLocationMap[playerIndex]![3]),
           ),
-        );
+        ) {
+    sprite = Sprite(
+      Flame.images.fromCache('spritesheet.png'),
+      srcPosition: Vector2(
+          spriteLocationMap[game.listOfColors[playerIndex]]![0],
+          spriteLocationMap[game.listOfColors[playerIndex]]![1]),
+      srcSize: Vector2(spriteLocationMap[game.listOfColors[playerIndex]]![2],
+          spriteLocationMap[game.listOfColors[playerIndex]]![3]),
+    );
+  }
 
   @override
   FutureOr<void> onLoad() {
