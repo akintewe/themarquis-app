@@ -93,6 +93,15 @@ class ProfileScreen extends ConsumerWidget {
                             DateFormat.yMMMMd().format(user.createdAt),
                           ),
                           const SizedBox(height: 16),
+                          const Text(
+                            'Wallet Address',
+                          ),
+                          const SizedBox(height: 8),
+                          SelectableText(
+                            user.accountAddress,
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          const SizedBox(height: 16),
                           TextButton.icon(
                               onPressed: () async {
                                 await ref

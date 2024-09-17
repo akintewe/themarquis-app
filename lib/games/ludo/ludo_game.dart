@@ -66,11 +66,21 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       _sessionData!.sessionUserStatus.map((user) => user.email).toList();
 
   Future<List<int>> generateMove() async {
-    return ref.read(ludoSessionProvider.notifier).generateMove();
+    try {
+      final res = await ref.read(ludoSessionProvider.notifier).generateMove();
+      return res;
+    } catch (e) {
+      showErrorDialog(e.toString());
+      return [];
+    }
   }
 
   Future<void> playMove(int index) async {
-    return ref.read(ludoSessionProvider.notifier).playMove(index.toString());
+    try {
+      await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
+    } catch (e) {
+      showErrorDialog(e.toString());
+    }
   }
 
   late PlayState _playState;
@@ -106,35 +116,41 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           }
           // Update pin locations
           if (_playState == PlayState.playing && isInit) {
-            for (final player in _sessionData!.sessionUserStatus) {
-              final pinLocations = player.playerTokensPosition;
-              final currentPinLocations = playerPinLocations[player.playerId];
-              final playerHome = playerHomes[player.playerId];
+            try {
+              for (final player in _sessionData!.sessionUserStatus) {
+                final pinLocations = player.playerTokensPosition;
+                final currentPinLocations = playerPinLocations[player.playerId];
+                final playerHome = playerHomes[player.playerId];
 
-              for (int i = 0; i < pinLocations.length; i++) {
-                final pinLocation = int.parse(pinLocations[i]);
+                for (int i = 0; i < pinLocations.length; i++) {
+                  final pinLocation = int.parse(pinLocations[i]);
 
-                if (currentPinLocations[i] != pinLocation) {
-                  if (currentPinLocations[i] == 0 && pinLocation != 0) {
-                    await board.addPin(playerHome.removePin(i),
-                        location:
-                            (pinLocation - player.playerId * 13 - 1) % 52);
-                  } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
-                    final pin = board.getPinWithIndex(player.playerId, i);
-                    board.attackPin(pin!);
-                  } else {
-                    final pin = board.getPinWithIndex(player.playerId, i);
-                    pin!.movePin((pinLocation - player.playerId * 13 - 1) % 52);
+                  if (currentPinLocations[i] != pinLocation) {
+                    if (currentPinLocations[i] == 0 && pinLocation != 0) {
+                      await board.addPin(playerHome.removePin(i),
+                          location:
+                              (pinLocation - player.playerId * 13 - 1) % 52);
+                    } else if (currentPinLocations[i] != 0 &&
+                        pinLocation == 0) {
+                      final pin = board.getPinWithIndex(player.playerId, i);
+                      board.attackPin(pin!);
+                    } else {
+                      final pin = board.getPinWithIndex(player.playerId, i);
+                      pin!.movePin(
+                          (pinLocation - player.playerId * 13 - 1) % 52);
+                    }
+
+                    playerPinLocations[player.playerId][i] = pinLocation;
                   }
-
-                  playerPinLocations[player.playerId][i] = pinLocation;
                 }
               }
+              _currentPlayer = _sessionData!.nextPlayerIndex;
+              updateTurnText();
+              // TODO: update dice state
+              // TODO: update destination state
+            } catch (e) {
+              showErrorDialog(e.toString());
             }
-            _currentPlayer = _sessionData!.nextPlayerIndex;
-            updateTurnText();
-            // TODO: update dice state
-            // TODO: update destination state
           }
         }
       });
@@ -231,6 +247,28 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   void nextPlayer() {
     _currentPlayer = (_currentPlayer + 1) % totalPlayers;
+  }
+
+  void showErrorDialog(String errorMessage) {
+    overlays.add('error');
+    addToGameWidgetBuild(() {
+      showDialog(
+        context: buildContext!,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                overlays.remove('error');
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   @override
