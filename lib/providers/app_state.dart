@@ -120,9 +120,14 @@ class AppState extends _$AppState {
       return false;
     }
     // await refreshToken();
-    await ref.read(userProvider.notifier).getUser();
-    state = state.copyWith(autoLoginResult: true);
-    return true;
+    try {
+      await ref.read(userProvider.notifier).getUser();
+      state = state.copyWith(autoLoginResult: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(autoLoginResult: true);
+      return false;
+    }
   }
 
   void setConnectivity(bool val) {
