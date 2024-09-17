@@ -66,7 +66,7 @@ class LudoGameTest extends LudoGame {
     // Check pins on the board
     for (var pin in board.children.whereType<PlayerPin>()) {
       if (pin.playerIndex == playerIndex &&
-          pin.currentPosIndex + diceValue <= 47) {
+          pin.currentPosIndex + diceValue <= 57) {
         movablePins.add(pin);
       }
     }

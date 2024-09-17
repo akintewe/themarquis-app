@@ -27,10 +27,10 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
 
     double dxStart = game.unitSize * 0.75;
     double dyStart = center.y - 1.5 * game.unitSize;
-    List<int> coloredBox = [1, 6, 7, 8, 9];
-    for (var i = 0; i < 15; i++) {
-      final x = dxStart + (i % 5) * game.unitSize;
-      final y = dyStart + (i ~/ 5) * game.unitSize;
+    List<int> coloredBox = [1, 7, 8, 9, 10, 11];
+    for (var i = 0; i < 18; i++) {
+      final x = dxStart + (i % 6) * game.unitSize;
+      final y = dyStart + (i ~/ 6) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
           const Radius.circular(3.0));
       canvas.drawRRect(
@@ -50,9 +50,9 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     }
 
     dxStart = center.x - 1.5 * game.unitSize;
-    dyStart = center.y - 6.75 * game.unitSize;
-    coloredBox = [4, 5, 7, 10, 13];
-    for (var i = 0; i < 15; i++) {
+    dyStart = center.y - 7.75 * game.unitSize;
+    coloredBox = [4, 5, 7, 10, 13, 16];
+    for (var i = 0; i < 18; i++) {
       final x = dxStart + (i % 3) * game.unitSize;
       final y = dyStart + (i ~/ 3) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
@@ -74,10 +74,10 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     }
     dxStart = center.x + 1.75 * game.unitSize;
     dyStart = center.y - 1.5 * game.unitSize;
-    coloredBox = [5, 6, 7, 8, 13];
-    for (var i = 0; i < 15; i++) {
-      final x = dxStart + (i % 5) * game.unitSize;
-      final y = dyStart + (i ~/ 5) * game.unitSize;
+    coloredBox = [6, 7, 8, 9, 10, 16];
+    for (var i = 0; i < 18; i++) {
+      final x = dxStart + (i % 6) * game.unitSize;
+      final y = dyStart + (i ~/ 6) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
           const Radius.circular(3.0));
       canvas.drawRRect(
@@ -98,8 +98,8 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
 
     dxStart = center.x - 1.5 * game.unitSize;
     dyStart = center.y + 1.75 * game.unitSize;
-    coloredBox = [1, 4, 7, 9, 10];
-    for (var i = 0; i < 15; i++) {
+    coloredBox = [1, 4, 7, 10, 12, 13];
+    for (var i = 0; i < 18; i++) {
       final x = dxStart + (i % 3) * game.unitSize;
       final y = dyStart + (i ~/ 3) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,

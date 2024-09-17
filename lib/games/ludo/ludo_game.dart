@@ -49,7 +49,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   double get width => size.x;
   double get height => size.y;
-  double get unitSize => size.x / 15;
+  double get unitSize => size.x / 17;
   Vector2 get center => size / 2;
 
   int get currentPlayer => _currentPlayer;
@@ -120,13 +120,13 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                     await board.addPin(
                         playerHome.removePin(pin!, i)
                           ..position = pin.position + playerHome.position,
-                        location: pinLocation - player.playerId * 11);
+                        location: pinLocation - player.playerId * 11 - 1);
                   } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
                     final pin = board.getPinWithIndex(player.playerId, i);
                     board.attackPin(pin!);
                   } else {
                     final pin = board.getPinWithIndex(player.playerId, i);
-                    pin!.movePin(pinLocation - player.playerId * 11);
+                    pin!.movePin(pinLocation - player.playerId * 11 - 1);
                   }
 
                   playerPinLocations[player.playerId][i] = pinLocation;
@@ -205,7 +205,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           board.addPin(
               playerHome.removePin(pin!, i)
                 ..position = pin.position + playerHome.position,
-              location: int.parse(pinLocation) - player.playerId * 11);
+              location: int.parse(pinLocation) - player.playerId * 11 - 1);
         }
       }
     }

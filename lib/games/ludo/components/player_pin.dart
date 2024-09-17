@@ -62,7 +62,7 @@ class PlayerPin extends SpriteComponent
     if (game.currentPlayer == playerIndex &&
         game.playerCanMove &&
         (currentPosIndex >= 0 || game.dice.value == 6) &&
-        (currentPosIndex + game.dice.value <= 47)) {
+        (currentPosIndex + game.dice.value <= 57)) {
       final paint = Paint()
         ..color = game.listOfColors[playerIndex]
         ..style = PaintingStyle.stroke
@@ -112,7 +112,7 @@ class PlayerPin extends SpriteComponent
       targetIndex = index;
     }
 
-    if (targetIndex == 47) {
+    if (targetIndex == 57) {
       game.destination.addPin(this);
       game.board.remove(this);
       return;
@@ -186,20 +186,20 @@ class PlayerPin extends SpriteComponent
       case 0:
         double dxStart = game.unitSize * 0.75;
         double dyStart = game.center.y - 1.5 * game.unitSize;
-        x = dxStart + (index % 5 + 0.24) * game.unitSize;
-        y = dyStart + (index ~/ 5 + 0.1) * game.unitSize;
+        x = dxStart + (index % 6 + 0.24) * game.unitSize;
+        y = dyStart + (index ~/ 6 + 0.1) * game.unitSize;
         break;
       case 1:
         double dxStart = game.center.x - 1.5 * game.unitSize;
-        double dyStart = game.center.y - 6.75 * game.unitSize;
+        double dyStart = game.center.y - 7.75 * game.unitSize;
         x = dxStart + (index % 3 + 0.24) * game.unitSize;
         y = dyStart + (index ~/ 3 + 0.1) * game.unitSize;
         break;
       case 2:
         double dxStart = game.center.x + 1.75 * game.unitSize;
         double dyStart = game.center.y - 1.5 * game.unitSize;
-        x = dxStart + (index % 5 + 0.24) * game.unitSize;
-        y = dyStart + (index ~/ 5 + 0.1) * game.unitSize;
+        x = dxStart + (index % 6 + 0.24) * game.unitSize;
+        y = dyStart + (index ~/ 6 + 0.1) * game.unitSize;
         break;
       case 3:
         double dxStart = game.center.x - 1.5 * game.unitSize;
