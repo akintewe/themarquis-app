@@ -174,6 +174,6 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
         return false;
       });
     print("moving pin");
-    pin.movePin(location);
+    await pin.movePin(location);
   }
 }

@@ -92,7 +92,8 @@ class PlayerPin extends SpriteComponent
     ));
   }
 
-  void movePin(int? index) {
+  Future<void> movePin(int? index) async {
+    await mounted;
     int startIndex = currentPosIndex;
     int targetIndex;
 
