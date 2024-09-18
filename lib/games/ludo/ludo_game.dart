@@ -129,6 +129,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                     if (currentPinLocations[i] == 0 && pinLocation != 0) {
                       print('Removing pin');
                       final pin = playerHome.removePin(i);
+                      await pin.removed;
                       print('Adding pin');
                       await board.addPin(pin,
                           location: (pinLocation +
@@ -138,6 +139,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                                   player.playerId * 13 -
                                   1) %
                               52);
+                      print('Pin added');
                     } else if (currentPinLocations[i] != 0 &&
                         pinLocation == 0) {
                       final pin = board.getPinWithIndex(player.playerId, i);

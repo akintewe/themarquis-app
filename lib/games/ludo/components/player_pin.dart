@@ -106,10 +106,7 @@ class PlayerPin extends SpriteComponent
         Vector2 startPosition = routeIndexToPos(playerIndex, 0);
         moveEffects.add(MoveEffect.to(
           startPosition,
-          EffectController(duration: 0.3, curve: Curves.easeInOut),
-          onComplete: () {
-            position = startPosition;
-          },
+          EffectController(duration: 0.1, curve: Curves.easeInOut),
         ));
         startIndex = 0;
       }
@@ -137,31 +134,9 @@ class PlayerPin extends SpriteComponent
 
     currentPosIndex = targetIndex;
 
-    // Check for attack
-    // final pinsAtTarget = game.board.getPinsAtPosition(playerIndex, targetIndex);
-    // PlayerPin? attackedPin = pinsAtTarget.isEmpty ? null : pinsAtTarget.first;
-
-    // if (attackedPin != null && attackedPin.playerIndex != playerIndex) {
-    //   game.board.attackPin(attackedPin);
-    //   print(
-    //       "Player $playerIndex attacked player ${attackedPin.playerIndex} at position $targetIndex");
-    // }
-    // if (pinsAtTarget.isNotEmpty) {
-    //   for (var attackedPin in pinsAtTarget) {
-    //     game.board.attackPin(attackedPin);
-    //     print(
-    //         "Player $playerIndex attacked player ${attackedPin.playerIndex} at position $targetIndex");
-    //   }
-    // }
-
     // Create a list of move effects for each step
 
     for (int i = startIndex + 1; i <= targetIndex; i++) {
-      // final pinsAtTarget = game.board.getPinsAtPosition(playerIndex, i);
-      // if (pinsAtTarget.length > 1) {
-      //   currentPosIndex = i;
-      //   break;
-      // }
       final newPosition = routeIndexToPos(playerIndex, i);
       moveEffects.add(
         MoveEffect.to(
@@ -174,12 +149,13 @@ class PlayerPin extends SpriteComponent
       );
     }
 
-    if (moveEffects.isNotEmpty) {
+    if (moveEffects.isNotEmpty && !isRemoved) {
       moveEffects.last.onComplete = () {
         position = moveEffects.last.target.position;
       };
       // Add sequential effect to combine all move effects
-      add(SequenceEffect(moveEffects));
+      await add(SequenceEffect(moveEffects));
+      await Future.delayed(Duration(milliseconds: 100 * moveEffects.length));
     } else {
       print("No movement required: start and target positions are the same");
     }
