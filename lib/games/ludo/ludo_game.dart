@@ -263,22 +263,24 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   void showErrorDialog(String errorMessage) {
     overlays.add('error');
     addToGameWidgetBuild(() {
-      showDialog(
-        context: buildContext!,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: Text(errorMessage),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                overlays.remove('error');
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      Future.delayed(Duration.zero, () {
+        showDialog(
+          context: buildContext!,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text(errorMessage),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  overlays.remove('error');
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      });
     });
   }
 
