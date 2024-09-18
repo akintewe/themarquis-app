@@ -7,10 +7,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gal/gal.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
-import 'package:marquis_v2/providers/app_state.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 class MatchResultsScreen extends ConsumerWidget {
   const MatchResultsScreen({super.key, required this.game});
@@ -197,10 +198,30 @@ class MatchResultsScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             IconButton.filled(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Share.shareXFiles(
+                                      [
+                                        XFile.fromData(imageBytes,
+                                            mimeType: 'image/png')
+                                      ],
+                                      subject: 'Ludo Results',
+                                      text:
+                                          'I am playing Ludo, please join us!',
+                                      fileNameOverrides: ['share.png']);
+                                },
                                 icon: const Icon(Icons.share)),
                             IconButton.filled(
-                                onPressed: () {},
+                                onPressed: () async {
+                                  await Gal.putImageBytes(imageBytes);
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Image successfully saved to gallery'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
                                 icon: const Icon(Icons.download)),
                           ],
                         ),

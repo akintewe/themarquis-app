@@ -91,7 +91,7 @@ class LudoSessionUserStatusImplAdapter
       status: fields[6] as String,
       profileImageUrl: fields[7] as String?,
       points: fields[8] as int,
-      playerTokensCircled: (fields[9] as List).cast<bool>(),
+      playerTokensCircled: (fields[9] as List?)?.cast<bool>(),
     );
   }
 
@@ -186,8 +186,8 @@ _$LudoSessionUserStatusImpl _$$LudoSessionUserStatusImplFromJson(
       status: json['status'] as String,
       profileImageUrl: json['profileImageUrl'] as String?,
       points: (json['points'] as num).toInt(),
-      playerTokensCircled: (json['playerTokensCircled'] as List<dynamic>)
-          .map((e) => e as bool)
+      playerTokensCircled: (json['playerTokensCircled'] as List<dynamic>?)
+          ?.map((e) => e as bool)
           .toList(),
     );
 

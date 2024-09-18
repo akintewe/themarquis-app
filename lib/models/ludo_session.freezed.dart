@@ -460,7 +460,7 @@ mixin _$LudoSessionUserStatus {
   @HiveField(8)
   int get points => throw _privateConstructorUsedError;
   @HiveField(9)
-  List<bool> get playerTokensCircled => throw _privateConstructorUsedError;
+  List<bool>? get playerTokensCircled => throw _privateConstructorUsedError;
 
   /// Serializes this LudoSessionUserStatus to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -488,7 +488,7 @@ abstract class $LudoSessionUserStatusCopyWith<$Res> {
       @HiveField(6) String status,
       @HiveField(7) String? profileImageUrl,
       @HiveField(8) int points,
-      @HiveField(9) List<bool> playerTokensCircled});
+      @HiveField(9) List<bool>? playerTokensCircled});
 }
 
 /// @nodoc
@@ -516,7 +516,7 @@ class _$LudoSessionUserStatusCopyWithImpl<$Res,
     Object? status = null,
     Object? profileImageUrl = freezed,
     Object? points = null,
-    Object? playerTokensCircled = null,
+    Object? playerTokensCircled = freezed,
   }) {
     return _then(_value.copyWith(
       playerId: null == playerId
@@ -555,10 +555,10 @@ class _$LudoSessionUserStatusCopyWithImpl<$Res,
           ? _value.points
           : points // ignore: cast_nullable_to_non_nullable
               as int,
-      playerTokensCircled: null == playerTokensCircled
+      playerTokensCircled: freezed == playerTokensCircled
           ? _value.playerTokensCircled
           : playerTokensCircled // ignore: cast_nullable_to_non_nullable
-              as List<bool>,
+              as List<bool>?,
     ) as $Val);
   }
 }
@@ -582,7 +582,7 @@ abstract class _$$LudoSessionUserStatusImplCopyWith<$Res>
       @HiveField(6) String status,
       @HiveField(7) String? profileImageUrl,
       @HiveField(8) int points,
-      @HiveField(9) List<bool> playerTokensCircled});
+      @HiveField(9) List<bool>? playerTokensCircled});
 }
 
 /// @nodoc
@@ -608,7 +608,7 @@ class __$$LudoSessionUserStatusImplCopyWithImpl<$Res>
     Object? status = null,
     Object? profileImageUrl = freezed,
     Object? points = null,
-    Object? playerTokensCircled = null,
+    Object? playerTokensCircled = freezed,
   }) {
     return _then(_$LudoSessionUserStatusImpl(
       playerId: null == playerId
@@ -647,10 +647,10 @@ class __$$LudoSessionUserStatusImplCopyWithImpl<$Res>
           ? _value.points
           : points // ignore: cast_nullable_to_non_nullable
               as int,
-      playerTokensCircled: null == playerTokensCircled
+      playerTokensCircled: freezed == playerTokensCircled
           ? _value._playerTokensCircled
           : playerTokensCircled // ignore: cast_nullable_to_non_nullable
-              as List<bool>,
+              as List<bool>?,
     ));
   }
 }
@@ -669,7 +669,7 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
       @HiveField(6) required this.status,
       @HiveField(7) this.profileImageUrl,
       @HiveField(8) required this.points,
-      @HiveField(9) required final List<bool> playerTokensCircled})
+      @HiveField(9) required final List<bool>? playerTokensCircled})
       : _playerTokensPosition = playerTokensPosition,
         _playerWinningTokens = playerWinningTokens,
         _playerTokensCircled = playerTokensCircled,
@@ -719,14 +719,16 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
   @override
   @HiveField(8)
   final int points;
-  final List<bool> _playerTokensCircled;
+  final List<bool>? _playerTokensCircled;
   @override
   @HiveField(9)
-  List<bool> get playerTokensCircled {
+  List<bool>? get playerTokensCircled {
+    final value = _playerTokensCircled;
+    if (value == null) return null;
     if (_playerTokensCircled is EqualUnmodifiableListView)
       return _playerTokensCircled;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_playerTokensCircled);
+    return EqualUnmodifiableListView(value);
   }
 
   @override
@@ -799,7 +801,7 @@ abstract class _LudoSessionUserStatus extends LudoSessionUserStatus {
           @HiveField(6) required final String status,
           @HiveField(7) final String? profileImageUrl,
           @HiveField(8) required final int points,
-          @HiveField(9) required final List<bool> playerTokensCircled}) =
+          @HiveField(9) required final List<bool>? playerTokensCircled}) =
       _$LudoSessionUserStatusImpl;
   _LudoSessionUserStatus._() : super._();
 
@@ -835,7 +837,7 @@ abstract class _LudoSessionUserStatus extends LudoSessionUserStatus {
   int get points;
   @override
   @HiveField(9)
-  List<bool> get playerTokensCircled;
+  List<bool>? get playerTokensCircled;
 
   /// Create a copy of LudoSessionUserStatus
   /// with the given fields replaced by the non-null parameter values.

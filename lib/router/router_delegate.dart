@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:marquis_v2/games/ludo/main.dart';
 import 'package:marquis_v2/models/app_state.dart';
-import 'package:marquis_v2/models/user.dart';
-import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/app_shell.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/router/fade_animation.dart';
@@ -33,18 +31,13 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   bool _isSignUp = false;
   final ProviderRef ref;
   late AppStateData _appState;
-  late UserData? _user;
 
   AppRouterDelegate(this.ref) : navigatorKey = GlobalKey<NavigatorState>() {
     _appState = ref.read(appStateProvider);
-    _user = ref.read(userProvider);
+
     ref.listen(appStateProvider, (previous, next) {
       _appState = next;
       print(_appState.autoLoginResult);
-      notifyListeners();
-    });
-    ref.listen(userProvider, (previous, next) {
-      _user = next;
       notifyListeners();
     });
   }

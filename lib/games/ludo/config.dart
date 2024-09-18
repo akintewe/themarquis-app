@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart'; // Add this import
-
 const gameWidth = 900.0;
 const gameHeight = 1600.0;
 

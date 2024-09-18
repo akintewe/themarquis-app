@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
+import 'package:marquis_v2/models/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
 
 class LudoWelcomeScreen extends ConsumerStatefulWidget {
@@ -474,7 +475,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                           alignment: Alignment.centerRight,
                           child: IconButton(
                             visualDensity: VisualDensity.compact,
-                            padding: EdgeInsets.all(0),
+                            padding: const EdgeInsets.all(0),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
@@ -499,6 +500,10 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                                 roomName: room['id']!,
                                 noOfPlayers: room['players_joined']!.length,
                                 context: context,
+                                colors: playerColors
+                                        .sublist(int.parse(room['color']!)) +
+                                    playerColors.sublist(
+                                        0, int.parse(room['color']!)),
                               )),
                         ],
                       ),
@@ -517,6 +522,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
     required String roomName,
     required int noOfPlayers,
     required BuildContext context,
+    required List<Color> colors,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -550,6 +556,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                     playerAvatarCard(
                       index: i,
                       size: 37,
+                      color: colors[i],
                     ),
                   for (int i = 0; i < 4 - noOfPlayers; i++)
                     playerEmptyCard(
@@ -605,15 +612,8 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
   Widget playerAvatarCard({
     required int index,
     required double size,
+    required Color color,
   }) {
-    const playerColors = [
-      // Add this const
-      Color(0xffd04c2f),
-      Color(0xff2fa9d0),
-      Color(0xffb0d02f),
-      Color(0xff2fd06f),
-    ];
-
     return Padding(
       padding: const EdgeInsets.only(
         right: 8.0,
@@ -622,7 +622,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
         width: size, // Width of the displayed sprite
         height: size, // Height of the displayed sprite
         decoration: BoxDecoration(
-          color: playerColors[index], // Background color
+          color: color, // Background color
           borderRadius:
               BorderRadius.circular(size / 8), // Rounded corners with radius 24
         ),
@@ -771,7 +771,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                               alignment: Alignment.centerRight,
                               child: IconButton(
                                 visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.all(0),
+                                padding: const EdgeInsets.all(0),
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
@@ -1090,16 +1090,16 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
         decoration: BoxDecoration(
           border: Border(
             top: top != null
-                ? BorderSide(width: 2, color: Colors.white)
+                ? const BorderSide(width: 2, color: Colors.white)
                 : BorderSide.none,
             left: left != null
-                ? BorderSide(width: 2, color: Colors.white)
+                ? const BorderSide(width: 2, color: Colors.white)
                 : BorderSide.none,
             right: right != null
-                ? BorderSide(width: 2, color: Colors.white)
+                ? const BorderSide(width: 2, color: Colors.white)
                 : BorderSide.none,
             bottom: bottom != null
-                ? BorderSide(width: 2, color: Colors.white)
+                ? const BorderSide(width: 2, color: Colors.white)
                 : BorderSide.none,
           ),
         ),

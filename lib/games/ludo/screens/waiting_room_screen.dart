@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gal/gal.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 class WaitingRoomScreen extends ConsumerStatefulWidget {
   const WaitingRoomScreen({super.key, required this.game});
@@ -42,9 +44,9 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Column(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: const Text(
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
                               'WAITING ROOM',
                               style: TextStyle(
                                 color: Colors.white,
@@ -53,9 +55,9 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: const Text(
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
                               'Room ID',
                               style: TextStyle(
                                 color: Colors.white70,
@@ -94,15 +96,15 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: playerAvatarCard(
-                                index: 0,
-                                size: 80,
-                                isSelf: true,
-                                player: session.sessionUserStatus[0],
-                              ),
+                                  index: 0,
+                                  size: 80,
+                                  isSelf: true,
+                                  player: session.sessionUserStatus[0],
+                                  color: session.getListOfColors[0]),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: const Text(
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
                                 'VS',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -122,11 +124,11 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 8),
                                       child: playerAvatarCard(
-                                        index: i,
-                                        size: 80,
-                                        isSelf: false,
-                                        player: session.sessionUserStatus[i],
-                                      ),
+                                          index: i,
+                                          size: 80,
+                                          isSelf: false,
+                                          player: session.sessionUserStatus[i],
+                                          color: session.getListOfColors[i]),
                                     ),
                                 ],
                               ),
@@ -156,10 +158,33 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                                         MainAxisAlignment.spaceAround,
                                     children: [
                                       IconButton.filled(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            Share.shareXFiles(
+                                                [
+                                                  XFile.fromData(imageBytes,
+                                                      mimeType: 'image/png')
+                                                ],
+                                                subject: 'Ludo Invite',
+                                                text:
+                                                    'I am playing Ludo, please join us!',
+                                                fileNameOverrides: [
+                                                  'share.png'
+                                                ]);
+                                          },
                                           icon: const Icon(Icons.share)),
                                       IconButton.filled(
-                                          onPressed: () {},
+                                          onPressed: () async {
+                                            await Gal.putImageBytes(imageBytes);
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Image successfully saved to gallery'),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          },
                                           icon: const Icon(Icons.download)),
                                     ],
                                   ),
@@ -243,10 +268,12 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: playerAvatarCard(
-                          index: index,
-                          size: 108,
-                          isSelf: false,
-                          player: session.sessionUserStatus[index]),
+                        index: index,
+                        size: 108,
+                        isSelf: false,
+                        player: session.sessionUserStatus[index],
+                        color: session.getListOfColors[index],
+                      ),
                     );
                   },
                 ),
@@ -346,21 +373,15 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
     required double size,
     required bool isSelf,
     required LudoSessionUserStatus player,
+    required Color color,
   }) {
-    const playerColors = [
-      // Add this const
-      Color(0xffd04c2f),
-      Color(0xff2fa9d0),
-      Color(0xffb0d02f),
-      Color(0xff2fd06f),
-    ];
     return Column(
       children: [
         Container(
           width: size, // Width of the displayed sprite
           height: size, // Height of the displayed sprite
           decoration: BoxDecoration(
-            color: playerColors[index], // Background color
+            color: color, // Background color
             borderRadius: BorderRadius.circular(
                 size / 8), // Rounded corners with radius 24
           ),

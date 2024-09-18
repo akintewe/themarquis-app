@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
-import 'package:marquis_v2/games/ludo/config.dart';
 
 part 'ludo_session.g.dart';
 part 'ludo_session.freezed.dart';
@@ -61,7 +60,7 @@ class LudoSessionUserStatus extends HiveObject with _$LudoSessionUserStatus {
     @HiveField(6) required String status,
     @HiveField(7) String? profileImageUrl,
     @HiveField(8) required int points,
-    @HiveField(9) required List<bool> playerTokensCircled,
+    @HiveField(9) required List<bool>? playerTokensCircled,
   }) = _LudoSessionUserStatus;
 
   factory LudoSessionUserStatus.fromJson(Map<String, dynamic> json) =>
