@@ -74,6 +74,7 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                                 ),
                             PlayState.finished.name: (context, game) =>
                                 MatchResultsScreen(game: game),
+                            'error': (context, game) => Container()
                           },
                         ),
                       ),
