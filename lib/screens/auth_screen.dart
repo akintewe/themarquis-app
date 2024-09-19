@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marquis_v2/env.dart';
 // import 'package:magic_sdk/magic_sdk.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
@@ -82,18 +83,22 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                             if (_isSignUp) {
                               //sign up
                               try {
-                                await ref
-                                    .read(appStateProvider.notifier)
-                                    .signup(
-                                      _emailController.text,
-                                      _refCodeController.text,
-                                    );
+                                if (environment['build'] != 'DEBUG') {
+                                  await ref
+                                      .read(appStateProvider.notifier)
+                                      .signup(
+                                        _emailController.text,
+                                        _refCodeController.text,
+                                      );
+                                }
                                 if (!context.mounted) return;
                                 await showDialog<String>(
                                   context: context,
                                   barrierDismissible: false,
-                                  builder: (BuildContext context) =>
-                                      OTPDialog(email: _emailController.text),
+                                  builder: (BuildContext context) => OTPDialog(
+                                    email: _emailController.text,
+                                    isSignUp: true,
+                                  ),
                                 );
                                 if (!context.mounted) return;
                                 Navigator.of(context).pop();
@@ -103,15 +108,19 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                             } else {
                               //login
                               try {
-                                await ref
-                                    .read(appStateProvider.notifier)
-                                    .login(_emailController.text);
+                                if (environment['build'] != 'DEBUG') {
+                                  await ref
+                                      .read(appStateProvider.notifier)
+                                      .login(_emailController.text);
+                                }
                                 if (!context.mounted) return;
                                 await showDialog<String>(
                                   context: context,
                                   barrierDismissible: false,
-                                  builder: (BuildContext context) =>
-                                      OTPDialog(email: _emailController.text),
+                                  builder: (BuildContext context) => OTPDialog(
+                                    email: _emailController.text,
+                                    isSignUp: false,
+                                  ),
                                 );
                                 if (!context.mounted) return;
                                 Navigator.of(context).pop();
@@ -158,8 +167,9 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
 }
 
 class OTPDialog extends ConsumerStatefulWidget {
-  const OTPDialog({super.key, required this.email});
+  const OTPDialog({super.key, required this.email, required this.isSignUp});
   final String email;
+  final bool isSignUp;
 
   @override
   ConsumerState<OTPDialog> createState() => _OTPDialogState();
@@ -229,7 +239,15 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
             if (_otp.length == 4) {
               final appState = ref.read(appStateProvider.notifier);
               try {
-                await appState.verifyCode(widget.email, _otp);
+                if (environment['build'] == 'DEBUG') {
+                  if (widget.isSignUp) {
+                    await appState.signupSandbox(widget.email);
+                  } else {
+                    await appState.loginSandbox(widget.email);
+                  }
+                } else {
+                  await appState.verifyCode(widget.email, _otp);
+                }
               } catch (e) {
                 if (e.toString().contains('Invalid')) {
                   if (!context.mounted) return;

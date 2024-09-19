@@ -13,8 +13,12 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 part "ludo_session.g.dart";
 
-final baseUrl = environment['apiUrl'];
-final wsUrl = environment['wsUrl'];
+final baseUrl = environment['build'] == 'DEBUG'
+    ? environment['apiUrlDebug']
+    : environment['apiUrl'];
+final wsUrl = environment['build'] == 'DEBUG'
+    ? environment['wsUrlDebug']
+    : environment['wsUrl'];
 
 @Riverpod(keepAlive: true)
 class LudoSession extends _$LudoSession {

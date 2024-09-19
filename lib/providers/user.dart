@@ -11,7 +11,9 @@ import 'package:http/http.dart' as http;
 
 part "user.g.dart";
 
-final baseUrl = environment['apiUrl'];
+final baseUrl = environment['build'] == 'DEBUG'
+    ? environment['apiUrlDebug']
+    : environment['apiUrl'];
 
 @Riverpod(keepAlive: true)
 class User extends _$User {

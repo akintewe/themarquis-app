@@ -11,7 +11,9 @@ import 'package:http/http.dart' as http;
 
 part "app_state.g.dart";
 
-final baseUrl = environment['apiUrl'];
+final baseUrl = environment['build'] == 'DEBUG'
+    ? environment['apiUrlDebug']
+    : environment['apiUrl'];
 
 @Riverpod(keepAlive: true)
 class AppState extends _$AppState {
@@ -52,14 +54,27 @@ class AppState extends _$AppState {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    //   final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    //   //verify token
-    //   state = state.copyWith(
-    //       accessToken: decodedResponse['access_token'],
-    //       refreshToken: decodedResponse['refresh_token'],
-    //       autoLoginResult: true);
-    //   await ref.read(userProvider.notifier).getUser();
-    //   await _hiveBox!.put("appState", state);
+  }
+
+  Future<void> loginSandbox(String email) async {
+    final url = Uri.parse('$baseUrl/auth/signin-sandbox');
+    final response = await http.post(
+      url,
+      body: jsonEncode({'email': email}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 200) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
+    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    //verify token
+    state = state.copyWith(
+        accessToken: decodedResponse['access_token'],
+        refreshToken: decodedResponse['refresh_token'],
+        autoLoginResult: true);
+    await _hiveBox!.put("appState", state);
+    await ref.read(userProvider.notifier).getUser();
   }
 
   Future<void> signup(String email, String referralCode) async {
@@ -73,14 +88,29 @@ class AppState extends _$AppState {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
+  }
+
+  Future<void> signupSandbox(String email) async {
+    final url = Uri.parse('$baseUrl/auth/signup-sandbox');
+    final response = await http.post(
+      url,
+      body: jsonEncode({
+        'email': email,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode != 201) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
     state = state.copyWith(
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
-    await ref.read(userProvider.notifier).getUser();
     await _hiveBox!.put("appState", state);
+    await ref.read(userProvider.notifier).getUser();
   }
 
   Future<void> verifyCode(String email, String code) async {
@@ -100,8 +130,8 @@ class AppState extends _$AppState {
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
-    await ref.read(userProvider.notifier).getUser();
     await _hiveBox!.put("appState", state);
+    await ref.read(userProvider.notifier).getUser();
   }
 
   Future<void> logout() async {
