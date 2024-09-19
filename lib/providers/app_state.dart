@@ -42,7 +42,7 @@ class AppState extends _$AppState {
   }
 
   Future<void> login(String email) async {
-    final url = Uri.parse('$baseUrl/auth/signin-sandbox');
+    final url = Uri.parse('$baseUrl/auth/signin');
     final response = await http.post(
       url,
       body: jsonEncode({'email': email}),
@@ -52,21 +52,21 @@ class AppState extends _$AppState {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    //verify token
-    state = state.copyWith(
-        accessToken: decodedResponse['access_token'],
-        refreshToken: decodedResponse['refresh_token'],
-        autoLoginResult: true);
-    await ref.read(userProvider.notifier).getUser();
-    await _hiveBox!.put("appState", state);
+    //   final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    //   //verify token
+    //   state = state.copyWith(
+    //       accessToken: decodedResponse['access_token'],
+    //       refreshToken: decodedResponse['refresh_token'],
+    //       autoLoginResult: true);
+    //   await ref.read(userProvider.notifier).getUser();
+    //   await _hiveBox!.put("appState", state);
   }
 
   Future<void> signup(String email, String referralCode) async {
-    final url = Uri.parse('$baseUrl/auth/signup-sandbox');
+    final url = Uri.parse('$baseUrl/auth/signup');
     final response = await http.post(
       url,
-      body: jsonEncode({'email': email}),
+      body: jsonEncode({'email': email, 'referral_code': referralCode}),
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201) {
@@ -90,6 +90,10 @@ class AppState extends _$AppState {
       body: jsonEncode({'email': email, 'code': code}),
       headers: {'Content-Type': 'application/json'},
     );
+    if (response.statusCode != 200) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
     state = state.copyWith(

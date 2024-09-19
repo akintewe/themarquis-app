@@ -42,7 +42,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
               ),
             ),
             AnimatedSize(
-              duration: Duration(
+              duration: const Duration(
                 milliseconds: 100,
               ),
               alignment: Alignment.centerRight,
@@ -89,6 +89,13 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                                       _refCodeController.text,
                                     );
                                 if (!context.mounted) return;
+                                await showDialog<String>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext context) =>
+                                      OTPDialog(email: _emailController.text),
+                                );
+                                if (!context.mounted) return;
                                 Navigator.of(context).pop();
                               } catch (e) {
                                 showErrorDialog(e.toString(), context);
@@ -99,6 +106,13 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                                 await ref
                                     .read(appStateProvider.notifier)
                                     .login(_emailController.text);
+                                if (!context.mounted) return;
+                                await showDialog<String>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext context) =>
+                                      OTPDialog(email: _emailController.text),
+                                );
                                 if (!context.mounted) return;
                                 Navigator.of(context).pop();
                               } catch (e) {
@@ -111,10 +125,10 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                             });
                           },
                           child: Padding(
-                            padding: EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: Text(
                               _isSignUp ? 'Sign Up' : 'Login',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -128,7 +142,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                           },
                           child: Text(
                             _isSignUp ? "Back to Login" : "Sign Up",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                             ),
                           ),
@@ -139,6 +153,110 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class OTPDialog extends ConsumerStatefulWidget {
+  const OTPDialog({super.key, required this.email});
+  final String email;
+
+  @override
+  ConsumerState<OTPDialog> createState() => _OTPDialogState();
+}
+
+class _OTPDialogState extends ConsumerState<OTPDialog> {
+  final List<TextEditingController> _controllers =
+      List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onOTPDigitChanged(int index) {
+    if (_controllers[index].text.length == 1) {
+      if (index < 3) {
+        _focusNodes[index + 1].requestFocus();
+      } else {
+        _focusNodes[index].unfocus();
+      }
+    }
+  }
+
+  String get _otp => _controllers.map((c) => c.text).join();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Enter OTP'),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(
+          4,
+          (index) => SizedBox(
+            width: 50,
+            child: TextField(
+              controller: _controllers[index],
+              focusNode: _focusNodes[index],
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              maxLength: 1,
+              decoration: const InputDecoration(
+                counterText: '',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (_) => _onOTPDigitChanged(index),
+            ),
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TextButton(
+          child: const Text('Submit'),
+          onPressed: () async {
+            if (_otp.length == 4) {
+              final appState = ref.read(appStateProvider.notifier);
+              try {
+                await appState.verifyCode(widget.email, _otp);
+              } catch (e) {
+                if (e.toString().contains('Invalid')) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Invalid OTP. Please try again.')),
+                  );
+                  return; // Don't close the dialog if the code is invalid
+                } else {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('An error occurred. Please try again.')),
+                  );
+                  return;
+                }
+              }
+              if (!context.mounted) return;
+              Navigator.of(context).pop(_otp);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Please enter a 4-digit OTP')),
+              );
+            }
+          },
+        ),
+      ],
     );
   }
 }

@@ -44,7 +44,7 @@ class User extends _$User {
       role: decodedResponse['user']['role'],
       status: decodedResponse['user']['status'],
       points: decodedResponse['user']['points'],
-      referredBy: decodedResponse['user']['referred_by'],
+      referredBy: decodedResponse['user']['referred_by'].toString(),
       referralId: decodedResponse['user']['referral_id'],
       walletId: decodedResponse['user']['wallet_id'],
       profileImageUrl: decodedResponse['user']['profile_image_url'],

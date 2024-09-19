@@ -1,6 +1,6 @@
 const environment = {
-  'apiUrl': 'http://desktop.wmtech.cc:8080',
+  'apiUrl': 'https://api.themarquis.xyz',
   // 'apiUrl': 'http://localhost:8080',
-  'wsUrl': 'ws://desktop.wmtech.cc:8080/ws',
+  'wsUrl': 'wss://api.themarquis.xyz/ws',
   'build': 'DEBUG',
 };
