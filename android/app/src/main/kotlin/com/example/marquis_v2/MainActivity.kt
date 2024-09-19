@@ -1,4 +1,4 @@
-package com.example.marquis_v2
+package com.marquis.app
 
 import io.flutter.embedding.android.FlutterActivity
 
