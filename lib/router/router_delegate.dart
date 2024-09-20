@@ -54,9 +54,11 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
       case 0:
         return HomePath();
       case 1:
-        return AchievementsPath();
-      case 2:
         return ProfilePath();
+      // case 1:
+      //   return AchievementsPath();
+      // case 2:
+      //   return ProfilePath();
       default:
         break;
     }
@@ -126,13 +128,17 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
       ref.read(appStateProvider.notifier).changeNavigatorIndex(0);
     }
 
-    if (configuration is AchievementsPath) {
+    if (configuration is ProfilePath) {
       ref.read(appStateProvider.notifier).changeNavigatorIndex(1);
     }
 
-    if (configuration is ProfilePath) {
-      ref.read(appStateProvider.notifier).changeNavigatorIndex(2);
-    }
+    // if (configuration is AchievementsPath) {
+    //   ref.read(appStateProvider.notifier).changeNavigatorIndex(1);
+    // }
+
+    // if (configuration is ProfilePath) {
+    //   ref.read(appStateProvider.notifier).changeNavigatorIndex(2);
+    // }
 
     if (configuration is GamePath) {
       ref.read(appStateProvider.notifier).selectGame(configuration.id);
@@ -170,16 +176,22 @@ class InnerRouterDelegate extends RouterDelegate<AppRoutePath>
             ],
           1 => [
               const FadeAnimationPage(
-                key: ValueKey('AchievementsPage'),
-                child: AchievementsScreen(),
-              ),
-            ],
-          2 => [
-              const FadeAnimationPage(
                 key: ValueKey('ProfilePage'),
                 child: ProfileScreen(),
               ),
             ],
+          // 1 => [
+          //     const FadeAnimationPage(
+          //       key: ValueKey('AchievementsPage'),
+          //       child: AchievementsScreen(),
+          //     ),
+          //   ],
+          // 2 => [
+          //     const FadeAnimationPage(
+          //       key: ValueKey('ProfilePage'),
+          //       child: ProfileScreen(),
+          //     ),
+          //   ],
           _ => [],
         },
         if (_appState.selectedGame != null)

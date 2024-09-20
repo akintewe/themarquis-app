@@ -52,14 +52,14 @@ class _AppShellState extends ConsumerState<AppShell> {
               items: const [
                 BottomNavigationBarItem(
                   // key: ValueKey("HomeBottomNavigationBarItem"),
-                  icon: FaIcon(FontAwesomeIcons.house),
-                  label: 'Home',
+                  icon: FaIcon(FontAwesomeIcons.compass),
+                  label: 'Discover',
                 ),
-                BottomNavigationBarItem(
-                  // key: ValueKey("FeedsBottomNavigationBarItem"),
-                  icon: FaIcon(FontAwesomeIcons.rss),
-                  label: 'Achievements',
-                ),
+                // BottomNavigationBarItem(
+                //   // key: ValueKey("FeedsBottomNavigationBarItem"),
+                //   icon: FaIcon(FontAwesomeIcons.rss),
+                //   label: 'Achievements',
+                // ),
                 BottomNavigationBarItem(
                   // key: ValueKey("AccountBottomNavigationBarItem"),
                   icon: FaIcon(FontAwesomeIcons.circleUser),

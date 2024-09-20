@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:marquis_v2/dialog/deposit_dialog.dart';
 import 'package:marquis_v2/providers/app_state.dart';
+import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
-import 'package:marquis_v2/screens/auth_screen.dart';
+import 'package:marquis_v2/dialog/auth_dialog.dart';
 
 class HomePath extends AppRoutePath {
   @override
@@ -22,11 +25,101 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final user = ref.read(userProvider);
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: user == null
+                  ? () {
+                      showDialog(
+                          context: context, builder: (c) => const AuthDialog());
+                    }
+                  : () {
+                      //go to profile page
+                    },
+              child: Row(
+                children: [
+                  user == null
+                      ? Icon(
+                          Icons.account_circle,
+                          size: 25,
+                        )
+                      : const CircleAvatar(
+                          radius: 15,
+                          backgroundImage: AssetImage(
+                            'assets/images/avatar.png',
+                          ), // Add your avatar image in assets folder
+                          backgroundColor: Colors.transparent,
+                        ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    user == null ? "LOGIN" : "user.email",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall!
+                        .copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 18,
+                  child: Image.asset('assets/images/member.png'),
+                ),
+                const SizedBox(width: 5),
+                const Text(
+                  "300",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                SvgPicture.asset(
+                  "assets/svg/STRK_logo.svg",
+                  width: 19,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  "300",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (c) {
+                          return const DepositDialog();
+                        });
+                  },
+                  child: Icon(
+                    Icons.add,
+                    size: 24,
+                    color: Colors.white,
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+        actions: [],
+      ),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 300.0,
+            expandedHeight: 230.0,
             flexibleSpace: FlexibleSpaceBar(
               expandedTitleScale: 1.5,
               centerTitle: false,

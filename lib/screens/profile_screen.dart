@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
-import 'package:marquis_v2/screens/auth_screen.dart';
+import 'package:marquis_v2/dialog/auth_dialog.dart';
 
 class ProfilePath extends AppRoutePath {
   @override
