@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marquis_v2/providers/user.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class DepositDialog extends ConsumerStatefulWidget {
   const DepositDialog({super.key});
@@ -74,7 +76,7 @@ class _DepositDialogState extends ConsumerState<DepositDialog> {
                 padding: const EdgeInsets.symmetric(vertical: 6.0),
                 child: Row(
                   children: [
-                    Text(
+                    const Text(
                       "1.  Login to ",
                       style: TextStyle(
                         fontSize: 13,
@@ -82,7 +84,7 @@ class _DepositDialogState extends ConsumerState<DepositDialog> {
                       ),
                     ),
                     GestureDetector(
-                      child: Row(
+                      child: const Row(
                         children: [
                           Text(
                             "The Marquis Website",
@@ -97,7 +99,7 @@ class _DepositDialogState extends ConsumerState<DepositDialog> {
                               ),
                             ),
                           ),
-                          const SizedBox(
+                          SizedBox(
                             width: 3,
                           ),
                           Icon(
@@ -116,8 +118,8 @@ class _DepositDialogState extends ConsumerState<DepositDialog> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 6.0),
                 child: Row(
                   children: [
                     Text(
@@ -130,8 +132,8 @@ class _DepositDialogState extends ConsumerState<DepositDialog> {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 6.0),
                 child: Row(
                   children: [
                     Text(
@@ -142,6 +144,15 @@ class _DepositDialogState extends ConsumerState<DepositDialog> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: QrImageView(
+                  data: ref.read(userProvider)?.accountAddress ?? "",
+                  version: QrVersions.auto,
+                  size: 200.0,
+                  backgroundColor: Colors.white,
                 ),
               ),
             ],

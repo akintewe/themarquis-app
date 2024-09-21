@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/dialog/auth_dialog.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ProfilePath extends AppRoutePath {
   @override
@@ -53,65 +55,197 @@ class ProfileScreen extends ConsumerWidget {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 50),
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage(
-                        'assets/images/avatar.png'), // Add your avatar image in assets folder
-                    backgroundColor: Colors.transparent,
+                  const SizedBox(
+                    height: 50,
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      user.email,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(fontWeight: FontWeight.w900),
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      elevation: 8.0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(36),
+                        ),
+                        child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const CircleAvatar(
+                                  radius: 50,
+                                  backgroundImage: AssetImage(
+                                      'assets/images/avatar.png'), // Add your avatar image in assets folder
+                                  backgroundColor: Colors.transparent,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Text(
+                                    user.email,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .copyWith(fontWeight: FontWeight.w900),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: SelectableText(
+                                    user.accountAddress,
+                                    style: const TextStyle(fontSize: 8),
+                                  ),
+                                ),
+                              ],
+                            )),
+                      ),
                     ),
                   ),
-                  const Divider(),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Referral Code',
+                  Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Invite your friends'),
+                            content: SizedBox(
+                              width: double.maxFinite,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: QrImageView(
+                                      data: user.referralCode,
+                                      size: 128,
+                                      backgroundColor: Colors.white,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextField(
+                                      controller: TextEditingController(
+                                          text: user.referralCode),
+                                      readOnly: true,
+                                      decoration: InputDecoration(
+                                        labelText: 'Referral Code',
+                                        border: const OutlineInputBorder(),
+                                        suffixIcon: IconButton(
+                                          icon: const Icon(Icons.copy),
+                                          onPressed: () {
+                                            Clipboard.setData(ClipboardData(
+                                                text: user.referralCode));
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'Referral code copied to clipboard')),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Close'),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            user.referralCode,
+                        );
+                      },
+                      child: Card(
+                          elevation: 8.0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.all(16.0),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Icon(Icons.share),
+                                ),
+                                Text('Show Referral Code'),
+                              ],
+                            ),
+                          )),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const AlertDialog(
+                            title: Text('Help and Support'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text("Contact us at support@marquis.com"),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Joined Date',
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            DateFormat.yMMMMd().format(user.createdAt),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Wallet Address',
-                          ),
-                          const SizedBox(height: 8),
-                          SelectableText(
-                            user.accountAddress,
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          const SizedBox(height: 16),
-                          TextButton.icon(
-                              onPressed: () async {
-                                await ref
-                                    .read(appStateProvider.notifier)
-                                    .logout();
-                              },
-                              icon: const Icon(Icons.logout),
-                              label: const Text('LOGOUT'))
-                        ],
-                      ),
+                        );
+                      },
+                      child: Card(
+                          elevation: 8.0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.all(16.0),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Icon(Icons.help),
+                                ),
+                                Text('Help and Support'),
+                              ],
+                            ),
+                          )),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: InkWell(
+                      onTap: () {
+                        ref.read(appStateProvider.notifier).logout();
+                      },
+                      child: Card(
+                          elevation: 8.0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.all(16.0),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Icon(
+                                    Icons.logout,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                Text(
+                                  'Logout',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          )),
                     ),
                   ),
                 ],

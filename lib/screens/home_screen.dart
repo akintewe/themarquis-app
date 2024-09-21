@@ -27,211 +27,334 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final user = ref.read(userProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: SingleChildScrollView(
+        child: Stack(
           children: [
-            GestureDetector(
-              onTap: user == null
-                  ? () {
-                      showDialog(
-                          context: context, builder: (c) => const AuthDialog());
-                    }
-                  : () {
-                      //go to profile page
-                    },
-              child: Row(
-                children: [
-                  user == null
-                      ? Icon(
-                          Icons.account_circle,
-                          size: 25,
-                        )
-                      : const CircleAvatar(
-                          radius: 15,
-                          backgroundImage: AssetImage(
-                            'assets/images/avatar.png',
-                          ), // Add your avatar image in assets folder
-                          backgroundColor: Colors.transparent,
-                        ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Text(
-                    user == null ? "LOGIN" : "user.email",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall!
-                        .copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Column(
               children: [
-                SizedBox(
-                  width: 18,
-                  child: Image.asset('assets/images/member.png'),
+                const SizedBox(
+                  height: 64,
                 ),
-                const SizedBox(width: 5),
-                const Text(
-                  "300",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
+                Image.asset(
+                  'assets/images/banner.png',
+                  fit: BoxFit.fitWidth,
+                ),
+              ],
+            ),
+            Column(
+              children: [
+                AppBar(
+                  backgroundColor: Colors.transparent,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: user == null
+                            ? () {
+                                showDialog(
+                                    context: context,
+                                    builder: (c) => const AuthDialog());
+                              }
+                            : () {
+                                //go to profile page
+                              },
+                        child: Row(
+                          children: [
+                            user == null
+                                ? const Icon(
+                                    Icons.account_circle,
+                                    size: 25,
+                                  )
+                                : const CircleAvatar(
+                                    radius: 15,
+                                    backgroundImage: AssetImage(
+                                      'assets/images/avatar.png',
+                                    ), // Add your avatar image in assets folder
+                                    backgroundColor: Colors.transparent,
+                                  ),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            Text(
+                              user == null ? "LOGIN" : user.email,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 18,
+                            child: Image.asset('assets/images/member.png'),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            user?.points.toString() ?? "0",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 15),
+                          SvgPicture.asset(
+                            "assets/svg/STRK_logo.svg",
+                            width: 19,
+                          ),
+                          const SizedBox(width: 5),
+                          FutureBuilder<int>(
+                            future: ref.read(userProvider.notifier).getTokenBalance(
+                                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              }
+                              if (snapshot.hasError) {
+                                return Container();
+                              }
+                              return Text(
+                                (snapshot.data! / 1e18).toStringAsPrecision(2),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (c) {
+                                    return const DepositDialog();
+                                  });
+                            },
+                            child: const Icon(
+                              Icons.add,
+                              size: 24,
+                              color: Colors.white,
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 15),
-                SvgPicture.asset(
-                  "assets/svg/STRK_logo.svg",
-                  width: 19,
+                const SizedBox(
+                  height: 24.0,
                 ),
-                const SizedBox(width: 5),
-                Text(
-                  "300",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
+                const ListTile(
+                  title: Text(
+                    'Top picks',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Lets explore our games',
+                    style: TextStyle(fontSize: 12),
                   ),
                 ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (c) {
-                          return const DepositDialog();
-                        });
-                  },
-                  child: Icon(
-                    Icons.add,
-                    size: 24,
-                    color: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Stack(
+                          children: [
+                            Image.asset('assets/images/ludo.png',
+                                fit: BoxFit.fitWidth,
+                                color: Colors.black.withAlpha(100),
+                                colorBlendMode: BlendMode.darken),
+                            const Positioned(
+                              bottom: 0,
+                              left: 0,
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Dice Game',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                    Text(
+                                      'Ludo',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: IconButton(
+                                  onPressed: () {
+                                    if (!ref.read(appStateProvider).isAuth) {
+                                      showDialog(
+                                          context: context,
+                                          builder: (ctx) => const AuthDialog());
+                                      return;
+                                    }
+                                    ref
+                                        .read(appStateProvider.notifier)
+                                        .selectGame("ludo");
+                                  },
+                                  icon: const Icon(
+                                    Icons.arrow_forward,
+                                    size: 32,
+                                  ),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.white.withAlpha(100),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )),
                   ),
-                )
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/images/yahtzee.png',
+                                fit: BoxFit.fitWidth,
+                                width: 64,
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Yahtzee',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Dice Game',
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          OutlinedButton(
+                            onPressed: () {},
+                            style: OutlinedButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                side: const BorderSide(color: Colors.cyan),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0)),
+                            child: const Text(
+                              'Comming Soon',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    child: Container(
+                      width: double.maxFinite,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/images/6nimmt.png',
+                                fit: BoxFit.fitWidth,
+                                width: 64,
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '6 nimmt',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Card Game',
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          OutlinedButton(
+                            onPressed: () {},
+                            style: OutlinedButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                side: const BorderSide(color: Colors.cyan),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0)),
+                            child: const Text(
+                              'Comming Soon',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
         ),
-        actions: [],
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 230.0,
-            flexibleSpace: FlexibleSpaceBar(
-              expandedTitleScale: 1.5,
-              centerTitle: false,
-              titlePadding:
-                  const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              title: const Text(
-                'Games',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset('assets/images/banner.png',
-                      fit: BoxFit.cover), // Replace with the actual asset
-                  Container(color: Colors.black54),
-                ],
-              ),
-            ),
-            pinned: true,
-            floating: true,
-          ),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'New Release',
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              child: SingleChildScrollView(
-                child: Row(
-                  children: [
-                    GameCard(
-                      title: 'Ludo',
-                      gameType: 'Dice Game',
-                      subtitle: 'Best Ludo game ever...',
-                      imagePath:
-                          'assets/images/ludo.png', // Replace with the actual asset
-                      isActive: true,
-                      isPopular: true,
-                      onPlay: () {
-                        if (!ref.read(appStateProvider).isAuth) {
-                          showDialog(
-                              context: context,
-                              builder: (ctx) => const AuthDialog());
-                          return;
-                        }
-                        ref.read(appStateProvider.notifier).selectGame("ludo");
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Coming Soon',
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            sliver: SliverToBoxAdapter(
-              child: SizedBox(
-                height: 320,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return const GameCard(
-                        title: 'Yahtzee',
-                        subtitle: 'Interesting game comming soom...',
-                        gameType: 'Dice game',
-                        imagePath: 'assets/images/yahtzee.png',
-                        isActive: false,
-                        isPopular: false,
-                      );
-                    } else {
-                      return const GameCard(
-                        title: '6 nimmt',
-                        subtitle: 'Interesting game comming soom...',
-                        gameType: 'Card Game',
-                        imagePath:
-                            'assets/images/6nimmt.png', // Replace with the actual asset
-                        isActive: false,
-                        isPopular: false,
-                      );
-                    }
-                  },
-                  itemCount: 2,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
