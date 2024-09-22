@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DepositDialog extends ConsumerStatefulWidget {
   const DepositDialog({super.key});
@@ -84,6 +85,9 @@ class _DepositDialogState extends ConsumerState<DepositDialog> {
                       ),
                     ),
                     GestureDetector(
+                      onTap: () {
+                        launchUrl(Uri.parse("https://themarquis.xyz/"));
+                      },
                       child: const Row(
                         children: [
                           Text(
