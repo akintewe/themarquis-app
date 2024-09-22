@@ -14,8 +14,6 @@ class DepositDialog extends ConsumerStatefulWidget {
 class _DepositDialogState extends ConsumerState<DepositDialog> {
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).size;
-
     return AlertDialog(
       content: Container(
         width: MediaQuery.of(context).size.width * 0.9,
