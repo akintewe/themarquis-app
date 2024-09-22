@@ -349,11 +349,18 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           //session = room
-                          ref.read(ludoSessionProvider.notifier).joinSession(
-                                _roomIdController.text,
-                              );
+                          try {
+                            await ref
+                                .read(ludoSessionProvider.notifier)
+                                .joinSession(
+                                  _roomIdController.text,
+                                );
+                          } catch (e) {
+                            widget.game.showErrorDialog(e.toString());
+                          }
+                          if (!context.mounted) return;
                           Navigator.of(context).pop();
 
                           widget.game.playState = PlayState.waiting;
@@ -716,6 +723,9 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                 child: Center(child: CircularProgressIndicator()),
               );
             }
+            if (snapshot.hasError) {
+              return Text(snapshot.error.toString());
+            }
             return Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -954,16 +964,22 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: TextButton(
-                          onPressed: () {
+                          onPressed: () async {
                             print(
                                 "${_sliderValue.round()}   ${_tokenAmountController.text}   $_selectedTokenAddress");
-                            ref
-                                .read(ludoSessionProvider.notifier)
-                                .createSession(
-                                  _sliderValue.round().toString(),
-                                  selectedColorIndex.toString(),
-                                  _selectedTokenAddress,
-                                );
+                            try {
+                              await ref
+                                  .read(ludoSessionProvider.notifier)
+                                  .createSession(
+                                    _sliderValue.round().toString(),
+                                    selectedColorIndex.toString(),
+                                    _selectedTokenAddress,
+                                  );
+                            } catch (e) {
+                              widget.game.showErrorDialog(e.toString());
+                            }
+
+                            if (!context.mounted) return;
                             Navigator.of(context).pop();
 
                             widget.game.playState = PlayState.waiting;
