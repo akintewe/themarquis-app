@@ -69,7 +69,7 @@ class PlayerPin extends SpriteComponent
     if (game.currentPlayer == playerIndex &&
         game.playerCanMove &&
         (currentPosIndex >= 0 || game.dice.value == 6) &&
-        (currentPosIndex + game.dice.value <= 57)) {
+        (currentPosIndex + game.dice.value <= 56)) {
       final paint = Paint()
         ..color = game.listOfColors[playerIndex]
         ..style = PaintingStyle.stroke
@@ -81,7 +81,7 @@ class PlayerPin extends SpriteComponent
     }
   }
 
-  bool get canMove => game.dice.value + currentPosIndex <= 57;
+  bool get canMove => game.dice.value + currentPosIndex <= 56;
 
   void returnToHome(Vector2 homePosition) {
     currentPosIndex = -1;
@@ -119,7 +119,7 @@ class PlayerPin extends SpriteComponent
       targetIndex = index;
     }
 
-    if (targetIndex == 57) {
+    if (targetIndex == 56) {
       game.destination.addPin(this);
       game.board.remove(this);
       return;
