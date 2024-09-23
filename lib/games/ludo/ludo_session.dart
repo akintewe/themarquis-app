@@ -24,32 +24,44 @@ final wsUrl = environment['build'] == 'DEBUG'
 class LudoSession extends _$LudoSession {
   //Details Declaration
   Box<LudoSessionData>? _hiveBox;
-  final WebSocketChannel _channel = WebSocketChannel.connect(
-    Uri.parse(wsUrl!),
-  );
+  late WebSocketChannel _channel;
   String? _id;
 
   @override
   LudoSessionData? build() {
     _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
-    _channel.stream.listen((data) async {
-      print("WS: $data");
-      final decodedResponse = jsonDecode(data) as Map;
-      switch (decodedResponse['event']) {
-        case 'play_move':
-        case 'player_joined':
-        case 'play_move_failed':
-          final dataStr = decodedResponse['data'] as String;
-          print('Data String ${dataStr}');
-          final data = jsonDecode(dataStr) as Map;
-          print('Data $data');
-          if (data["session_id"] == _id) {
-            await getLudoSession();
-          }
-          break;
-      }
-    });
+    _connectWebSocket();
     return null;
+  }
+
+  void _connectWebSocket() {
+    _channel = WebSocketChannel.connect(Uri.parse(wsUrl!));
+    _channel.stream.listen(
+      (data) async {
+        print("WS: $data");
+        final decodedResponse = jsonDecode(data) as Map;
+        switch (decodedResponse['event']) {
+          case 'play_move':
+          case 'player_joined':
+          case 'play_move_failed':
+            final dataStr = decodedResponse['data'] as String;
+            print('Data String ${dataStr}');
+            final data = jsonDecode(dataStr) as Map;
+            print('Data $data');
+            if (data["session_id"] == _id) {
+              await getLudoSession();
+            }
+            break;
+        }
+      },
+      onDone: () {
+        _connectWebSocket();
+      },
+      onError: (error) {
+        print('WS Error $error');
+        _connectWebSocket();
+      },
+    );
   }
 
   Future<void> getLudoSession() async {
