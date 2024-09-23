@@ -81,6 +81,8 @@ class PlayerPin extends SpriteComponent
     }
   }
 
+  bool get canMove => game.dice.value + currentPosIndex <= 57;
+
   void returnToHome(Vector2 homePosition) {
     currentPosIndex = -1;
     add(MoveEffect.to(
