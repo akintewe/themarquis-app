@@ -126,11 +126,11 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       case 0:
         return positionIndex;
       case 1:
-        return (positionIndex + 11) % 44;
+        return (positionIndex + 13) % 52;
       case 2:
-        return (positionIndex + 22) % 44;
+        return (positionIndex + 26) % 52;
       case 3:
-        return (positionIndex + 33) % 44;
+        return (positionIndex + 39) % 52;
       default:
         return 0;
     }
@@ -154,6 +154,16 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       }
     }
     return null;
+  }
+
+  List<PlayerPin> getPlayerPinsOnBoard(int playerIndex) {
+    final List<PlayerPin> results = [];
+    for (var pin in children.whereType<PlayerPin>()) {
+      if (pin.playerIndex == playerIndex) {
+        results.add(pin);
+      }
+    }
+    return results;
   }
 
   void attackPin(PlayerPin pin) {

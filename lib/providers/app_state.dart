@@ -73,6 +73,12 @@ class AppState extends _$AppState {
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
+    _refreshTokenTimer = Timer(
+      const Duration(days: 1),
+      () {
+        logout();
+      },
+    );
     await _hiveBox!.put("appState", state);
     await ref.read(userProvider.notifier).getUser();
   }
@@ -109,6 +115,12 @@ class AppState extends _$AppState {
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
+    _refreshTokenTimer = Timer(
+      const Duration(days: 1),
+      () {
+        logout();
+      },
+    );
     await _hiveBox!.put("appState", state);
     await ref.read(userProvider.notifier).getUser();
   }

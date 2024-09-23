@@ -11,6 +11,7 @@ import 'package:marquis_v2/games/ludo/components/board.dart';
 import 'package:marquis_v2/games/ludo/components/destination.dart';
 import 'package:marquis_v2/games/ludo/components/dice.dart';
 import 'package:marquis_v2/games/ludo/components/player_home.dart';
+import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
@@ -265,8 +266,25 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> rollDice() async {
     if (playerCanMove) return;
     await dice.roll();
+    //player can move = false
 
-    playerCanMove = !playerHomes[_currentPlayer].isHomeFull || dice.value == 6;
+    //if 1 pin inside winning route, 3 pin at home, rolled value = the 1 pin ->win! ?
+    //if 2 pin inside winning route, 2 pin at home, rolled value = the 2 pin ->win! ?
+    //if 3 pin inside winning route, 1 pin at home, rolled value = the 3 pin ->win! ?
+    //everything on board can move, and home can come out
+    List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(_userIndex);
+    for (PlayerPin i in listOfPlayerPin) {
+      if (i.canMove) {
+        playerCanMove = true;
+        break;
+      }
+    }
+    if (!playerCanMove &&
+        !playerHomes[_currentPlayer].isHomeEmpty &&
+        dice.value == 6) {
+      playerCanMove = true;
+    }
+
     if (!playerCanMove) {
       await ref.read(ludoSessionProvider.notifier).playMove("0");
     }

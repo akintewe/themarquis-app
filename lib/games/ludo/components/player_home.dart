@@ -21,6 +21,12 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       _homePins[2] != null &&
       _homePins[3] != null;
 
+  bool get isHomeEmpty =>
+      _homePins[0] == null &&
+      _homePins[1] == null &&
+      _homePins[2] == null &&
+      _homePins[3] == null;
+
   List<PlayerPin?> get homePins => _homePins;
 
   PlayerHome(this.playerIndex, this.userStatus, Vector2 position)
