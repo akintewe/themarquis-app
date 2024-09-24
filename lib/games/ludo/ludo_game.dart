@@ -124,7 +124,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                 final playerHome = playerHomes[player.playerId];
 
                 for (int i = 0; i < pinLocations.length; i++) {
-                  final pinLocation = int.parse(pinLocations[i]);
+                  final pinLocation = int.parse(pinLocations[i]) +
+                      (player.playerTokensCircled?[i] ?? false ? 52 : 0);
                   if (player.playerWinningTokens[i] == true &&
                       currentPinLocations[i] != -1) {
                     playerPinLocations[player.playerId][i] = -1;
@@ -138,13 +139,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                       await pin.removed;
                       print('Adding pin');
                       await board.addPin(pin,
-                          location: (pinLocation +
-                                  (player.playerTokensCircled?[i] ?? false
-                                      ? 52
-                                      : 0) -
-                                  player.playerId * 13 -
-                                  1) %
-                              52);
+                          location:
+                              (pinLocation - player.playerId * 13 - 1) % 52);
                       print('Pin added');
                     } else if (currentPinLocations[i] != 0 &&
                         pinLocation == 0) {
@@ -152,13 +148,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                       board.attackPin(pin!);
                     } else {
                       final pin = board.getPinWithIndex(player.playerId, i);
-                      await pin!.movePin((pinLocation +
-                              (player.playerTokensCircled?[i] ?? false
-                                  ? 52
-                                  : 0) -
-                              player.playerId * 13 -
-                              1) %
-                          52);
+                      await pin!.movePin(
+                          (pinLocation - player.playerId * 13 - 1) % 52);
                     }
 
                     playerPinLocations[player.playerId][i] = pinLocation;

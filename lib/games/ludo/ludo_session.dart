@@ -35,33 +35,38 @@ class LudoSession extends _$LudoSession {
   }
 
   void _connectWebSocket() {
-    _channel = WebSocketChannel.connect(Uri.parse(wsUrl!));
-    _channel.stream.listen(
-      (data) async {
-        print("WS: $data");
-        final decodedResponse = jsonDecode(data) as Map;
-        switch (decodedResponse['event']) {
-          case 'play_move':
-          case 'player_joined':
-          case 'play_move_failed':
-            final dataStr = decodedResponse['data'] as String;
-            print('Data String ${dataStr}');
-            final data = jsonDecode(dataStr) as Map;
-            print('Data $data');
-            if (data["session_id"] == _id) {
-              await getLudoSession();
-            }
-            break;
-        }
-      },
-      onDone: () {
-        _connectWebSocket();
-      },
-      onError: (error) {
-        print('WS Error $error');
-        _connectWebSocket();
-      },
-    );
+    try {
+      _channel = WebSocketChannel.connect(Uri.parse(wsUrl!));
+      _channel.stream.listen(
+        (data) async {
+          print("WS: $data");
+          final decodedResponse = jsonDecode(data) as Map;
+          switch (decodedResponse['event']) {
+            case 'play_move':
+            case 'player_joined':
+            case 'play_move_failed':
+              final dataStr = decodedResponse['data'] as String;
+              print('Data String ${dataStr}');
+              final data = jsonDecode(dataStr) as Map;
+              print('Data $data');
+              if (data["session_id"] == _id) {
+                await getLudoSession();
+              }
+              break;
+          }
+        },
+        onDone: () {
+          _connectWebSocket();
+        },
+        onError: (error) {
+          print('WS Error $error');
+          _connectWebSocket();
+        },
+      );
+    } catch (e) {
+      print('WS Connection Error $e');
+      _connectWebSocket();
+    }
   }
 
   Future<void> getLudoSession() async {
