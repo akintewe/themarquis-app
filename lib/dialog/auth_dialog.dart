@@ -83,7 +83,8 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                             if (_isSignUp) {
                               //sign up
                               try {
-                                if (environment['build'] != 'DEBUG') {
+                                if (!_emailController.text
+                                    .endsWith('@test.com')) {
                                   await ref
                                       .read(appStateProvider.notifier)
                                       .signup(
@@ -108,7 +109,8 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                             } else {
                               //login
                               try {
-                                if (environment['build'] != 'DEBUG') {
+                                if (!_emailController.text
+                                    .endsWith('@test.com')) {
                                   await ref
                                       .read(appStateProvider.notifier)
                                       .login(_emailController.text);
@@ -239,7 +241,7 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
             if (_otp.length == 4) {
               final appState = ref.read(appStateProvider.notifier);
               try {
-                if (environment['build'] == 'DEBUG') {
+                if (widget.email.endsWith('@test.com')) {
                   if (widget.isSignUp) {
                     await appState.signupSandbox(widget.email);
                   } else {
