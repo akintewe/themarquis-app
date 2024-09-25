@@ -65,46 +65,46 @@ class Destination extends PositionComponent with HasGameReference<LudoGame> {
           size: Vector2(0.5 * game.unitSize, 0.125 * game.unitSize),
         ),
       ],
-      2: [
+      3: [
         BarComponent(
-          playerIndex: 2,
+          playerIndex: 3,
           position: Vector2(1.25 * game.unitSize, 2.3125 * game.unitSize),
           size: Vector2(1.8 * game.unitSize, 0.125 * game.unitSize),
         ),
         BarComponent(
-          playerIndex: 2,
+          playerIndex: 3,
           position: Vector2(1.25 * game.unitSize, 2.0625 * game.unitSize),
           size: Vector2(1.4 * game.unitSize, 0.125 * game.unitSize),
         ),
         BarComponent(
-          playerIndex: 2,
+          playerIndex: 3,
           position: Vector2(1.25 * game.unitSize, 1.8125 * game.unitSize),
           size: Vector2(1 * game.unitSize, 0.125 * game.unitSize),
         ),
         BarComponent(
-          playerIndex: 2,
+          playerIndex: 3,
           position: Vector2(1.25 * game.unitSize, 1.5625 * game.unitSize),
           size: Vector2(0.5 * game.unitSize, 0.125 * game.unitSize),
         ),
       ],
-      3: [
+      2: [
         BarComponent(
-          playerIndex: 3,
+          playerIndex: 2,
           position: Vector2(2.3125 * game.unitSize, 1.25 * game.unitSize),
           size: Vector2(0.125 * game.unitSize, 1.8 * game.unitSize),
         ),
         BarComponent(
-          playerIndex: 3,
+          playerIndex: 2,
           position: Vector2(2.0625 * game.unitSize, 1.25 * game.unitSize),
           size: Vector2(0.125 * game.unitSize, 1.4 * game.unitSize),
         ),
         BarComponent(
-          playerIndex: 3,
+          playerIndex: 2,
           position: Vector2(1.8125 * game.unitSize, 1.25 * game.unitSize),
           size: Vector2(0.125 * game.unitSize, 1 * game.unitSize),
         ),
         BarComponent(
-          playerIndex: 3,
+          playerIndex: 2,
           position: Vector2(1.5625 * game.unitSize, 1.25 * game.unitSize),
           size: Vector2(0.125 * game.unitSize, 0.5 * game.unitSize),
         ),
