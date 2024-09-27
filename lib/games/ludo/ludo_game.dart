@@ -292,6 +292,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                   errorMessage,
                   style: const TextStyle(color: Colors.red),
                 ),
+                action: SnackBarAction(
+                  label: "X",
+                  onPressed: () {
+                    overlays.remove('error');
+                  },
+                ),
               ),
             )
             .closed

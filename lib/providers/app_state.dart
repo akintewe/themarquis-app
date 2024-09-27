@@ -19,6 +19,7 @@ final baseUrl = environment['build'] == 'DEBUG'
 class AppState extends _$AppState {
   Box<AppStateData>? _hiveBox;
   Timer? _refreshTokenTimer;
+  Timer? _logoutTimer;
   @override
   AppStateData build() {
     _hiveBox ??= Hive.box<AppStateData>("appState");
@@ -73,7 +74,15 @@ class AppState extends _$AppState {
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
+    if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
+      const Duration(hours: 1),
+      () {
+        refreshToken();
+      },
+    );
+    if (_logoutTimer != null) _logoutTimer!.cancel();
+    _logoutTimer = Timer(
       const Duration(days: 1),
       () {
         logout();
@@ -115,7 +124,15 @@ class AppState extends _$AppState {
         accessToken: decodedResponse['access_token'],
         refreshToken: decodedResponse['refresh_token'],
         autoLoginResult: true);
+    if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
+      const Duration(hours: 1),
+      () {
+        refreshToken();
+      },
+    );
+    if (_logoutTimer != null) _logoutTimer!.cancel();
+    _logoutTimer = Timer(
       const Duration(days: 1),
       () {
         logout();
@@ -130,7 +147,9 @@ class AppState extends _$AppState {
     final response = await http.post(
       url,
       body: jsonEncode({'email': email, 'code': code}),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+      },
     );
     if (response.statusCode != 200) {
       throw HttpException(
@@ -139,9 +158,24 @@ class AppState extends _$AppState {
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
     state = state.copyWith(
-        accessToken: decodedResponse['access_token'],
-        refreshToken: decodedResponse['refresh_token'],
-        autoLoginResult: true);
+      accessToken: decodedResponse['access_token'],
+      refreshToken: decodedResponse['refresh_token'],
+      autoLoginResult: true,
+    );
+    if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
+    _refreshTokenTimer = Timer(
+      const Duration(hours: 1),
+      () {
+        refreshToken();
+      },
+    );
+    if (_logoutTimer != null) _logoutTimer!.cancel();
+    _logoutTimer = Timer(
+      const Duration(days: 1),
+      () {
+        logout();
+      },
+    );
     await _hiveBox!.put("appState", state);
     await ref.read(userProvider.notifier).getUser();
   }
@@ -156,6 +190,8 @@ class AppState extends _$AppState {
     );
     _refreshTokenTimer?.cancel();
     _refreshTokenTimer = null;
+    _logoutTimer?.cancel();
+    _logoutTimer = null;
     ref.read(userProvider.notifier).clearData();
     await _hiveBox!.put("appState", state);
   }
@@ -165,10 +201,10 @@ class AppState extends _$AppState {
       state = state.copyWith(autoLoginResult: true);
       return false;
     }
-    // await refreshToken();
     try {
-      await ref.read(userProvider.notifier).getUser();
-      state = state.copyWith(autoLoginResult: true);
+      // await ref.read(userProvider.notifier).getUser();
+      await refreshToken();
+      // state = state.copyWith(autoLoginResult: true);
       return true;
     } catch (e) {
       state = state.copyWith(autoLoginResult: true);
@@ -185,35 +221,44 @@ class AppState extends _$AppState {
   }
 
   Future<void> refreshToken() async {
-    if (state.accessToken == null) return;
-    // await ref.read(natsServiceProvider.notifier).resetConnection();
-    // final response =
-    //     await ref.read(natsServiceProvider.notifier).makeMicroserviceRequest(
-    //           "auth.refreshToken",
-    //           jsonEncode({
-    //             "accessToken": state.token!.accessToken,
-    //             "refreshToken": state.token!.id,
-    //           }),
-    //           isAuth: true,
-    //         );
-    // final json = jsonDecode(response) as Map<String, dynamic>;
-    // final token = Token.fromJson(json["token"]);
-    // final creds = json["creds"];
-    // await ref
-    //     .read(natsServiceProvider.notifier)
-    //     .updateConnection(creds, token.user);
-
-    state =
-        state.copyWith(accessToken: state.accessToken, autoLoginResult: true);
-    // _refreshTokenTimer = Timer(
-    //   token.accessTokenExpiry.difference(
-    //     DateTime.now(),
-    //   ),
-    //   () {
-    //     refreshToken();
-    //   },
-    // );
+    final url = Uri.parse('$baseUrl/auth/refresh');
+    final response = await http.post(
+      url,
+      body: jsonEncode({
+        'refresh_token': state.refreshToken,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': state.bearerToken,
+      },
+    );
+    if (response.statusCode != 200) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
+    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    //verify token
+    state = state.copyWith(
+      accessToken: decodedResponse['access_token'],
+      refreshToken: decodedResponse['refresh_token'],
+      autoLoginResult: true,
+    );
+    if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
+    _refreshTokenTimer = Timer(
+      const Duration(hours: 1),
+      () {
+        refreshToken();
+      },
+    );
+    if (_logoutTimer != null) _logoutTimer!.cancel();
+    _logoutTimer = Timer(
+      const Duration(days: 1),
+      () {
+        logout();
+      },
+    );
     await _hiveBox!.put("appState", state);
+    await ref.read(userProvider.notifier).getUser();
   }
 
   // Future<void> requestChangePassword(String email) async {

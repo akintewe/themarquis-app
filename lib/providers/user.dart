@@ -119,6 +119,7 @@ class User extends _$User {
   }
 
   Future<int> getTokenBalance(String tokenAddress) async {
+    if (state == null) return 0;
     final url = Uri.parse(
         '$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
     final response = await http.get(

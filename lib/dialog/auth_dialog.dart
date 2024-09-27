@@ -181,6 +181,7 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
   final List<TextEditingController> _controllers =
       List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -235,47 +236,61 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
           child: const Text('Cancel'),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        TextButton(
-          child: const Text('Submit'),
-          onPressed: () async {
-            if (_otp.length == 4) {
-              final appState = ref.read(appStateProvider.notifier);
-              try {
-                if (widget.email.endsWith('@test.com')) {
-                  if (widget.isSignUp) {
-                    await appState.signupSandbox(widget.email);
+        _isLoading
+            ? const CircularProgressIndicator()
+            : TextButton(
+                child: const Text('Submit'),
+                onPressed: () async {
+                  if (_otp.length == 4) {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    final appState = ref.read(appStateProvider.notifier);
+                    try {
+                      if (widget.email.endsWith('@test.com')) {
+                        if (widget.isSignUp) {
+                          await appState.signupSandbox(widget.email);
+                        } else {
+                          await appState.loginSandbox(widget.email);
+                        }
+                      } else {
+                        await appState.verifyCode(widget.email, _otp);
+                      }
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    } catch (e) {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      if (e.toString().contains('Invalid')) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Invalid OTP. Please try again.')),
+                        );
+                        return; // Don't close the dialog if the code is invalid
+                      } else {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('An error occurred. Please try again.')),
+                        );
+                        return;
+                      }
+                    }
+
+                    if (!context.mounted) return;
+                    Navigator.of(context).pop(_otp);
                   } else {
-                    await appState.loginSandbox(widget.email);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Please enter a 4-digit OTP')),
+                    );
                   }
-                } else {
-                  await appState.verifyCode(widget.email, _otp);
-                }
-              } catch (e) {
-                if (e.toString().contains('Invalid')) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Invalid OTP. Please try again.')),
-                  );
-                  return; // Don't close the dialog if the code is invalid
-                } else {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('An error occurred. Please try again.')),
-                  );
-                  return;
-                }
-              }
-              if (!context.mounted) return;
-              Navigator.of(context).pop(_otp);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Please enter a 4-digit OTP')),
-              );
-            }
-          },
-        ),
+                },
+              ),
       ],
     );
   }
