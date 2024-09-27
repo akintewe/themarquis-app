@@ -417,7 +417,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: FutureBuilder<List<dynamic>>(future: () async {
+      child: FutureBuilder<List<LudoSessionData>>(future: () async {
         final rooms =
             await ref.read(ludoSessionProvider.notifier).getOpenSessions();
         return rooms;
@@ -503,15 +503,11 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          ...snapshot.data!.map((room) => openSessionRoomCard(
-                                roomName: room['id']!,
-                                noOfPlayers: room['players_joined']!.length,
-                                context: context,
-                                colors: playerColors
-                                        .sublist(int.parse(room['color']!)) +
-                                    playerColors.sublist(
-                                        0, int.parse(room['color']!)),
-                              )),
+                          ...snapshot.data!
+                              .map((sessionData) => openSessionRoomCard(
+                                    sessionData: sessionData,
+                                    context: context,
+                                  )),
                         ],
                       ),
                     ),
@@ -526,11 +522,15 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
   }
 
   Widget openSessionRoomCard({
-    required String roomName,
-    required int noOfPlayers,
+    required LudoSessionData sessionData,
     required BuildContext context,
-    required List<Color> colors,
   }) {
+    final colors = playerColors.sublist(int.parse(sessionData.color)) +
+        playerColors.sublist(0, int.parse(sessionData.color));
+    final roomName = sessionData.id;
+    final noOfPlayers = sessionData.sessionUserStatus
+        .map((e) => e.status == "ACTIVE" ? 1 : 0)
+        .reduce((value, element) => value + element);
     return Padding(
       padding: const EdgeInsets.symmetric(
         vertical: 8,

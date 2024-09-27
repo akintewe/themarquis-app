@@ -133,7 +133,7 @@ class LudoSession extends _$LudoSession {
     state = ludoSession;
   }
 
-  Future<List<dynamic>> getOpenSessions() async {
+  Future<List<LudoSessionData>> getOpenSessions() async {
     final url = Uri.parse('$baseUrl/session/get-open-sessions');
     final response = await http.get(
       url,
@@ -145,7 +145,50 @@ class LudoSession extends _$LudoSession {
     }
     final decodedResponse =
         jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
-    return decodedResponse;
+    return decodedResponse
+        .map((sessionData) => LudoSessionData(
+              id: sessionData['id'],
+              status: sessionData['status'],
+              nextPlayer: sessionData['next_player'],
+              nonce: sessionData['nonce'],
+              color: sessionData['color'] ?? "0",
+              playAmount: sessionData['play_amount'],
+              playToken: sessionData['play_token'],
+              sessionUserStatus: [
+                ...sessionData['session_user_status'].map(
+                  (e) {
+                    final List<String> playerTokensPosition =
+                        (e['player_tokens_position'] as List<dynamic>)
+                            .map((e) => e.toString())
+                            .toList();
+                    final List<bool> playerWinningTokens =
+                        (e['player_winning_tokens'] as List<dynamic>)
+                            .map((e) => e as bool)
+                            .toList();
+                    final List<bool> playerTokensCircled =
+                        (e['player_tokens_circled'] as List<dynamic>)
+                            .map((e) => e as bool)
+                            .toList();
+                    return LudoSessionUserStatus(
+                      playerId: e['player_id'],
+                      playerTokensPosition: playerTokensPosition,
+                      playerWinningTokens: playerWinningTokens,
+                      playerTokensCircled: playerTokensCircled,
+                      userId: e['user_id'],
+                      email: e['email'],
+                      role: e['role'],
+                      status: e['status'],
+                      points: e['points'],
+                    );
+                  },
+                ),
+              ],
+              nextPlayerId: sessionData['next_player_id'],
+              createdAt: DateTime.fromMillisecondsSinceEpoch(
+                  sessionData['created_at'] * 1000),
+              creator: "",
+            ))
+        .toList();
   }
 
   Future<List<int>> generateMove() async {
