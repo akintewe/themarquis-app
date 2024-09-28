@@ -148,7 +148,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                       board.attackPin(pin!);
                     } else {
                       final pin = board.getPinWithIndex(player.playerId, i);
-                      await pin!.movePin(
+                      await pin?.movePin(
                           (pinLocation - player.playerId * 13 - 1) % 52);
                     }
 
