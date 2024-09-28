@@ -44,12 +44,8 @@ mixin _$LudoSessionData {
   @HiveField(11)
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Serializes this LudoSessionData to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of LudoSessionData
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LudoSessionDataCopyWith<LudoSessionData> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -84,8 +80,6 @@ class _$LudoSessionDataCopyWithImpl<$Res, $Val extends LudoSessionData>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LudoSessionData
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -180,8 +174,6 @@ class __$$LudoSessionDataImplCopyWithImpl<$Res>
       _$LudoSessionDataImpl _value, $Res Function(_$LudoSessionDataImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LudoSessionData
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -339,7 +331,7 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
                 other.createdAt == createdAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -355,9 +347,7 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
       creator,
       createdAt);
 
-  /// Create a copy of LudoSessionData
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LudoSessionDataImplCopyWith<_$LudoSessionDataImpl> get copyWith =>
@@ -425,11 +415,8 @@ abstract class _LudoSessionData extends LudoSessionData {
   @override
   @HiveField(11)
   DateTime get createdAt;
-
-  /// Create a copy of LudoSessionData
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LudoSessionDataImplCopyWith<_$LudoSessionDataImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -462,12 +449,8 @@ mixin _$LudoSessionUserStatus {
   @HiveField(9)
   List<bool>? get playerTokensCircled => throw _privateConstructorUsedError;
 
-  /// Serializes this LudoSessionUserStatus to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of LudoSessionUserStatus
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LudoSessionUserStatusCopyWith<LudoSessionUserStatus> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -502,8 +485,6 @@ class _$LudoSessionUserStatusCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LudoSessionUserStatus
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -594,8 +575,6 @@ class __$$LudoSessionUserStatusImplCopyWithImpl<$Res>
       $Res Function(_$LudoSessionUserStatusImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LudoSessionUserStatus
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -758,7 +737,7 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
                 .equals(other._playerTokensCircled, _playerTokensCircled));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -773,9 +752,7 @@ class _$LudoSessionUserStatusImpl extends _LudoSessionUserStatus {
       points,
       const DeepCollectionEquality().hash(_playerTokensCircled));
 
-  /// Create a copy of LudoSessionUserStatus
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LudoSessionUserStatusImplCopyWith<_$LudoSessionUserStatusImpl>
@@ -838,11 +815,8 @@ abstract class _LudoSessionUserStatus extends LudoSessionUserStatus {
   @override
   @HiveField(9)
   List<bool>? get playerTokensCircled;
-
-  /// Create a copy of LudoSessionUserStatus
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LudoSessionUserStatusImplCopyWith<_$LudoSessionUserStatusImpl>
       get copyWith => throw _privateConstructorUsedError;
 }

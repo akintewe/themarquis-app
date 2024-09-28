@@ -27,7 +27,7 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(ludoSessionProvider);
+    // ref.watch(ludoSessionProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Ludo"),

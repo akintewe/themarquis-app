@@ -71,19 +71,22 @@ class AppState extends _$AppState {
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
     state = state.copyWith(
-        accessToken: decodedResponse['access_token'],
-        refreshToken: decodedResponse['refresh_token'],
-        autoLoginResult: true);
+      accessToken: decodedResponse['access_token'],
+      refreshToken: decodedResponse['refresh_token'],
+      accessTokenExpiry: DateTime.now().add(const Duration(hours: 1)),
+      refreshTokenExpiry: DateTime.now().add(const Duration(days: 1)),
+      autoLoginResult: true,
+    );
     if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
-      const Duration(hours: 1),
+      state.accessTokenExpiry!.difference(DateTime.now()),
       () {
         refreshToken();
       },
     );
     if (_logoutTimer != null) _logoutTimer!.cancel();
     _logoutTimer = Timer(
-      const Duration(days: 1),
+      state.refreshTokenExpiry!.difference(DateTime.now()),
       () {
         logout();
       },
@@ -121,19 +124,22 @@ class AppState extends _$AppState {
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
     state = state.copyWith(
-        accessToken: decodedResponse['access_token'],
-        refreshToken: decodedResponse['refresh_token'],
-        autoLoginResult: true);
+      accessToken: decodedResponse['access_token'],
+      refreshToken: decodedResponse['refresh_token'],
+      accessTokenExpiry: DateTime.now().add(const Duration(hours: 1)),
+      refreshTokenExpiry: DateTime.now().add(const Duration(days: 1)),
+      autoLoginResult: true,
+    );
     if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
-      const Duration(hours: 1),
+      state.accessTokenExpiry!.difference(DateTime.now()),
       () {
         refreshToken();
       },
     );
     if (_logoutTimer != null) _logoutTimer!.cancel();
     _logoutTimer = Timer(
-      const Duration(days: 1),
+      state.refreshTokenExpiry!.difference(DateTime.now()),
       () {
         logout();
       },
@@ -160,18 +166,20 @@ class AppState extends _$AppState {
     state = state.copyWith(
       accessToken: decodedResponse['access_token'],
       refreshToken: decodedResponse['refresh_token'],
+      accessTokenExpiry: DateTime.now().add(const Duration(hours: 1)),
+      refreshTokenExpiry: DateTime.now().add(const Duration(days: 1)),
       autoLoginResult: true,
     );
     if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
-      const Duration(hours: 1),
+      state.accessTokenExpiry!.difference(DateTime.now()),
       () {
         refreshToken();
       },
     );
     if (_logoutTimer != null) _logoutTimer!.cancel();
     _logoutTimer = Timer(
-      const Duration(days: 1),
+      state.refreshTokenExpiry!.difference(DateTime.now()),
       () {
         logout();
       },
@@ -199,6 +207,10 @@ class AppState extends _$AppState {
   Future<bool> tryAutoLogin() async {
     if (state.accessToken == null) {
       state = state.copyWith(autoLoginResult: true);
+      return false;
+    }
+    if (state.accessTokenExpiry!.isBefore(DateTime.now())) {
+      await logout();
       return false;
     }
     try {
@@ -241,18 +253,20 @@ class AppState extends _$AppState {
     state = state.copyWith(
       accessToken: decodedResponse['access_token'],
       refreshToken: decodedResponse['refresh_token'],
+      accessTokenExpiry: DateTime.now().add(const Duration(hours: 1)),
+      refreshTokenExpiry: DateTime.now().add(const Duration(days: 1)),
       autoLoginResult: true,
     );
     if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
-      const Duration(hours: 1),
+      state.accessTokenExpiry!.difference(DateTime.now()),
       () {
         refreshToken();
       },
     );
     if (_logoutTimer != null) _logoutTimer!.cancel();
     _logoutTimer = Timer(
-      const Duration(days: 1),
+      state.refreshTokenExpiry!.difference(DateTime.now()),
       () {
         logout();
       },

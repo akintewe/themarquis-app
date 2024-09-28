@@ -132,7 +132,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                     final pin = board.getPinWithIndex(player.playerId, i);
                     board.remove(pin!);
                     destination.addPin(pin);
-                  } else if (currentPinLocations[i] != pinLocation) {
+                  } else if (player.playerWinningTokens[i] != true &&
+                      currentPinLocations[i] != pinLocation) {
                     if (currentPinLocations[i] == 0 && pinLocation != 0) {
                       print('Removing pin');
                       final pin = playerHome.removePin(i);

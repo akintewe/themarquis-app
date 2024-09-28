@@ -20,7 +20,7 @@ final wsUrl = environment['build'] == 'DEBUG'
     ? environment['wsUrlDebug']
     : environment['wsUrl'];
 
-@Riverpod(keepAlive: true)
+@riverpod
 class LudoSession extends _$LudoSession {
   //Details Declaration
   Box<LudoSessionData>? _hiveBox;
