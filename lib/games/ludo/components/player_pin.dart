@@ -138,13 +138,18 @@ class PlayerPin extends SpriteComponent
 
     // Create a list of move effects for each step
 
+    double timePerStep = 0.1;
+    if (targetIndex - startIndex > 15) {
+      timePerStep = 1 / (targetIndex - startIndex);
+    }
+
     for (int i = startIndex + 1; i <= targetIndex; i++) {
       final newPosition = routeIndexToPos(playerIndex, i);
       moveEffects.add(
         MoveEffect.to(
           newPosition,
           EffectController(
-            duration: 0.1,
+            duration: timePerStep,
             curve: Curves.easeInOut,
           ),
         ),

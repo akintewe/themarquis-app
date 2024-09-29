@@ -29,6 +29,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
 
   List<PlayerPin?> get homePins => _homePins;
 
+  List<PlayerPin?> get pinsAtHome =>
+      _homePins.where((pin) => pin != null).toList();
+
   PlayerHome(this.playerIndex, this.userStatus, Vector2 position)
       : super(position: position);
 

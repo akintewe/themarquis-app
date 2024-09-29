@@ -282,7 +282,13 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
 
     if (!playerCanMove) {
-      await ref.read(ludoSessionProvider.notifier).playMove("0");
+      final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
+      if (pinsAtHome.isNotEmpty) {
+        await playMove(pinsAtHome[0]!.homeIndex);
+      } else {
+        final pins = board.getPlayerPinsOnBoard(_userIndex);
+        await playMove(pins[0].homeIndex);
+      }
     }
   }
 
