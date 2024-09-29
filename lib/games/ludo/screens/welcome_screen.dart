@@ -82,7 +82,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                             letterSpacing: 8,
                           ),
                         ),
-                        SizedBox(height: 60),
+                        SizedBox(height: 35),
                       ],
                     ),
                   ),
