@@ -131,6 +131,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                     playerPinLocations[player.playerId][i] = -1;
                     final pin = board.getPinWithIndex(player.playerId, i);
                     board.remove(pin!);
+                    await pin.removed;
                     destination.addPin(pin);
                   } else if (player.playerWinningTokens[i] != true &&
                       currentPinLocations[i] != pinLocation) {
@@ -146,7 +147,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                     } else if (currentPinLocations[i] != 0 &&
                         pinLocation == 0) {
                       final pin = board.getPinWithIndex(player.playerId, i);
-                      board.attackPin(pin!);
+                      await board.attackPin(pin!);
                     } else {
                       final pin = board.getPinWithIndex(player.playerId, i);
                       await pin?.movePin(
@@ -160,8 +161,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
               _currentPlayer = _sessionData!.nextPlayerIndex;
               playerCanMove = false;
               updateTurnText();
-              // TODO: update dice state
-              // TODO: update destination state
+              if (_sessionData!.currentDiceValue != null) {
+                dice.value = _sessionData!.currentDiceValue!;
+                dice.update(0);
+              }
             } catch (e) {
               showErrorDialog(e.toString());
             }
@@ -234,7 +237,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           // playerHome.removePin(i);
           destination.addPin(playerHome.removePin(i));
         } else if (pinLocation != '0') {
-          board.addPin(playerHome.removePin(i),
+          await board.addPin(playerHome.removePin(i),
               location: (int.parse(pinLocation) +
                   (player.playerTokensCircled?[i] ?? false ? 52 : 0) -
                   player.playerId * 13 -

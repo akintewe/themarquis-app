@@ -198,7 +198,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     return result;
   }
 
-  void returnPin(PlayerPin pin) {
+  Future<void> returnPin(PlayerPin pin) async {
     _homePins[pin.homeIndex] = pin
       ..onTap = (event, pin) {
         if (game.dice.value == 6 && game.currentPlayer == pin.playerIndex) {
@@ -209,6 +209,6 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       }
       ..returnToHome(_homePinLocations[pin.homeIndex]);
     print("Player ${pin.playerIndex} pin ${pin.homeIndex} returned to home");
-    add(_homePins[pin.homeIndex]!);
+    await add(_homePins[pin.homeIndex]!);
   }
 }

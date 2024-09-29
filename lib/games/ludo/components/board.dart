@@ -166,11 +166,12 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     return results;
   }
 
-  void attackPin(PlayerPin pin) {
+  Future<void> attackPin(PlayerPin pin) async {
     pin.currentPosIndex = -1;
     final playerHome = game.playerHomes[pin.playerIndex];
     remove(pin);
-    playerHome.returnPin(pin);
+    await pin.removed;
+    await playerHome.returnPin(pin);
   }
 
   Future<void> addPin(PlayerPin pin, {int location = 0}) async {
