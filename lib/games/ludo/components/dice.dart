@@ -15,6 +15,11 @@ class Dice extends PositionComponent
 
   final Random random = Random();
 
+  set isLoading(bool value) {
+    _isLoading = value;
+    update(0);
+  }
+
   Dice({required Vector2 size, required Vector2 position})
       : super(
           size: size,
@@ -40,7 +45,7 @@ class Dice extends PositionComponent
       final center = Offset(size.x / 2, size.y / 2);
       final radius = min(size.x, size.y) / 4;
       final paint = Paint()
-        ..color = Colors.black
+        ..color = Colors.cyan
         ..style = PaintingStyle.stroke
         ..strokeWidth = 4;
 
@@ -54,8 +59,8 @@ class Dice extends PositionComponent
         paint,
       );
     } else {
-      currentSprite =
-          diceSpriteSheet.getSprite(0, value - 1); // value between 1 and 6
+      currentSprite = diceSpriteSheet.getSprite(
+          0, (value - 1) % 6); // value between 1 and 6
       if (currentSprite != null) {
         currentSprite!.render(
           canvas,
@@ -85,16 +90,14 @@ class Dice extends PositionComponent
     update(0);
     try {
       final moveResults = await game.generateMove();
-      value = moveResults[0];
-      if (moveResults.length > 1) {
-        game.pendingMoves = moveResults.reduce((a, b) => a + b) - value;
-      }
+      value = moveResults.reduce((a, b) => a + b);
+      // if (moveResults.length > 1) {
+      //   game.pendingMoves =  - value;
+      // }
     } catch (e) {
       print(e);
     }
-
     _isLoading = false;
-    // Request another redraw to show the new value
     update(0);
   }
 
