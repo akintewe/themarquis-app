@@ -205,7 +205,7 @@ class AppState extends _$AppState {
   }
 
   Future<bool> tryAutoLogin() async {
-    if (state.accessToken == null) {
+    if (state.accessToken == null || state.accessTokenExpiry == null) {
       state = state.copyWith(autoLoginResult: true);
       return false;
     }
