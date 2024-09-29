@@ -100,7 +100,10 @@ class User extends _$User {
     final url = Uri.parse('$baseUrl/game/supported-tokens');
     final response = await http.get(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken
+      },
     );
     if (response.statusCode != 200) {
       throw HttpException(
@@ -124,7 +127,10 @@ class User extends _$User {
         '$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
     final response = await http.get(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken
+      },
     );
     if (response.statusCode != 200) {
       throw HttpException(
