@@ -78,10 +78,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   Future<void> playMove(int index) async {
     try {
+      dice.isLoading = true;
       await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
     } catch (e) {
       showErrorDialog(e.toString());
     }
+    dice.isLoading = false;
   }
 
   late PlayState _playState;
@@ -131,6 +133,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                     playerPinLocations[player.playerId][i] = -1;
                     final pin = board.getPinWithIndex(player.playerId, i);
                     board.remove(pin!);
+                    await pin.removed;
                     destination.addPin(pin);
                   } else if (player.playerWinningTokens[i] != true &&
                       currentPinLocations[i] != pinLocation) {
@@ -140,17 +143,16 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                       await pin.removed;
                       print('Adding pin');
                       await board.addPin(pin,
-                          location:
-                              (pinLocation - player.playerId * 13 - 1) % 52);
+                          location: pinLocation - player.playerId * 13 - 1);
                       print('Pin added');
                     } else if (currentPinLocations[i] != 0 &&
                         pinLocation == 0) {
                       final pin = board.getPinWithIndex(player.playerId, i);
-                      board.attackPin(pin!);
+                      await board.attackPin(pin!);
                     } else {
                       final pin = board.getPinWithIndex(player.playerId, i);
-                      await pin?.movePin(
-                          (pinLocation - player.playerId * 13 - 1) % 52);
+                      await pin
+                          ?.movePin(pinLocation - player.playerId * 13 - 1);
                     }
 
                     playerPinLocations[player.playerId][i] = pinLocation;
@@ -160,8 +162,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
               _currentPlayer = _sessionData!.nextPlayerIndex;
               playerCanMove = false;
               updateTurnText();
-              // TODO: update dice state
-              // TODO: update destination state
+              if (_sessionData!.currentDiceValue != null) {
+                dice.value = _sessionData!.currentDiceValue!;
+                dice.isLoading = false;
+              }
             } catch (e) {
               showErrorDialog(e.toString());
             }
@@ -181,7 +185,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         (user) => user.userId.toString() == ref.read(userProvider)?.id);
     _currentPlayer = _sessionData!.nextPlayerIndex;
     board = Board();
-    add(board);
+    await add(board);
     final positions = [
       Vector2(center.x - unitSize * 6.25,
           center.y - unitSize * 6.25), // Top-left corner (Player 1)
@@ -195,18 +199,18 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     for (int i = 0; i < positions.length; i++) {
       playerHomes
           .add(PlayerHome(i, _sessionData!.sessionUserStatus[i], positions[i]));
-      add(playerHomes.last);
+      await add(playerHomes.last);
     }
 
     destination = Destination();
-    add(destination);
+    await add(destination);
 
     dice = Dice(
         size: Vector2(100, 100), position: Vector2(size.x / 2, size.y - 200));
-    add(dice);
+    await add(dice);
 
     turnText = TextComponent(
-      text: 'Player 1\'s turn',
+      text: '',
       position: Vector2(size.x / 2, 50),
       anchor: Anchor.center,
       textRenderer: TextPaint(
@@ -217,28 +221,28 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         ),
       ),
     );
-    add(turnText);
+    await add(turnText);
 
     await mounted;
 
     for (var player in _sessionData!.sessionUserStatus) {
       final pinLocations = player.playerTokensPosition;
-      playerPinLocations[player.playerId] =
-          pinLocations.map((e) => int.parse(e)).toList();
       final playerHome = playerHomes[player.playerId];
       for (int i = 0; i < pinLocations.length; i++) {
-        var pinLocation = pinLocations[i];
+        var pinLocation = int.parse(pinLocations[i]) +
+            (player.playerTokensCircled?[i] ?? false ? 52 : 0);
 
         if (player.playerWinningTokens[i] == true) {
           playerPinLocations[player.playerId][i] = -1;
           // playerHome.removePin(i);
-          destination.addPin(playerHome.removePin(i));
-        } else if (pinLocation != '0') {
-          board.addPin(playerHome.removePin(i),
-              location: (int.parse(pinLocation) +
-                  (player.playerTokensCircled?[i] ?? false ? 52 : 0) -
-                  player.playerId * 13 -
-                  1));
+          final pin = playerHome.removePin(i);
+          // await pin.removed;
+          destination.addPin(pin);
+        } else if (pinLocation != 0 || player.playerTokensCircled?[i] == true) {
+          final pin = playerHome.removePin(i);
+          //  pin.removed;
+          board.addPin(pin, location: pinLocation - player.playerId * 13 - 1);
+          playerPinLocations[player.playerId][i] = pinLocation;
         }
       }
     }

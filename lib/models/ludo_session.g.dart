@@ -28,13 +28,14 @@ class LudoSessionDataImplAdapter extends TypeAdapter<_$LudoSessionDataImpl> {
       nextPlayerId: fields[9] as int,
       creator: fields[10] as String,
       createdAt: fields[11] as DateTime,
+      currentDiceValue: fields[12] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$LudoSessionDataImpl obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(2)
@@ -55,6 +56,8 @@ class LudoSessionDataImplAdapter extends TypeAdapter<_$LudoSessionDataImpl> {
       ..write(obj.creator)
       ..writeByte(11)
       ..write(obj.createdAt)
+      ..writeByte(12)
+      ..write(obj.currentDiceValue)
       ..writeByte(8)
       ..write(obj.sessionUserStatus);
   }
@@ -152,6 +155,7 @@ _$LudoSessionDataImpl _$$LudoSessionDataImplFromJson(
       nextPlayerId: (json['nextPlayerId'] as num).toInt(),
       creator: json['creator'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      currentDiceValue: (json['currentDiceValue'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$$LudoSessionDataImplToJson(
@@ -168,6 +172,7 @@ Map<String, dynamic> _$$LudoSessionDataImplToJson(
       'nextPlayerId': instance.nextPlayerId,
       'creator': instance.creator,
       'createdAt': instance.createdAt.toIso8601String(),
+      'currentDiceValue': instance.currentDiceValue,
     };
 
 _$LudoSessionUserStatusImpl _$$LudoSessionUserStatusImplFromJson(

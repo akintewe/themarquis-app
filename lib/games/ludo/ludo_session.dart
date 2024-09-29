@@ -48,6 +48,9 @@ class LudoSession extends _$LudoSession {
               final dataStr = decodedResponse['data'] as String;
               print('Data String ${dataStr}');
               final data = jsonDecode(dataStr) as Map;
+              if (decodedResponse['event'] != 'play_move_failed') {
+                await setDiceValue(int.parse(data['steps']));
+              }
               print('Data $data');
               if (data["session_id"] == _id) {
                 await getLudoSession();
@@ -67,6 +70,12 @@ class LudoSession extends _$LudoSession {
       print('WS Connection Error $e');
       _connectWebSocket();
     }
+  }
+
+  Future<void> setDiceValue(int value) async {
+    if (state == null) return;
+    state = state!.copyWith(currentDiceValue: value);
+    await _hiveBox!.put(_id, state!);
   }
 
   Future<void> getLudoSession() async {
@@ -128,6 +137,7 @@ class LudoSession extends _$LudoSession {
       createdAt: DateTime.fromMillisecondsSinceEpoch(
           decodedResponse['created_at'] * 1000),
       creator: "",
+      currentDiceValue: state?.currentDiceValue ?? -1,
     );
     await _hiveBox!.put(_id, ludoSession);
     state = ludoSession;
@@ -146,48 +156,51 @@ class LudoSession extends _$LudoSession {
     final decodedResponse =
         jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
     return decodedResponse
-        .map((sessionData) => LudoSessionData(
-              id: sessionData['id'],
-              status: sessionData['status'],
-              nextPlayer: sessionData['next_player'],
-              nonce: sessionData['nonce'],
-              color: sessionData['color'] ?? "0",
-              playAmount: sessionData['play_amount'],
-              playToken: sessionData['play_token'],
-              sessionUserStatus: [
-                ...sessionData['session_user_status'].map(
-                  (e) {
-                    final List<String> playerTokensPosition =
-                        (e['player_tokens_position'] as List<dynamic>)
-                            .map((e) => e.toString())
-                            .toList();
-                    final List<bool> playerWinningTokens =
-                        (e['player_winning_tokens'] as List<dynamic>)
-                            .map((e) => e as bool)
-                            .toList();
-                    final List<bool> playerTokensCircled =
-                        (e['player_tokens_circled'] as List<dynamic>)
-                            .map((e) => e as bool)
-                            .toList();
-                    return LudoSessionUserStatus(
-                      playerId: e['player_id'],
-                      playerTokensPosition: playerTokensPosition,
-                      playerWinningTokens: playerWinningTokens,
-                      playerTokensCircled: playerTokensCircled,
-                      userId: e['user_id'],
-                      email: e['email'],
-                      role: e['role'],
-                      status: e['status'],
-                      points: e['points'],
-                    );
-                  },
-                ),
-              ],
-              nextPlayerId: sessionData['next_player_id'],
-              createdAt: DateTime.fromMillisecondsSinceEpoch(
-                  sessionData['created_at'] * 1000),
-              creator: "",
-            ))
+        .map(
+          (sessionData) => LudoSessionData(
+            id: sessionData['id'],
+            status: sessionData['status'],
+            nextPlayer: sessionData['next_player'],
+            nonce: sessionData['nonce'],
+            color: sessionData['color'] ?? "0",
+            playAmount: sessionData['play_amount'],
+            playToken: sessionData['play_token'],
+            sessionUserStatus: [
+              ...sessionData['session_user_status'].map(
+                (e) {
+                  final List<String> playerTokensPosition =
+                      (e['player_tokens_position'] as List<dynamic>)
+                          .map((e) => e.toString())
+                          .toList();
+                  final List<bool> playerWinningTokens =
+                      (e['player_winning_tokens'] as List<dynamic>)
+                          .map((e) => e as bool)
+                          .toList();
+                  final List<bool> playerTokensCircled =
+                      (e['player_tokens_circled'] as List<dynamic>)
+                          .map((e) => e as bool)
+                          .toList();
+                  return LudoSessionUserStatus(
+                    playerId: e['player_id'],
+                    playerTokensPosition: playerTokensPosition,
+                    playerWinningTokens: playerWinningTokens,
+                    playerTokensCircled: playerTokensCircled,
+                    userId: e['user_id'],
+                    email: e['email'],
+                    role: e['role'],
+                    status: e['status'],
+                    points: e['points'],
+                  );
+                },
+              ),
+            ],
+            nextPlayerId: sessionData['next_player_id'],
+            createdAt: DateTime.fromMillisecondsSinceEpoch(
+                sessionData['created_at'] * 1000),
+            creator: "",
+            currentDiceValue: -1,
+          ),
+        )
         .toList();
   }
 

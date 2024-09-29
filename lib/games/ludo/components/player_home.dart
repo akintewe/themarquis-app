@@ -108,7 +108,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     ];
 
     for (var pin in _homePins) {
-      add(pin!);
+      await add(pin!);
     }
 
     _avatarPositions = [
@@ -137,9 +137,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         ),
       ),
     );
-    add(playerName);
+    await add(playerName);
 
-    add(PlayerAvatar(_avatarPositions[playerIndex], playerIndex));
+    await add(PlayerAvatar(_avatarPositions[playerIndex], playerIndex));
   }
 
   @override
@@ -190,15 +190,15 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
   }
 
   PlayerPin removePin(int homePinIndex) {
-    if (_homePins[homePinIndex]!.isMounted) {
-      remove(_homePins[homePinIndex]!);
-    }
+    // if (_homePins[homePinIndex]!.isMounted) {
+    remove(_homePins[homePinIndex]!);
+    // }
     final result = _homePins[homePinIndex]!..position += position;
     _homePins[homePinIndex] = null;
     return result;
   }
 
-  void returnPin(PlayerPin pin) {
+  Future<void> returnPin(PlayerPin pin) async {
     _homePins[pin.homeIndex] = pin
       ..onTap = (event, pin) {
         if (game.dice.value == 6 && game.currentPlayer == pin.playerIndex) {
@@ -209,6 +209,6 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       }
       ..returnToHome(_homePinLocations[pin.homeIndex]);
     print("Player ${pin.playerIndex} pin ${pin.homeIndex} returned to home");
-    add(_homePins[pin.homeIndex]!);
+    await add(_homePins[pin.homeIndex]!);
   }
 }
