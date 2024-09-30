@@ -270,7 +270,7 @@ class LudoSession extends _$LudoSession {
       url,
       body: jsonEncode({
         'amount': amount,
-        'color': color,
+        'user_creator_color': color,
         // 'token_address': tokenAddress,
         'token_address': '0',
       }),
