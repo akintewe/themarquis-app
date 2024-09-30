@@ -48,7 +48,7 @@ class LudoSession extends _$LudoSession {
               final dataStr = decodedResponse['data'] as String;
               print('Data String ${dataStr}');
               final data = jsonDecode(dataStr) as Map;
-              if (decodedResponse['event'] != 'play_move_failed') {
+              if (decodedResponse['event'] == 'play_move') {
                 await setDiceValue(int.parse(data['steps']));
               }
               print('Data $data');
@@ -59,16 +59,22 @@ class LudoSession extends _$LudoSession {
           }
         },
         onDone: () {
-          _connectWebSocket();
+          Future.delayed(const Duration(seconds: 1), () {
+            _connectWebSocket();
+          });
         },
         onError: (error) {
           print('WS Error $error');
-          _connectWebSocket();
+          Future.delayed(const Duration(seconds: 1), () {
+            _connectWebSocket();
+          });
         },
       );
     } catch (e) {
       print('WS Connection Error $e');
-      _connectWebSocket();
+      Future.delayed(const Duration(seconds: 1), () {
+        _connectWebSocket();
+      });
     }
   }
 
@@ -78,12 +84,14 @@ class LudoSession extends _$LudoSession {
     await _hiveBox!.put(_id, state!);
   }
 
-  Future<void> getLudoSession() async {
-    if (_id == null) {
+  Future<LudoSessionData?> getLudoSession([String? id]) async {
+    String? idToFetch = id ?? _id;
+    if (_id == null && idToFetch == null) {
       _id = ref.read(userProvider)?.sessionId;
-      if (_id == null) return;
+      idToFetch = _id;
+      if (_id == null) return null;
     }
-    final url = Uri.parse('$baseUrl/game/session/$_id');
+    final url = Uri.parse('$baseUrl/game/session/$idToFetch');
     final response = await http.get(
       url,
       headers: {
@@ -97,7 +105,7 @@ class LudoSession extends _$LudoSession {
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     final ludoSession = LudoSessionData(
-      id: _id!,
+      id: idToFetch!,
       status: decodedResponse['status'],
       nextPlayer: decodedResponse['next_player'],
       nonce: decodedResponse['nonce'],
@@ -140,8 +148,11 @@ class LudoSession extends _$LudoSession {
       creator: "",
       currentDiceValue: state?.currentDiceValue ?? -1,
     );
-    await _hiveBox!.put(_id, ludoSession);
-    state = ludoSession;
+    if (id == null) {
+      await _hiveBox!.put(_id, ludoSession);
+      state = ludoSession;
+    }
+    return ludoSession;
   }
 
   Future<List<LudoSessionData>> getOpenSessions() async {
@@ -270,7 +281,7 @@ class LudoSession extends _$LudoSession {
       url,
       body: jsonEncode({
         'amount': amount,
-        'color': color,
+        'user_creator_color': color,
         // 'token_address': tokenAddress,
         'token_address': '0',
       }),
@@ -290,11 +301,14 @@ class LudoSession extends _$LudoSession {
     await ref.read(userProvider.notifier).getUser();
   }
 
-  Future<void> joinSession(String sessionId) async {
+  Future<void> joinSession(String sessionId, String color) async {
     final url = Uri.parse('$baseUrl/session/join');
     final response = await http.post(
       url,
-      body: jsonEncode({'session_id': sessionId}),
+      body: jsonEncode({
+        'session_id': sessionId,
+        'user_color': color,
+      }),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': ref.read(appStateProvider).bearerToken,

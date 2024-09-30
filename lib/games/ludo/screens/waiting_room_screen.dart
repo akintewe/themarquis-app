@@ -214,9 +214,15 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                     ),
                     // Bottom Timer Section
                     IconButton(
-                      onPressed: () async {
-                        widget.game.playState = PlayState.playing;
-                      },
+                      onPressed: session.sessionUserStatus
+                                  .where((e) => e.status == "ACTIVE")
+                                  .length ==
+                              4
+                          ? () async {
+                              widget.game.playState = PlayState.playing;
+                            }
+                          : null,
+                      disabledColor: Colors.grey,
                       icon: Stack(
                         alignment: AlignmentDirectional.center,
                         children: [
