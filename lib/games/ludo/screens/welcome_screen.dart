@@ -598,7 +598,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                   ),
                   padding: const EdgeInsets.symmetric(
                     vertical: 10.0,
-                    horizontal: 30.0,
+                    horizontal: 25.0,
                   ), // Padding inside the button
                   child: const Text(
                     "JOIN",

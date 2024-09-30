@@ -136,20 +136,28 @@ class MatchResultsScreen extends ConsumerWidget {
             child: Row(
               children: [
                 _buildRankIndicator(result['rank'] as int),
-                const SizedBox(width: 16),
-                Text(game.playerNames[result['index'] as int],
-                    style: const TextStyle(color: Colors.white, fontSize: 20)),
-                const Spacer(),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    game.playerNames[result['index'] as int],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                // const Spacer(),
                 Text(
                   '${result['rank'] == 1 ? '+' : ''} ${result['score']}',
                   style: TextStyle(
                       color: result['rank'] == 1 ? Colors.yellow : Colors.red,
-                      fontSize: 18),
+                      fontSize: 14),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '+${result['exp']} EXP',
-                  style: const TextStyle(color: Colors.cyan, fontSize: 18),
+                  style: const TextStyle(color: Colors.cyan, fontSize: 14),
                 ),
               ],
             ),
@@ -169,12 +177,12 @@ class MatchResultsScreen extends ConsumerWidget {
             2 => "assets/svg/ludo_rank_2.svg",
             _ => "assets/svg/ludo_rank_3.svg"
           },
-          width: 50,
+          width: 46,
         ),
         Text(
           '$rank',
           style: const TextStyle(
-              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
         ),
       ],
     );
