@@ -10,6 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gal/gal.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
+import 'package:marquis_v2/providers/user.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -140,7 +141,7 @@ class MatchResultsScreen extends ConsumerWidget {
                     style: const TextStyle(color: Colors.white, fontSize: 20)),
                 const Spacer(),
                 Text(
-                  '${result['rank'] == 1 ? '+' : '-'} ${result['score']}',
+                  '${result['rank'] == 1 ? '+' : ''} ${result['score']}',
                   style: TextStyle(
                       color: result['rank'] == 1 ? Colors.yellow : Colors.red,
                       fontSize: 18),
@@ -251,7 +252,8 @@ class MatchResultsScreen extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: TextButton(
-        onPressed: () {
+        onPressed: () async {
+          await ref.read(userProvider.notifier).getUser();
           game.playState = PlayState.welcome;
         },
         child:
