@@ -368,9 +368,11 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                                   .read(ludoSessionProvider.notifier)
                                   .joinSession(
                                     _roomIdController.text,
-                                    ludoSession.sessionUserStatus
-                                        .where((e) => e.status == "ACTIVE")
-                                        .length
+                                    (ludoSession.sessionUserStatus
+                                                .where(
+                                                    (e) => e.status == "ACTIVE")
+                                                .length +
+                                            1)
                                         .toString(),
                                   );
                             } catch (e) {
