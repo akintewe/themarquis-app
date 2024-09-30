@@ -5,13 +5,13 @@ import 'package:hive/hive.dart';
 part 'ludo_session.g.dart';
 part 'ludo_session.freezed.dart';
 
-const playerColors = [
+const playerColors = {
   // Add this const
-  Color(0xffd04c2f),
-  Color(0xff2fa9d0),
-  Color(0xff2fd06f),
-  Color(0xffb0d02f),
-];
+  'red': Color(0xffd04c2f),
+  'blue': Color(0xff2fa9d0),
+  'green': Color(0xff2fd06f),
+  'yellow': Color(0xffb0d02f),
+};
 
 @freezed
 class LudoSessionData extends HiveObject with _$LudoSessionData {
@@ -33,9 +33,9 @@ class LudoSessionData extends HiveObject with _$LudoSessionData {
     @HiveField(12) required int? currentDiceValue,
   }) = _LudoSessionData;
 
-  List<Color> get getListOfColors =>
-      playerColors.sublist(int.parse(color)) +
-      playerColors.sublist(0, int.parse(color));
+  List<Color> get getListOfColors => sessionUserStatus
+      .map((user) => playerColors[user.color] ?? Colors.grey)
+      .toList();
 //find index of that color
 //sub list, [0, target][target, 3]
 //return it
@@ -62,6 +62,7 @@ class LudoSessionUserStatus extends HiveObject with _$LudoSessionUserStatus {
     @HiveField(7) String? profileImageUrl,
     @HiveField(8) required int points,
     @HiveField(9) required List<bool>? playerTokensCircled,
+    @HiveField(10) required String? color,
   }) = _LudoSessionUserStatus;
 
   factory LudoSessionUserStatus.fromJson(Map<String, dynamic> json) =>

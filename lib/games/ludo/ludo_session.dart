@@ -129,6 +129,7 @@ class LudoSession extends _$LudoSession {
               role: e['role'],
               status: e['status'],
               points: e['points'],
+              color: e['color'],
             );
           },
         ),
@@ -190,6 +191,7 @@ class LudoSession extends _$LudoSession {
                     role: e['role'],
                     status: e['status'],
                     points: e['points'],
+                    color: e['color'],
                   );
                 },
               ),
