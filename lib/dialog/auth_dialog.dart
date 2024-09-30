@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marquis_v2/env.dart';
 // import 'package:magic_sdk/magic_sdk.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
@@ -81,53 +80,60 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                               _isLoading = true;
                             });
                             if (_isSignUp) {
-                              //sign up
-                              try {
-                                if (!_emailController.text
-                                    .endsWith('@test.com')) {
-                                  await ref
-                                      .read(appStateProvider.notifier)
-                                      .signup(
-                                        _emailController.text,
-                                        _refCodeController.text,
-                                      );
+                              if (_emailController.text != "" &&
+                                  _refCodeController.text != "") {
+                                try {
+                                  if (!_emailController.text
+                                      .endsWith('@test.com')) {
+                                    await ref
+                                        .read(appStateProvider.notifier)
+                                        .signup(
+                                          _emailController.text,
+                                          _refCodeController.text,
+                                        );
+                                  }
+                                  if (!context.mounted) return;
+                                  await showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) =>
+                                        OTPDialog(
+                                      email: _emailController.text,
+                                      isSignUp: true,
+                                    ),
+                                  );
+                                  if (!context.mounted) return;
+                                  Navigator.of(context).pop();
+                                } catch (e) {
+                                  showErrorDialog(e.toString(), context);
                                 }
-                                if (!context.mounted) return;
-                                await showDialog<String>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (BuildContext context) => OTPDialog(
-                                    email: _emailController.text,
-                                    isSignUp: true,
-                                  ),
-                                );
-                                if (!context.mounted) return;
-                                Navigator.of(context).pop();
-                              } catch (e) {
-                                showErrorDialog(e.toString(), context);
                               }
+                              //sign up
                             } else {
                               //login
-                              try {
-                                if (!_emailController.text
-                                    .endsWith('@test.com')) {
-                                  await ref
-                                      .read(appStateProvider.notifier)
-                                      .login(_emailController.text);
+                              if (_emailController.text != "") {
+                                try {
+                                  if (!_emailController.text
+                                      .endsWith('@test.com')) {
+                                    await ref
+                                        .read(appStateProvider.notifier)
+                                        .login(_emailController.text);
+                                  }
+                                  if (!context.mounted) return;
+                                  await showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) =>
+                                        OTPDialog(
+                                      email: _emailController.text,
+                                      isSignUp: false,
+                                    ),
+                                  );
+                                  if (!context.mounted) return;
+                                  Navigator.of(context).pop();
+                                } catch (e) {
+                                  showErrorDialog(e.toString(), context);
                                 }
-                                if (!context.mounted) return;
-                                await showDialog<String>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (BuildContext context) => OTPDialog(
-                                    email: _emailController.text,
-                                    isSignUp: false,
-                                  ),
-                                );
-                                if (!context.mounted) return;
-                                Navigator.of(context).pop();
-                              } catch (e) {
-                                showErrorDialog(e.toString(), context);
                               }
                             }
 

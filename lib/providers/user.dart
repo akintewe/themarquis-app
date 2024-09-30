@@ -63,8 +63,9 @@ class User extends _$User {
   }
 
   Future<void> clearData() async {
-    _hiveBox!.delete("user");
-    state = null;
+    await _hiveBox!.delete("user");
+    // state = null;
+    ref.invalidateSelf();
   }
 
   Future<void> editUser(

@@ -190,12 +190,19 @@ class AppState extends _$AppState {
 
   Future<void> logout() async {
     print("logout");
-    state = state.copyWith(
-      navigatorIndex: 0,
-      accessToken: null,
-      refreshToken: null,
-      selectedGame: null,
+    await Future.delayed(
+      Duration.zero,
+      () {
+        state = state.copyWith(
+          navigatorIndex: 0,
+          accessToken: null,
+          refreshToken: null,
+          selectedGame: null,
+          autoLoginResult: false,
+        );
+      },
     );
+
     _refreshTokenTimer?.cancel();
     _refreshTokenTimer = null;
     _logoutTimer?.cancel();
@@ -206,8 +213,9 @@ class AppState extends _$AppState {
 
   Future<bool> tryAutoLogin() async {
     if (state.accessToken == null || state.accessTokenExpiry == null) {
-      state = state.copyWith(autoLoginResult: false);
+      // state = state.copyWith(autoLoginResult: false);
 
+      await logout();
       return false;
     }
     if (state.accessTokenExpiry!.isBefore(DateTime.now())) {
@@ -220,7 +228,9 @@ class AppState extends _$AppState {
       // state = state.copyWith(autoLoginResult: true);
       return true;
     } catch (e) {
-      state = state.copyWith(autoLoginResult: true);
+      await logout();
+
+      // state = state.copyWith(autoLoginResult: true);
       return false;
     }
   }
@@ -229,9 +239,9 @@ class AppState extends _$AppState {
     state = state.copyWith(isConnectedInternet: val);
   }
 
-  void setAutoLogin(bool val) {
-    state = state.copyWith(autoLoginResult: val);
-  }
+  // void setAutoLogin(bool val) {
+  //   state = state.copyWith(autoLoginResult: val);
+  // }
 
   Future<void> refreshToken() async {
     final url = Uri.parse('$baseUrl/auth/refresh');
