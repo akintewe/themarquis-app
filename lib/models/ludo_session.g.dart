@@ -95,13 +95,14 @@ class LudoSessionUserStatusImplAdapter
       profileImageUrl: fields[7] as String?,
       points: fields[8] as int,
       playerTokensCircled: (fields[9] as List?)?.cast<bool>(),
+      color: fields[10] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$LudoSessionUserStatusImpl obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.playerId)
       ..writeByte(3)
@@ -116,6 +117,8 @@ class LudoSessionUserStatusImplAdapter
       ..write(obj.profileImageUrl)
       ..writeByte(8)
       ..write(obj.points)
+      ..writeByte(10)
+      ..write(obj.color)
       ..writeByte(1)
       ..write(obj.playerTokensPosition)
       ..writeByte(2)
@@ -194,6 +197,7 @@ _$LudoSessionUserStatusImpl _$$LudoSessionUserStatusImplFromJson(
       playerTokensCircled: (json['playerTokensCircled'] as List<dynamic>?)
           ?.map((e) => e as bool)
           .toList(),
+      color: json['color'] as String?,
     );
 
 Map<String, dynamic> _$$LudoSessionUserStatusImplToJson(
@@ -209,4 +213,5 @@ Map<String, dynamic> _$$LudoSessionUserStatusImplToJson(
       'profileImageUrl': instance.profileImageUrl,
       'points': instance.points,
       'playerTokensCircled': instance.playerTokensCircled,
+      'color': instance.color,
     };

@@ -525,8 +525,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
     required LudoSessionData sessionData,
     required BuildContext context,
   }) {
-    final colors = playerColors.sublist(int.parse(sessionData.color)) +
-        playerColors.sublist(0, int.parse(sessionData.color));
+    final colors = sessionData.getListOfColors;
     final roomName = sessionData.id;
     final noOfPlayers = sessionData.sessionUserStatus
         .map((e) => e.status == "ACTIVE" ? 1 : 0)
