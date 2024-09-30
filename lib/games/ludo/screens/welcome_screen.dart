@@ -258,6 +258,8 @@ class JoinRoomDialog extends ConsumerStatefulWidget {
 
 class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
   final _roomIdController = TextEditingController();
+  LudoSessionData? _sessionData;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -344,54 +346,69 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                     controller: _roomIdController,
                   ),
                 ),
-                StatefulBuilder(
-                  builder: (context, stste) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextButton(
-                        onPressed: () async {
-                          //session = room
-                          try {
-                            await ref
-                                .read(ludoSessionProvider.notifier)
-                                .joinSession(
-                                  _roomIdController.text,
-                                );
-                          } catch (e) {
-                            widget.game.showErrorDialog(e.toString());
-                          }
-                          if (!context.mounted) return;
-                          Navigator.of(context).pop();
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextButton(
+                          onPressed: () async {
+                            //session = room
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            try {
+                              final ludoSession = await ref
+                                  .read(ludoSessionProvider.notifier)
+                                  .getLudoSession(_roomIdController.text);
+                              if (ludoSession == null) {
+                                widget.game.showErrorDialog("Room not found");
+                                return;
+                              }
+                              await ref
+                                  .read(ludoSessionProvider.notifier)
+                                  .joinSession(
+                                    _roomIdController.text,
+                                    ludoSession.sessionUserStatus
+                                        .where((e) => e.status == "ACTIVE")
+                                        .length
+                                        .toString(),
+                                  );
+                            } catch (e) {
+                              widget.game.showErrorDialog(e.toString());
+                            }
+                            setState(() {
+                              _isLoading = false;
+                            });
+                            if (!context.mounted) return;
+                            Navigator.of(context).pop();
 
-                          widget.game.playState = PlayState.waiting;
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color.fromARGB(255, 0, 236, 255),
-                              width: 1.2,
+                            widget.game.playState = PlayState.waiting;
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 0, 236, 255),
+                                width: 1.2,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
-                            horizontal: 42.0,
-                          ),
-                          child: const Text(
-                            "Confirm",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal: 42.0,
+                            ),
+                            child: const Text(
+                              "Confirm",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    );
-                  },
-                ),
               ],
             ),
           ),
