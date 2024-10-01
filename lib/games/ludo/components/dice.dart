@@ -60,7 +60,7 @@ class Dice extends PositionComponent
       );
     } else {
       currentSprite = diceSpriteSheet.getSprite(
-          0, (value - 1) % 6); // value between 1 and 6
+          0, min(value - 1, 5)); // value between 1 and 6
       if (currentSprite != null) {
         currentSprite!.render(
           canvas,
