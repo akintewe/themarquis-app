@@ -368,11 +368,11 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                                   .read(ludoSessionProvider.notifier)
                                   .joinSession(
                                     _roomIdController.text,
-                                    (ludoSession.sessionUserStatus
-                                                .where(
-                                                    (e) => e.status == "ACTIVE")
-                                                .length +
-                                            1)
+                                    ((int.parse(ludoSession.sessionUserStatus[0]
+                                                        .color ??
+                                                    "0") +
+                                                1) %
+                                            4)
                                         .toString(),
                                   );
                             } catch (e) {
@@ -1043,7 +1043,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
     return GestureDetector(
       onTap: () {
         stste(() {
-          selectedColorIndex = index;
+          selectedColorIndex = index + 1;
         });
       },
       child: Padding(
