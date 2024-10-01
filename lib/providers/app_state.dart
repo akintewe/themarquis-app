@@ -218,7 +218,7 @@ class AppState extends _$AppState {
       await logout();
       return false;
     }
-    if (state.accessTokenExpiry!.isBefore(DateTime.now())) {
+    if (state.refreshTokenExpiry!.isBefore(DateTime.now())) {
       await logout();
       return false;
     }
