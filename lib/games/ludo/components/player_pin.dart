@@ -68,7 +68,7 @@ class PlayerPin extends SpriteComponent
 
     if (game.currentPlayer == playerIndex &&
         game.playerCanMove &&
-        (currentPosIndex >= 0 || game.dice.value == 6) &&
+        (currentPosIndex >= 0 || game.dice.value >= 6) &&
         (currentPosIndex + game.dice.value <= 56)) {
       final paint = Paint()
         ..color = game.listOfColors[playerIndex]
@@ -103,7 +103,7 @@ class PlayerPin extends SpriteComponent
 
     // Handle initial move from home
     if (startIndex == -1) {
-      if (game.dice.value == 6) {
+      if (game.dice.value >= 6) {
         currentPosIndex = 0;
         Vector2 startPosition = routeIndexToPos(playerIndex, 0);
         moveEffects.add(MoveEffect.to(

@@ -52,7 +52,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         playerIndex,
         0,
         (event, pin) {
-          if (game.dice.value == 6) {
+          if (game.dice.value >= 6) {
             // Move in websockets handler
             // game.board.addPin(
             //     removePin(pin, 0)..position = pin.position + position,
@@ -68,7 +68,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         playerIndex,
         1,
         (event, pin) {
-          if (game.dice.value == 6) {
+          if (game.dice.value >= 6) {
             // game.board.addPin(
             //     removePin(pin, 1)..position = pin.position + position,
             //     location: game.pendingMoves);
@@ -83,7 +83,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         playerIndex,
         2,
         (event, pin) {
-          if (game.dice.value == 6) {
+          if (game.dice.value >= 6) {
             // game.board.addPin(
             //     removePin(pin, 2)..position = pin.position + position,
             //     location: game.pendingMoves);
@@ -98,7 +98,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         playerIndex,
         3,
         (event, pin) {
-          if (game.dice.value == 6) {
+          if (game.dice.value >= 6) {
             // game.board.addPin(
             //     removePin(pin, 3)..position = pin.position + position,
             //     location: game.pendingMoves);
@@ -204,7 +204,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
   Future<void> returnPin(PlayerPin pin) async {
     _homePins[pin.homeIndex] = pin
       ..onTap = (event, pin) {
-        if (game.dice.value == 6 && game.currentPlayer == pin.playerIndex) {
+        if (game.dice.value >= 6 && game.currentPlayer == pin.playerIndex) {
           return true;
         } else {
           return false;

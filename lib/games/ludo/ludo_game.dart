@@ -277,7 +277,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
     if (!playerCanMove &&
         !playerHomes[_currentPlayer].isHomeEmpty &&
-        dice.value == 6) {
+        dice.value >= 6) {
       playerCanMove = true;
     }
 
