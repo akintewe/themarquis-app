@@ -515,18 +515,17 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                       ),
                     ],
                   ),
-                  SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.60,
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       child: Column(
-                        mainAxisSize: MainAxisSize.max,
                         children: [
-                          ...snapshot.data!
-                              .map((sessionData) => openSessionRoomCard(
-                                    sessionData: sessionData,
-                                    context: context,
-                                  )),
+                          ...snapshot.data!.map(
+                            (sessionData) => openSessionRoomCard(
+                              sessionData: sessionData,
+                              context: context,
+                            ),
+                          ),
                         ],
                       ),
                     ),
