@@ -259,11 +259,117 @@ class JoinRoomDialog extends ConsumerStatefulWidget {
 class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
   final _roomIdController = TextEditingController();
   bool _isLoading = false;
+  int selectedColorIndex = 0; // To keep track of the selected color
 
   @override
   void initState() {
     super.initState();
     _roomIdController.text = widget.roomId ?? "";
+  }
+
+  Widget colorChoosingCard(
+      {required int index,
+      required bool isPicked,
+      required void Function(void Function()) stste}) {
+    return GestureDetector(
+      onTap: () {
+        stste(() {
+          selectedColorIndex = index + 1;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Opacity(
+          opacity: isPicked ? 1 : 0.6,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 52,
+                height: 52,
+                child: SvgPicture.asset(
+                  "assets/svg/chess-and-bg/${_getColorBackground(index)}.svg",
+                ),
+              ),
+              SizedBox(
+                width: 30,
+                height: 30,
+                child: SvgPicture.asset(
+                  "assets/svg/chess-and-bg/${_getColorChess(index)}.svg",
+                ),
+              ),
+              if (isPicked) _buildCornerBorder(top: 0, left: 0),
+              if (isPicked) _buildCornerBorder(top: 0, right: 0),
+              if (isPicked) _buildCornerBorder(bottom: 0, left: 0),
+              if (isPicked) _buildCornerBorder(bottom: 0, right: 0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getColorBackground(int index) {
+    switch (index) {
+      case 0:
+        return "red_bg";
+      case 1:
+        return "blue_bg";
+
+      case 2:
+        return "green_bg";
+      case 3:
+        return "yellow_bg";
+      default:
+        return "blue_bg";
+    }
+  }
+
+  String _getColorChess(int index) {
+    switch (index) {
+      case 0:
+        return "red_chess";
+
+      case 1:
+        return "blue_chess";
+
+      case 2:
+        return "green_chess";
+      case 3:
+        return "yellow_chess";
+      default:
+        return "blue_chess";
+    }
+  }
+
+  Widget _buildCornerBorder(
+      {double? top, double? left, double? right, double? bottom}) {
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(
+          border: Border(
+            top: top != null
+                ? const BorderSide(width: 2, color: Colors.white)
+                : BorderSide.none,
+            left: left != null
+                ? const BorderSide(width: 2, color: Colors.white)
+                : BorderSide.none,
+            right: right != null
+                ? const BorderSide(width: 2, color: Colors.white)
+                : BorderSide.none,
+            bottom: bottom != null
+                ? const BorderSide(width: 2, color: Colors.white)
+                : BorderSide.none,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -363,17 +469,125 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                                 widget.game.showErrorDialog("Room not found");
                                 return;
                               }
-                              await ref
-                                  .read(ludoSessionProvider.notifier)
-                                  .joinSession(
-                                    _roomIdController.text,
-                                    ((int.parse(ludoSession.sessionUserStatus[0]
-                                                        .color ??
-                                                    "0") +
-                                                1) %
-                                            4)
-                                        .toString(),
-                                  );
+                              //let user choose color
+                              //show new dialog let user choose
+                              //check which existing color already picked, then only make available of unchose one
+                              //when submit check if really available to check, otherwise loop back, let user choose again
+                              List<String?> notAvailableColors = ludoSession
+                                  .sessionUserStatus
+                                  .where((pl) => pl.status == "ACTIVE")
+                                  .toList()
+                                  .map((e) => e.color)
+                                  .toList();
+                              List<String?> availableColors = [
+                                "1",
+                                "2",
+                                "3",
+                                "4"
+                              ]
+                                  .where((color) =>
+                                      !notAvailableColors.contains(color))
+                                  .toList();
+                              showDialog(
+                                  context: context,
+                                  builder: (c) {
+                                    return Dialog(
+                                      child: Column(
+                                        children: [
+                                          StatefulBuilder(
+                                            builder: (ctx, stste) {
+                                              return Column(
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: List.generate(
+                                                      availableColors.length,
+                                                      (index) {
+                                                        return colorChoosingCard(
+                                                          index: int.parse(
+                                                              availableColors[
+                                                                  index]!),
+                                                          isPicked:
+                                                              selectedColorIndex ==
+                                                                  index,
+                                                          stste: stste,
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 8,
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: TextButton(
+                                                      onPressed: () async {
+                                                        await ref
+                                                            .read(
+                                                                ludoSessionProvider
+                                                                    .notifier)
+                                                            .joinSession(
+                                                              _roomIdController
+                                                                  .text,
+                                                              availableColors[
+                                                                      selectedColorIndex]
+                                                                  .toString(),
+                                                            );
+
+                                                        if (!context.mounted)
+                                                          return;
+                                                        Navigator.of(context)
+                                                            .pop();
+
+                                                        widget.game.playState =
+                                                            PlayState.waiting;
+                                                      },
+                                                      style:
+                                                          TextButton.styleFrom(
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                      ),
+                                                      child: Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(
+                                                            color: const Color
+                                                                .fromARGB(255,
+                                                                0, 236, 255),
+                                                            width: 1.2,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6),
+                                                        ),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          vertical: 8.0,
+                                                          horizontal: 42.0,
+                                                        ),
+                                                        child: const Text(
+                                                          "Join Session",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  });
                             } catch (e) {
                               widget.game.showErrorDialog(e.toString());
                             }
@@ -588,43 +802,48 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                 ],
               ),
               //join button
-              TextButton(
-                onPressed: () async {
-                  await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return JoinRoomDialog(
-                        game: widget.game,
-                        roomId: roomName,
-                      );
-                    },
-                  );
-                  if (!context.mounted) return;
-                  Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets
-                      .zero, // Remove the default padding from TextButton
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(
-                        255, 0, 236, 255), // Background color
-                    borderRadius: BorderRadius.circular(8), // Rounded edges
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10.0,
-                    horizontal: 25.0,
-                  ), // Padding inside the button
-                  child: const Text(
-                    "JOIN",
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.black, // Text color
+              noOfPlayers == 4
+                  ? const SizedBox(
+                      child: Text("FULL"),
+                    )
+                  : TextButton(
+                      onPressed: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return JoinRoomDialog(
+                              game: widget.game,
+                              roomId: roomName,
+                            );
+                          },
+                        );
+                        if (!context.mounted) return;
+                        Navigator.of(context).pop();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets
+                            .zero, // Remove the default padding from TextButton
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(
+                              255, 0, 236, 255), // Background color
+                          borderRadius:
+                              BorderRadius.circular(8), // Rounded edges
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10.0,
+                          horizontal: 25.0,
+                        ), // Padding inside the button
+                        child: const Text(
+                          "JOIN",
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.black, // Text color
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ],
           ),
         ],
