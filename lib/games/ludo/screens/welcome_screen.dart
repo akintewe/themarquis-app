@@ -258,7 +258,6 @@ class JoinRoomDialog extends ConsumerStatefulWidget {
 
 class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
   final _roomIdController = TextEditingController();
-  LudoSessionData? _sessionData;
   bool _isLoading = false;
 
   @override
@@ -858,8 +857,13 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                       decoration: const InputDecoration(
                                         labelText: 'Token',
                                       ),
-                                      items: snapshot.data!
-                                          .map((Map<String, String> value) {
+                                      items: [
+                                        ...snapshot.data!,
+                                        {
+                                          "tokenAddress": "0",
+                                          "tokenName": "0",
+                                        },
+                                      ].map((Map<String, String> value) {
                                         return DropdownMenuItem<String>(
                                           value: value['tokenAddress']!,
                                           child: Text(value['tokenName']!),

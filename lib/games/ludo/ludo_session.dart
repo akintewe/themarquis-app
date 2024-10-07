@@ -282,8 +282,7 @@ class LudoSession extends _$LudoSession {
       body: jsonEncode({
         'amount': amount,
         'user_creator_color': color,
-        // 'token_address': tokenAddress,
-        'token_address': '0',
+        'token_address': tokenAddress,
       }),
       headers: {
         'Content-Type': 'application/json',
