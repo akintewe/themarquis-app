@@ -76,7 +76,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               width: 8,
                             ),
                             Text(
-                              user == null ? "LOGIN" : user.email,
+                              user == null
+                                  ? "LOGIN"
+                                  : user.email.split("@").first,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall!

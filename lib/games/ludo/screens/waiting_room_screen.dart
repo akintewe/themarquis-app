@@ -419,7 +419,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
           ),
         ),
         Text(
-          player.email,
+          player.email.split("@").first,
           style: TextStyle(
             color: Colors.white,
             fontSize: isSelf ? 18 : 12,

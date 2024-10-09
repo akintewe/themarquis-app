@@ -79,7 +79,7 @@ class ProfileScreen extends ConsumerWidget {
                                 Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Text(
-                                    user.email,
+                                    user.email.split("@").first,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleLarge!

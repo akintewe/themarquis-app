@@ -123,7 +123,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
 
     //player name
     playerName = TextComponent(
-      text: userStatus.email,
+      text: userStatus.email.split("@").first,
       position: (playerIndex == 0 || playerIndex == 1)
           ? (playerIndex % 2 == 0)
               ? Vector2(size.x / 2, size.y / -2)
