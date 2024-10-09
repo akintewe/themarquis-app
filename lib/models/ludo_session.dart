@@ -7,10 +7,10 @@ part 'ludo_session.freezed.dart';
 
 const playerColors = {
   // Add this const
-  '1': Color(0xffd04c2f),
-  '2': Color(0xff2fa9d0),
-  '3': Color(0xff2fd06f),
-  '4': Color(0xffb0d02f),
+  'red': Color(0xffd04c2f),
+  'blue': Color(0xff2fa9d0),
+  'green': Color(0xff2fd06f),
+  'yellow': Color(0xffb0d02f),
 };
 
 @freezed

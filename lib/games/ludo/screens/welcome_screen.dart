@@ -6,6 +6,7 @@ import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/models/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
+import 'package:marquis_v2/widgets/error_dialog.dart';
 
 class LudoWelcomeScreen extends ConsumerStatefulWidget {
   const LudoWelcomeScreen({super.key, required this.game});
@@ -259,117 +260,12 @@ class JoinRoomDialog extends ConsumerStatefulWidget {
 class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
   final _roomIdController = TextEditingController();
   bool _isLoading = false;
-  int selectedColorIndex = 0; // To keep track of the selected color
+  String? _selectedColor; // To keep track of the selected color
 
   @override
   void initState() {
     super.initState();
     _roomIdController.text = widget.roomId ?? "";
-  }
-
-  Widget colorChoosingCard(
-      {required int index,
-      required bool isPicked,
-      required void Function(void Function()) stste}) {
-    return GestureDetector(
-      onTap: () {
-        stste(() {
-          selectedColorIndex = index + 1;
-        });
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Opacity(
-          opacity: isPicked ? 1 : 0.6,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 52,
-                height: 52,
-                child: SvgPicture.asset(
-                  "assets/svg/chess-and-bg/${_getColorBackground(index)}.svg",
-                ),
-              ),
-              SizedBox(
-                width: 30,
-                height: 30,
-                child: SvgPicture.asset(
-                  "assets/svg/chess-and-bg/${_getColorChess(index)}.svg",
-                ),
-              ),
-              if (isPicked) _buildCornerBorder(top: 0, left: 0),
-              if (isPicked) _buildCornerBorder(top: 0, right: 0),
-              if (isPicked) _buildCornerBorder(bottom: 0, left: 0),
-              if (isPicked) _buildCornerBorder(bottom: 0, right: 0),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _getColorBackground(int index) {
-    switch (index) {
-      case 0:
-        return "red_bg";
-      case 1:
-        return "blue_bg";
-
-      case 2:
-        return "green_bg";
-      case 3:
-        return "yellow_bg";
-      default:
-        return "blue_bg";
-    }
-  }
-
-  String _getColorChess(int index) {
-    switch (index) {
-      case 0:
-        return "red_chess";
-
-      case 1:
-        return "blue_chess";
-
-      case 2:
-        return "green_chess";
-      case 3:
-        return "yellow_chess";
-      default:
-        return "blue_chess";
-    }
-  }
-
-  Widget _buildCornerBorder(
-      {double? top, double? left, double? right, double? bottom}) {
-    return Positioned(
-      top: top,
-      left: left,
-      right: right,
-      bottom: bottom,
-      child: Container(
-        width: 10,
-        height: 10,
-        decoration: BoxDecoration(
-          border: Border(
-            top: top != null
-                ? const BorderSide(width: 2, color: Colors.white)
-                : BorderSide.none,
-            left: left != null
-                ? const BorderSide(width: 2, color: Colors.white)
-                : BorderSide.none,
-            right: right != null
-                ? const BorderSide(width: 2, color: Colors.white)
-                : BorderSide.none,
-            bottom: bottom != null
-                ? const BorderSide(width: 2, color: Colors.white)
-                : BorderSide.none,
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -473,21 +369,13 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                               //show new dialog let user choose
                               //check which existing color already picked, then only make available of unchose one
                               //when submit check if really available to check, otherwise loop back, let user choose again
-                              List<String?> notAvailableColors = ludoSession
+                              List<String> notAvailableColors = ludoSession
                                   .sessionUserStatus
                                   .where((pl) => pl.status == "ACTIVE")
                                   .toList()
-                                  .map((e) => e.color)
+                                  .map((e) => e.color!)
                                   .toList();
-                              List<String?> availableColors = [
-                                "1",
-                                "2",
-                                "3",
-                                "4"
-                              ]
-                                  .where((color) =>
-                                      !notAvailableColors.contains(color))
-                                  .toList();
+                              if (!context.mounted) return;
                               showDialog(
                                   context: context,
                                   builder: (c) {
@@ -498,24 +386,14 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                                             builder: (ctx, stste) {
                                               return Column(
                                                 children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: List.generate(
-                                                      availableColors.length,
-                                                      (index) {
-                                                        return colorChoosingCard(
-                                                          index: int.parse(
-                                                              availableColors[
-                                                                  index]!),
-                                                          isPicked:
-                                                              selectedColorIndex ==
-                                                                  index,
-                                                          stste: stste,
-                                                        );
-                                                      },
-                                                    ),
+                                                  ColorChoosingCard(
+                                                    onColorPicked: (color) {
+                                                      stste(() {
+                                                        _selectedColor = color;
+                                                      });
+                                                    },
+                                                    takenColors:
+                                                        notAvailableColors,
                                                   ),
                                                   const SizedBox(
                                                     height: 8,
@@ -533,9 +411,7 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                                                             .joinSession(
                                                               _roomIdController
                                                                   .text,
-                                                              availableColors[
-                                                                      selectedColorIndex]
-                                                                  .toString(),
+                                                              _selectedColor!,
                                                             );
 
                                                         if (!context.mounted)
@@ -941,7 +817,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
   int? _tokenBalance;
   String _selectedTokenAddress = '';
   final _tokenAmountController = TextEditingController();
-  int selectedColorIndex = 0; // To keep track of the selected color
+  String? _selectedColor; // To keep track of the selected color
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -1052,18 +928,12 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                         builder: (ctx, stste) {
                           return Column(
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  4,
-                                  (index) {
-                                    return colorChoosingCard(
-                                      index: index,
-                                      isPicked: selectedColorIndex == index,
-                                      stste: stste,
-                                    );
-                                  },
-                                ),
+                              ColorChoosingCard(
+                                onColorPicked: (color) {
+                                  setState(() {
+                                    _selectedColor = color;
+                                  });
+                                },
                               ),
                               const SizedBox(
                                 height: 14,
@@ -1208,11 +1078,16 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                             print(
                                 "${_sliderValue.round()}   ${_tokenAmountController.text}   $_selectedTokenAddress");
                             try {
+                              if (_selectedColor == null) {
+                                showErrorDialog(
+                                    "Please select a color", context);
+                                return;
+                              }
                               await ref
                                   .read(ludoSessionProvider.notifier)
                                   .createSession(
                                     _sliderValue.round().toString(),
-                                    selectedColorIndex.toString(),
+                                    _selectedColor!,
                                     _selectedTokenAddress,
                                   );
                             } catch (e) {
@@ -1257,47 +1132,27 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
           }),
     );
   }
+}
 
-  Widget colorChoosingCard(
-      {required int index,
-      required bool isPicked,
-      required void Function(void Function()) stste}) {
-    return GestureDetector(
-      onTap: () {
-        stste(() {
-          selectedColorIndex = index + 1;
-        });
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Opacity(
-          opacity: isPicked ? 1 : 0.6,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 52,
-                height: 52,
-                child: SvgPicture.asset(
-                  "assets/svg/chess-and-bg/${_getColorBackground(index)}.svg",
-                ),
-              ),
-              SizedBox(
-                width: 30,
-                height: 30,
-                child: SvgPicture.asset(
-                  "assets/svg/chess-and-bg/${_getColorChess(index)}.svg",
-                ),
-              ),
-              if (isPicked) _buildCornerBorder(top: 0, left: 0),
-              if (isPicked) _buildCornerBorder(top: 0, right: 0),
-              if (isPicked) _buildCornerBorder(bottom: 0, left: 0),
-              if (isPicked) _buildCornerBorder(bottom: 0, right: 0),
-            ],
-          ),
-        ),
-      ),
-    );
+class ColorChoosingCard extends StatefulWidget {
+  const ColorChoosingCard(
+      {super.key, required this.onColorPicked, this.takenColors = const []});
+  final Function(String) onColorPicked;
+  final List<String> takenColors;
+
+  @override
+  State<ColorChoosingCard> createState() => _ColorChoosingCardState();
+}
+
+class _ColorChoosingCardState extends State<ColorChoosingCard> {
+  final colors = ["red", "blue", "green", "yellow"];
+  late final List<String> _takenColors;
+  int _pickedColorIndex = 0;
+
+  @override
+  void initState() {
+    _takenColors = widget.takenColors;
+    super.initState();
   }
 
   String _getColorBackground(int index) {
@@ -1360,6 +1215,70 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
           ),
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        ...colors.map(
+          (color) => GestureDetector(
+            onTap: () {
+              if (_takenColors.contains(color)) {
+                return;
+              }
+              setState(() {
+                _pickedColorIndex = colors.indexOf(color);
+                widget.onColorPicked(color);
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Opacity(
+                opacity: _pickedColorIndex == colors.indexOf(color) ? 1 : 0.6,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: SvgPicture.asset(
+                        "assets/svg/chess-and-bg/${_getColorBackground(colors.indexOf(color))}.svg",
+                      ),
+                    ),
+                    SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: SvgPicture.asset(
+                        "assets/svg/chess-and-bg/${_getColorChess(colors.indexOf(color))}.svg",
+                      ),
+                    ),
+                    if (_pickedColorIndex == colors.indexOf(color))
+                      _buildCornerBorder(top: 0, left: 0),
+                    if (_pickedColorIndex == colors.indexOf(color))
+                      _buildCornerBorder(top: 0, right: 0),
+                    if (_pickedColorIndex == colors.indexOf(color))
+                      _buildCornerBorder(bottom: 0, left: 0),
+                    if (_pickedColorIndex == colors.indexOf(color))
+                      _buildCornerBorder(bottom: 0, right: 0),
+                    if (_takenColors.contains(color))
+                      SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withAlpha(100),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
