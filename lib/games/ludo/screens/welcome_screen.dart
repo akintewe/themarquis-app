@@ -260,7 +260,6 @@ class JoinRoomDialog extends ConsumerStatefulWidget {
 class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
   final _roomIdController = TextEditingController();
   bool _isLoading = false;
-  String? _selectedColor; // To keep track of the selected color
 
   @override
   void initState() {
@@ -362,118 +361,31 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                                   .read(ludoSessionProvider.notifier)
                                   .getLudoSession(_roomIdController.text);
                               if (ludoSession == null) {
-                                widget.game.showErrorDialog("Room not found");
+                                if (!context.mounted) return;
+                                showErrorDialog("Room not found", context);
                                 return;
                               }
-                              //let user choose color
-                              //show new dialog let user choose
-                              //check which existing color already picked, then only make available of unchose one
-                              //when submit check if really available to check, otherwise loop back, let user choose again
-                              List<String> notAvailableColors = ludoSession
-                                  .sessionUserStatus
-                                  .where((pl) => pl.status == "ACTIVE")
-                                  .toList()
-                                  .map((e) => e.color!)
-                                  .toList();
                               if (!context.mounted) return;
-                              showDialog(
+                              final res = await showDialog(
                                   context: context,
                                   builder: (c) {
-                                    return Dialog(
-                                      child: Column(
-                                        children: [
-                                          StatefulBuilder(
-                                            builder: (ctx, stste) {
-                                              return Column(
-                                                children: [
-                                                  ColorChoosingCard(
-                                                    onColorPicked: (color) {
-                                                      stste(() {
-                                                        _selectedColor = color;
-                                                      });
-                                                    },
-                                                    takenColors:
-                                                        notAvailableColors,
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 8,
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: TextButton(
-                                                      onPressed: () async {
-                                                        await ref
-                                                            .read(
-                                                                ludoSessionProvider
-                                                                    .notifier)
-                                                            .joinSession(
-                                                              _roomIdController
-                                                                  .text,
-                                                              _selectedColor!,
-                                                            );
-
-                                                        if (!context.mounted)
-                                                          return;
-                                                        Navigator.of(context)
-                                                            .pop();
-
-                                                        widget.game.playState =
-                                                            PlayState.waiting;
-                                                      },
-                                                      style:
-                                                          TextButton.styleFrom(
-                                                        padding:
-                                                            EdgeInsets.zero,
-                                                      ),
-                                                      child: Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border.all(
-                                                            color: const Color
-                                                                .fromARGB(255,
-                                                                0, 236, 255),
-                                                            width: 1.2,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(6),
-                                                        ),
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                          vertical: 8.0,
-                                                          horizontal: 42.0,
-                                                        ),
-                                                        child: const Text(
-                                                          "Join Session",
-                                                          style: TextStyle(
-                                                            fontSize: 14,
-                                                            color: Colors.white,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ),
+                                    return JoinRoomChooseColorDialog(
+                                      roomId: _roomIdController.text,
+                                      selectedSession: ludoSession,
                                     );
                                   });
+                              if (res == true) {
+                                if (!context.mounted) return;
+                                Navigator.of(context).pop(true);
+                                widget.game.playState = PlayState.waiting;
+                              }
                             } catch (e) {
-                              widget.game.showErrorDialog(e.toString());
+                              if (!context.mounted) return;
+                              showErrorDialog(e.toString(), context);
                             }
                             setState(() {
                               _isLoading = false;
                             });
-                            if (!context.mounted) return;
-                            Navigator.of(context).pop();
-
-                            widget.game.playState = PlayState.waiting;
                           },
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -684,7 +596,7 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                     )
                   : TextButton(
                       onPressed: () async {
-                        await showDialog(
+                        final res = await showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return JoinRoomDialog(
@@ -693,8 +605,10 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
                             );
                           },
                         );
-                        if (!context.mounted) return;
-                        Navigator.of(context).pop();
+                        if (res == true) {
+                          if (!context.mounted) return;
+                          Navigator.of(context).pop();
+                        }
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets
@@ -817,15 +731,24 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
   int? _tokenBalance;
   String _selectedTokenAddress = '';
   final _tokenAmountController = TextEditingController();
+  List<Map<String, String>>? _supportedTokens;
   String? _selectedColor; // To keep track of the selected color
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: FutureBuilder<List<Map<String, String>>>(
-          future: ref.read(userProvider.notifier).getSupportedTokens(),
+      child: FutureBuilder(
+          future: _supportedTokens == null
+              ? () async {
+                  _supportedTokens = await ref
+                      .read(userProvider.notifier)
+                      .getSupportedTokens();
+                }()
+              : null,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox(
@@ -947,10 +870,10 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                         labelText: 'Token',
                                       ),
                                       items: [
-                                        ...snapshot.data!,
+                                        ...?_supportedTokens,
                                         {
-                                          "tokenAddress": "0",
-                                          "tokenName": "0",
+                                          "tokenAddress": "0x0",
+                                          "tokenName": "0x0",
                                         },
                                       ].map((Map<String, String> value) {
                                         return DropdownMenuItem<String>(
@@ -1012,6 +935,12 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                     future: _tokenBalance != null
                                         ? null
                                         : () async {
+                                            if (_selectedTokenAddress ==
+                                                "0x0") {
+                                              _sliderValue = 0;
+                                              _tokenBalance = 0;
+                                              return;
+                                            }
                                             final res = await ref
                                                 .read(userProvider.notifier)
                                                 .getTokenBalance(
@@ -1071,59 +1000,69 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                       const SizedBox(
                         height: 8,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextButton(
-                          onPressed: () async {
-                            print(
-                                "${_sliderValue.round()}   ${_tokenAmountController.text}   $_selectedTokenAddress");
-                            try {
-                              if (_selectedColor == null) {
-                                showErrorDialog(
-                                    "Please select a color", context);
-                                return;
-                              }
-                              await ref
-                                  .read(ludoSessionProvider.notifier)
-                                  .createSession(
-                                    _sliderValue.round().toString(),
-                                    _selectedColor!,
-                                    _selectedTokenAddress,
-                                  );
-                            } catch (e) {
-                              widget.game.showErrorDialog(e.toString());
-                            }
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextButton(
+                                onPressed: () async {
+                                  print(
+                                      "${_sliderValue.round()}   ${_tokenAmountController.text}   $_selectedTokenAddress");
+                                  try {
+                                    if (_selectedColor == null) {
+                                      showErrorDialog(
+                                          "Please select a color", context);
+                                      return;
+                                    }
+                                    setState(() {
+                                      _isLoading = true;
+                                    });
+                                    await ref
+                                        .read(ludoSessionProvider.notifier)
+                                        .createSession(
+                                          _sliderValue.round().toString(),
+                                          _selectedColor!,
+                                          _selectedTokenAddress,
+                                        );
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+                                    showErrorDialog(e.toString(), context);
+                                  }
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
 
-                            if (!context.mounted) return;
-                            Navigator.of(context).pop();
+                                  if (!context.mounted) return;
+                                  Navigator.of(context).pop();
 
-                            widget.game.playState = PlayState.waiting;
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: const Color.fromARGB(255, 0, 236, 255),
-                                width: 1.2,
+                                  widget.game.playState = PlayState.waiting;
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color.fromARGB(
+                                          255, 0, 236, 255),
+                                      width: 1.2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                    horizontal: 42.0,
+                                  ),
+                                  child: const Text(
+                                    "Create",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(6),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 8.0,
-                              horizontal: 42.0,
-                            ),
-                            child: const Text(
-                              "Create",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -1152,6 +1091,11 @@ class _ColorChoosingCardState extends State<ColorChoosingCard> {
   @override
   void initState() {
     _takenColors = widget.takenColors;
+    print("Taken Colors: $_takenColors");
+    _pickedColorIndex =
+        colors.indexWhere((color) => !_takenColors.contains(color));
+    Future.delayed(
+        Duration.zero, () => widget.onColorPicked(colors[_pickedColorIndex]));
     super.initState();
   }
 
@@ -1268,7 +1212,7 @@ class _ColorChoosingCardState extends State<ColorChoosingCard> {
                         height: 52,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.black.withAlpha(100),
+                            color: Colors.white.withAlpha(200),
                           ),
                         ),
                       ),
@@ -1279,6 +1223,156 @@ class _ColorChoosingCardState extends State<ColorChoosingCard> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class JoinRoomChooseColorDialog extends ConsumerStatefulWidget {
+  const JoinRoomChooseColorDialog(
+      {super.key, required this.roomId, required this.selectedSession});
+  final String roomId;
+  final LudoSessionData selectedSession;
+
+  @override
+  ConsumerState<JoinRoomChooseColorDialog> createState() =>
+      _JoinRoomChooseColorDialogState();
+}
+
+class _JoinRoomChooseColorDialogState
+    extends ConsumerState<JoinRoomChooseColorDialog> {
+  String _selectedColor = "";
+  bool _isLoading = false;
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: const Color.fromARGB(255, 0, 236, 255), // Cyan border color
+            width: 1, // Border thickness
+          ),
+          borderRadius: BorderRadius.circular(
+              12), // Ensure the border follows the shape of the dialog
+        ),
+        width: MediaQuery.of(context).size.width * 0.80,
+        height: MediaQuery.of(context).size.height * 0.50 < 280
+            ? 280
+            : MediaQuery.of(context).size.height * 0.50,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                const Expanded(
+                  flex: 1,
+                  child: SizedBox(),
+                ),
+                const Expanded(
+                  flex: 3,
+                  child: Center(
+                    child: Text(
+                      'JOIN ROOM',
+                      style: TextStyle(
+                        color: Color.fromARGB(
+                          255,
+                          0,
+                          236,
+                          255,
+                        ), // Cyan border color
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: const Icon(
+                        Icons.cancel_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ColorChoosingCard(
+              onColorPicked: (color) {
+                setState(() {
+                  _selectedColor = color;
+                });
+              },
+              takenColors: widget.selectedSession.notAvailableColors,
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextButton(
+                      onPressed: () async {
+                        try {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          if (_selectedColor == "") {
+                            showErrorDialog("Please select a color", context);
+                            return;
+                          }
+                          await ref
+                              .read(ludoSessionProvider.notifier)
+                              .joinSession(
+                                widget.roomId,
+                                _selectedColor,
+                              );
+                          if (!context.mounted) return;
+                          Navigator.of(context).pop(true);
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          showErrorDialog(e.toString(), context);
+                        }
+                        setState(() {
+                          _isLoading = false;
+                        });
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 0, 236, 255),
+                            width: 1.2,
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 42.0,
+                        ),
+                        child: const Text(
+                          "Join Session",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+          ],
+        ),
+      ),
     );
   }
 }
