@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,9 +23,33 @@ class WaitingRoomScreen extends ConsumerStatefulWidget {
 }
 
 class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
+  Timer? _countdownTimer;
+  int _countdown = 15;
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdown = 15;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          _countdownTimer?.cancel();
+          widget.game.playState = PlayState.playing;
+        }
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(ludoSessionProvider);
+    if (_isRoomFull(session) && _countdownTimer == null) _startCountdown();
     final deviceSize = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.black,
@@ -138,106 +163,118 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                       ],
                     ),
                     // Invite Button
-                    ElevatedButton(
-                      onPressed: () async {
-                        final imageBytes = await _buildShareImage(session);
-                        if (!context.mounted) return;
-                        showDialog(
-                          context: context,
-                          builder: (ctx) => Dialog(
-                            backgroundColor: Colors.transparent,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Image.memory(imageBytes),
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      IconButton.filled(
-                                          onPressed: () {
-                                            Share.shareXFiles(
-                                                [
-                                                  XFile.fromData(imageBytes,
-                                                      mimeType: 'image/png')
-                                                ],
-                                                subject: 'Ludo Invite',
-                                                text:
-                                                    'I am playing Ludo, please join us!',
-                                                fileNameOverrides: [
-                                                  'share.png'
-                                                ]);
-                                          },
-                                          icon: const Icon(Icons.share)),
-                                      IconButton.filled(
-                                          onPressed: () async {
-                                            await Gal.putImageBytes(imageBytes);
-                                            if (!context.mounted) return;
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                    'Image successfully saved to gallery'),
-                                                duration: Duration(seconds: 2),
-                                              ),
-                                            );
-                                          },
-                                          icon: const Icon(Icons.download)),
-                                    ],
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final imageBytes = await _buildShareImage(session);
+                          if (!context.mounted) return;
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => Dialog(
+                              backgroundColor: Colors.transparent,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Image.memory(imageBytes),
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        IconButton.filled(
+                                            onPressed: () {
+                                              Share.shareXFiles(
+                                                  [
+                                                    XFile.fromData(imageBytes,
+                                                        mimeType: 'image/png')
+                                                  ],
+                                                  subject: 'Ludo Invite',
+                                                  text:
+                                                      'I am playing Ludo, please join us!',
+                                                  fileNameOverrides: [
+                                                    'share.png'
+                                                  ]);
+                                            },
+                                            icon: const Icon(Icons.share)),
+                                        IconButton.filled(
+                                            onPressed: () async {
+                                              await Gal.putImageBytes(
+                                                  imageBytes);
+                                              if (!context.mounted) return;
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      'Image successfully saved to gallery'),
+                                                  duration:
+                                                      Duration(seconds: 2),
+                                                ),
+                                              );
+                                            },
+                                            icon: const Icon(Icons.download)),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          // primary: Colors.cyan, // background color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        // primary: Colors.cyan, // background color
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
                         ),
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 30.0, vertical: 10),
-                        child: Text(
-                          'Invite',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30.0, vertical: 10),
+                          child: Text(
+                            'Invite',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
                     ),
                     // Bottom Timer Section
-                    IconButton(
-                      onPressed: session.sessionUserStatus
-                                  .where((e) => e.status == "ACTIVE")
-                                  .length ==
-                              4
-                          ? () async {
-                              widget.game.playState = PlayState.playing;
-                            }
-                          : null,
-                      disabledColor: Colors.grey,
-                      icon: Stack(
-                        alignment: AlignmentDirectional.center,
-                        children: [
-                          Center(
-                            child: SvgPicture.asset(
-                                "assets/svg/ludo_elevated_button.svg"),
-                          ),
-                          const Center(
-                            child: Text('Game Start',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ],
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: IconButton(
+                        onPressed: _isRoomFull(session)
+                            ? () {
+                                widget.game.playState = PlayState.playing;
+                              }
+                            : null,
+                        disabledColor: Colors.grey,
+                        icon: Stack(
+                          alignment: AlignmentDirectional.center,
+                          children: [
+                            Center(
+                              child: SvgPicture.asset(
+                                  "assets/svg/ludo_elevated_button.svg"),
+                            ),
+                            Center(
+                              child: Text(
+                                _isRoomFull(session)
+                                    ? _countdownTimer == null
+                                        ? 'Start Game'
+                                        : 'Starting in $_countdown'
+                                    : 'Waiting for players',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -427,5 +464,11 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
         ),
       ],
     );
+  }
+
+  bool _isRoomFull(LudoSessionData? session) {
+    return session != null &&
+        session.sessionUserStatus.where((e) => e.status == "ACTIVE").length ==
+            4;
   }
 }

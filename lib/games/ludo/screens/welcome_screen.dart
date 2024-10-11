@@ -866,14 +866,15 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                   Expanded(
                                     flex: 2,
                                     child: DropdownButtonFormField<String>(
+                                      isExpanded: true,
                                       decoration: const InputDecoration(
                                         labelText: 'Token',
                                       ),
                                       items: [
                                         ...?_supportedTokens,
                                         {
-                                          "tokenAddress": "0x0",
-                                          "tokenName": "0x0",
+                                          "tokenAddress": "0",
+                                          "tokenName": "No Token",
                                         },
                                       ].map((Map<String, String> value) {
                                         return DropdownMenuItem<String>(
@@ -889,54 +890,57 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                       },
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    flex: 3,
-                                    child: TextField(
-                                      decoration: const InputDecoration(
-                                        labelText: 'Token Amount',
+                                  if (_selectedTokenAddress != "0")
+                                    const SizedBox(width: 16),
+                                  if (_selectedTokenAddress != "0")
+                                    Expanded(
+                                      flex: 3,
+                                      child: TextField(
+                                        decoration: const InputDecoration(
+                                          labelText: 'Token Amount',
+                                        ),
+                                        controller: _tokenAmountController,
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(
+                                              RegExp(r'^\d*\.?\d*$')),
+                                          TextInputFormatter.withFunction(
+                                              (oldValue, newValue) {
+                                            if (newValue.text.isEmpty) {
+                                              return newValue;
+                                            }
+                                            double? value =
+                                                double.tryParse(newValue.text);
+                                            if (value != null &&
+                                                _tokenBalance != null &&
+                                                value <=
+                                                    _tokenBalance! / 1e18) {
+                                              return newValue;
+                                            }
+                                            return oldValue;
+                                          }),
+                                        ],
+                                        onChanged: (value) {
+                                          if (value.isNotEmpty) {
+                                            stste(() {
+                                              _sliderValue =
+                                                  double.parse(value) * 1e18;
+                                            });
+                                          }
+                                        },
                                       ),
-                                      controller: _tokenAmountController,
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                            RegExp(r'^\d*\.?\d*$')),
-                                        TextInputFormatter.withFunction(
-                                            (oldValue, newValue) {
-                                          if (newValue.text.isEmpty) {
-                                            return newValue;
-                                          }
-                                          double? value =
-                                              double.tryParse(newValue.text);
-                                          if (value != null &&
-                                              _tokenBalance != null &&
-                                              value <= _tokenBalance! / 1e18) {
-                                            return newValue;
-                                          }
-                                          return oldValue;
-                                        }),
-                                      ],
-                                      onChanged: (value) {
-                                        if (value.isNotEmpty) {
-                                          stste(() {
-                                            _sliderValue =
-                                                double.parse(value) * 1e18;
-                                          });
-                                        }
-                                      },
                                     ),
-                                  ),
                                 ],
                               ),
-                              if (_selectedTokenAddress != "")
+                              if (_selectedTokenAddress != "0" &&
+                                  _selectedTokenAddress != "")
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: FutureBuilder(
                                     future: _tokenBalance != null
                                         ? null
                                         : () async {
-                                            if (_selectedTokenAddress ==
-                                                "0x0") {
+                                            if (_selectedTokenAddress == "0") {
                                               _sliderValue = 0;
                                               _tokenBalance = 0;
                                               return;
@@ -1242,6 +1246,8 @@ class _JoinRoomChooseColorDialogState
     extends ConsumerState<JoinRoomChooseColorDialog> {
   String _selectedColor = "";
   bool _isLoading = false;
+  List<Map<String, String>>? _supportedTokens;
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -1269,12 +1275,12 @@ class _JoinRoomChooseColorDialogState
                   flex: 1,
                   child: SizedBox(),
                 ),
-                const Expanded(
+                Expanded(
                   flex: 3,
                   child: Center(
                     child: Text(
-                      'JOIN ROOM',
-                      style: TextStyle(
+                      'JOIN ROOM ${widget.roomId}',
+                      style: const TextStyle(
                         color: Color.fromARGB(
                           255,
                           0,
@@ -1304,16 +1310,81 @@ class _JoinRoomChooseColorDialogState
                 ),
               ],
             ),
-            ColorChoosingCard(
-              onColorPicked: (color) {
-                setState(() {
-                  _selectedColor = color;
-                });
-              },
-              takenColors: widget.selectedSession.notAvailableColors,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ColorChoosingCard(
+                onColorPicked: (color) {
+                  setState(() {
+                    _selectedColor = color;
+                  });
+                },
+                takenColors: widget.selectedSession.notAvailableColors,
+              ),
             ),
-            const SizedBox(
-              height: 8,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FutureBuilder(
+                  future: _supportedTokens == null
+                      ? () async {
+                          _supportedTokens = await ref
+                              .read(userProvider.notifier)
+                              .getSupportedTokens();
+                          _supportedTokens!.add({
+                            "tokenAddress": "0",
+                            "tokenName": "No Token",
+                          });
+                        }()
+                      : null,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    return Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color.fromARGB(255, 0, 236, 255),
+                          width: 1.2,
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              _supportedTokens?.firstWhere((e) =>
+                                      e["tokenAddress"] ==
+                                      widget.selectedSession
+                                          .playToken)["tokenName"] ??
+                                  "",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          if (widget.selectedSession.playToken != "0")
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                widget.selectedSession
+                                    .playAmount, // Replace with actual play amount
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }),
             ),
             _isLoading
                 ? const CircularProgressIndicator()
@@ -1347,6 +1418,8 @@ class _JoinRoomChooseColorDialogState
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
+                        // Remove the default splash effect
+                        splashFactory: NoSplash.splashFactory,
                       ),
                       child: Container(
                         decoration: BoxDecoration(
@@ -1355,6 +1428,13 @@ class _JoinRoomChooseColorDialogState
                             width: 1.2,
                           ),
                           borderRadius: BorderRadius.circular(6),
+                          // boxShadow: [
+                          //   BoxShadow(
+                          //     color: Colors.pink,
+                          //     spreadRadius: -4,
+                          //     blurRadius: 10,
+                          //   ),
+                          // ],
                         ),
                         padding: const EdgeInsets.symmetric(
                           vertical: 8.0,

@@ -1,11 +1,19 @@
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/dialog/auth_dialog.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfilePath extends AppRoutePath {
   @override
@@ -104,58 +112,7 @@ class ProfileScreen extends ConsumerWidget {
                       onTap: () {
                         showDialog(
                           context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Invite your friends'),
-                            content: SizedBox(
-                              width: double.maxFinite,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: QrImageView(
-                                      data: user.referralCode,
-                                      size: 128,
-                                      backgroundColor: Colors.white,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: TextField(
-                                      controller: TextEditingController(
-                                          text: user.referralCode),
-                                      readOnly: true,
-                                      decoration: InputDecoration(
-                                        labelText: 'Referral Code',
-                                        border: const OutlineInputBorder(),
-                                        suffixIcon: IconButton(
-                                          icon: const Icon(Icons.copy),
-                                          onPressed: () {
-                                            Clipboard.setData(ClipboardData(
-                                                text: user.referralCode));
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                  content: Text(
-                                                      'Referral code copied to clipboard')),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Close'),
-                              ),
-                            ],
-                          ),
+                          builder: (context) => InviteFriendDialog(user: user),
                         );
                       },
                       child: Card(
@@ -251,5 +208,216 @@ class ProfileScreen extends ConsumerWidget {
               ),
       ),
     );
+  }
+}
+
+class InviteFriendDialog extends StatefulWidget {
+  const InviteFriendDialog({
+    super.key,
+    required this.user,
+  });
+
+  final UserData user;
+
+  @override
+  State<InviteFriendDialog> createState() => _InviteFriendDialogState();
+}
+
+class _InviteFriendDialogState extends State<InviteFriendDialog> {
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: const Color(0xFF1E1E1E),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Invite Friend To Sign Up',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            QrImageView(
+              data: widget.user.referralCode,
+              size: 150,
+              backgroundColor: Colors.white,
+            ),
+            const SizedBox(height: 20),
+            _buildReferralField('Referral Code', widget.user.referralCode),
+            const SizedBox(height: 10),
+            _buildReferralField('Referral Link',
+                'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'),
+            const SizedBox(height: 18),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildActionButton(FontAwesomeIcons.xTwitter, 'X', () async {
+                    // Prepare the tweet text
+                    final tweetText =
+                        'Join TheMarquis with my referral code: ${widget.user.referralCode}';
+                    final url =
+                        'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}';
+
+                    // Construct the tweet URL with text and referral link
+                    final tweetUrl = Uri.encodeFull(
+                        'https://twitter.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz');
+
+                    // Launch the URL
+                    if (await canLaunchUrl(Uri.parse(tweetUrl))) {
+                      await launchUrl(Uri.parse(tweetUrl));
+                    } else {
+                      // Handle error
+                      print('Could not launch $tweetUrl');
+                    }
+                  }),
+                  _buildActionButton(Icons.link, 'Copy Link', () {
+                    Clipboard.setData(ClipboardData(
+                        text:
+                            'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Copied to clipboard')),
+                    );
+                  }),
+                  _buildActionButton(Icons.share, 'Share', () async {
+                    final image = await createImageFromWidget(
+                      QrImageView(
+                        data: widget.user.referralCode,
+                        size: 150,
+                      ),
+                    );
+                    Share.shareXFiles([
+                      XFile.fromData(image,
+                          mimeType: 'image/png', name: 'qr_code.png')
+                    ],
+                        subject: 'TheMarquis Referral Code',
+                        text:
+                            'Join TheMarquis with my referral code: ${widget.user.referralCode}\nhttps://themarquis.xyz/signup?referralcode=${widget.user.referralCode}');
+                  }),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReferralField(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '$label    $value',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Copied to clipboard')),
+              );
+            },
+            icon: const Icon(Icons.copy, color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+      IconData icon, String label, VoidCallback onPressed) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: onPressed,
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF2A2A2A),
+            ),
+            child: Icon(icon, color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+      ],
+    );
+  }
+
+  Future<Uint8List> createImageFromWidget(Widget widget,
+      {Duration? wait, Size? logicalSize}) async {
+    final RenderRepaintBoundary repaintBoundary = RenderRepaintBoundary();
+    final view = PlatformDispatcher.instance.views.first;
+    logicalSize ??= view.physicalSize / view.devicePixelRatio;
+
+    final RenderView renderView = RenderView(
+      view: view,
+      child: RenderPositionedBox(
+          alignment: Alignment.center, child: repaintBoundary),
+      configuration: ViewConfiguration(
+        logicalConstraints: BoxConstraints(
+            maxWidth: logicalSize.width, maxHeight: logicalSize.height),
+        devicePixelRatio: 1.0,
+      ),
+    );
+
+    final PipelineOwner pipelineOwner = PipelineOwner();
+    final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
+
+    pipelineOwner.rootNode = renderView;
+    renderView.prepareInitialFrame();
+
+    final RenderObjectToWidgetElement<RenderBox> rootElement =
+        RenderObjectToWidgetAdapter<RenderBox>(
+      container: repaintBoundary,
+      child: widget,
+    ).attachToRenderTree(buildOwner);
+
+    buildOwner.buildScope(rootElement);
+
+    if (wait != null) {
+      await Future.delayed(wait);
+    }
+
+    buildOwner.buildScope(rootElement);
+    buildOwner.finalizeTree();
+
+    pipelineOwner.flushLayout();
+    pipelineOwner.flushCompositingBits();
+    pipelineOwner.flushPaint();
+
+    final ui.Image image = await repaintBoundary.toImage();
+    final ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+
+    return Uint8List.view(byteData!.buffer);
   }
 }

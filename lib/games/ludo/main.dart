@@ -7,6 +7,7 @@ import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/screens/game_over_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/welcome_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/waiting_room_screen.dart';
+import 'package:marquis_v2/games/ludo/widgets/message_overlay.dart';
 
 void main() {
   runApp(const LudoGameApp());
@@ -74,7 +75,22 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                                 ),
                             PlayState.finished.name: (context, game) =>
                                 MatchResultsScreen(game: game),
-                            'error': (context, game) => Container()
+                            'snackbar': (_, __) =>
+                                Container(), // Empty container for snackbar overlay
+                            'error': (_, __) =>
+                                Container(), // Empty container for error overlay
+                            'message': (BuildContext context, LudoGame game) {
+                              return MessageOverlay(
+                                // game: game,
+                                message: game.currentMessage ?? '',
+                                backgroundColor: game.isErrorMessage
+                                    ? Colors.red
+                                    : Colors.black87,
+                                onDismiss: () {
+                                  game.overlays.remove('message');
+                                },
+                              );
+                            },
                           },
                         ),
                       ),

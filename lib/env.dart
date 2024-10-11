@@ -7,5 +7,5 @@ const environment = {
   'wsUrlDebug': 'wss://themarquis.wmtech.cc/ws',
   // 'wsUrlDebug': 'wss://themarquis.home.wmtech.cc/ws',
   // 'build': 'PROD',
-  'build': 'PROD',
+  'build': 'DEBUG',
 };

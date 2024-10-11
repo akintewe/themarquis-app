@@ -6,6 +6,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/material.dart';
+import 'package:marquis_v2/games/ludo/components/board.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
@@ -22,6 +23,8 @@ class PlayerPin extends SpriteComponent
   final int playerIndex;
   final int homeIndex;
   int currentPosIndex = -1; // Ensure this is set to -1 initially
+  int badgeCount = 1;
+
   PlayerPin(Vector2 position, this.playerIndex, this.homeIndex, this.onTap)
       : super(
           position: position,
@@ -78,6 +81,25 @@ class PlayerPin extends SpriteComponent
       final center = Offset(size.x / 2, size.y / 2);
 
       canvas.drawCircle(center, radius, paint);
+    }
+
+    // Render badge if count is greater than 1
+    if (badgeCount > 1) {
+      final badgePaint = Paint()..color = Colors.red;
+      final textPaint = TextPaint(
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+
+      canvas.drawCircle(Offset(size.x - 8, 8), 8, badgePaint);
+      textPaint.render(
+        canvas,
+        badgeCount.toString(),
+        Vector2(size.x - 12, 2),
+      );
     }
   }
 
@@ -159,6 +181,9 @@ class PlayerPin extends SpriteComponent
     if (moveEffects.isNotEmpty && !isRemoved) {
       moveEffects.last.onComplete = () {
         position = moveEffects.last.target.position;
+        if (parent is Board) {
+          (parent as Board).updateOverlappingPins();
+        }
       };
       // Add sequential effect to combine all move effects
       await add(SequenceEffect(moveEffects));

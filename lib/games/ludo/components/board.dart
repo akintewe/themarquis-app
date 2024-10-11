@@ -179,12 +179,41 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       ..onTap = (event, pin) {
         if ((pin.currentPosIndex >= 0 || game.dice.value == 6) &&
             (pin.currentPosIndex + game.dice.value <= 56)) {
-          // pin.movePin(null);
           return true;
         }
         return false;
       });
     print("moving pin");
     await pin.movePin(location);
+    // updateOverlappingPins();
   }
+
+  Map<String, List<PlayerPin>> overlappingPins = {};
+
+  void updateOverlappingPins() {
+    overlappingPins.clear();
+    for (var pin in children.whereType<PlayerPin>()) {
+      String key = '${pin.playerIndex}-${pin.currentPosIndex}';
+      if (!overlappingPins.containsKey(key)) {
+        overlappingPins[key] = [];
+      }
+      overlappingPins[key]!.add(pin);
+    }
+
+    for (var pins in overlappingPins.values) {
+      if (pins.length > 1) {
+        for (var pin in pins) {
+          pin.badgeCount = pins.length;
+        }
+      } else if (pins.length == 1) {
+        pins[0].badgeCount = 1;
+      }
+    }
+  }
+
+  // @override
+  // void update(double dt) {
+  //   super.update(dt);
+  //   updateOverlappingPins();
+  // }
 }

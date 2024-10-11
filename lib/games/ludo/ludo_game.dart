@@ -1,3 +1,6 @@
+import 'package:marquis_v2/games/ludo/widgets/message_overlay.dart';
+import 'dart:async' as dart_async;
+
 // ignore_for_file: unused_field
 
 import 'package:flame/components.dart';
@@ -39,6 +42,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   int? winnerIndex;
   LudoSessionData? _sessionData;
   int pendingMoves = 0;
+  String? currentMessage;
+  bool isErrorMessage = false;
+  dart_async.Timer? _messageTimer;
 
   LudoGame()
       : super(
@@ -63,8 +69,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         Color(0xffb0d02f),
       ];
   int get userIndex => _userIndex;
-  List<String> get playerNames =>
-      _sessionData!.sessionUserStatus.map((user) => user.email).toList();
+  List<String> get playerNames => _sessionData!.sessionUserStatus
+      .map((user) => user.email.split('@')[0])
+      .toList();
 
   Future<List<int>> generateMove() async {
     try {
@@ -262,26 +269,18 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> rollDice() async {
     if (playerCanMove) return;
     await dice.roll();
-    //player can move = false
 
-    //if 1 pin inside winning route, 3 pin at home, rolled value = the 1 pin ->win! ?
-    //if 2 pin inside winning route, 2 pin at home, rolled value = the 2 pin ->win! ?
-    //if 3 pin inside winning route, 1 pin at home, rolled value = the 3 pin ->win! ?
-    //everything on board can move, and home can come out
     List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(_userIndex);
-    for (PlayerPin i in listOfPlayerPin) {
-      if (i.canMove) {
-        playerCanMove = true;
-        break;
+    List<PlayerPin> movablePins = [];
+
+    for (PlayerPin pin in listOfPlayerPin) {
+      if (pin.canMove) {
+        movablePins.add(pin);
       }
     }
-    if (!playerCanMove &&
-        !playerHomes[_currentPlayer].isHomeEmpty &&
-        dice.value >= 6) {
-      playerCanMove = true;
-    }
 
-    if (!playerCanMove) {
+    if (movablePins.isEmpty && dice.value < 6) {
+      showSnackBar("Can not move from Basement, try to get a 6!!");
       final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
       if (pinsAtHome.isNotEmpty) {
         await playMove(pinsAtHome[0]!.homeIndex);
@@ -289,34 +288,66 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         final pins = board.getPlayerPinsOnBoard(_userIndex);
         await playMove(pins[0].homeIndex);
       }
+      return;
     }
+
+    if (movablePins.length == 1 && dice.value != 6) {
+      // Automatically play move on the only movable pin
+      await playMove(movablePins[0].homeIndex);
+      return;
+    }
+
+    playerCanMove = true;
+
+    // playerCanMove = !movablePins.isEmpty ||
+    //     (dice.value >= 6 && !playerHomes[_currentPlayer].isHomeEmpty);
+
+    // if (!playerCanMove) {
+    //   final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
+    //   if (pinsAtHome.isNotEmpty) {
+    //     await playMove(pinsAtHome[0]!.homeIndex);
+    //   } else {
+    //     final pins = board.getPlayerPinsOnBoard(_userIndex);
+    //     await playMove(pins[0].homeIndex);
+    //   }
+    // }
+  }
+
+  void showMessage(String message,
+      {bool isError = false, int durationSeconds = 3}) {
+    currentMessage = message;
+    isErrorMessage = isError;
+
+    // Cancel any existing timer
+    _messageTimer?.cancel();
+
+    if (!overlays.isActive('message')) {
+      overlays.add('message');
+    } else {
+      overlays.remove('message');
+      overlays.add('message');
+    }
+
+    // Set a timer to remove the message after the specified duration
+    _messageTimer = dart_async.Timer(Duration(seconds: durationSeconds), () {
+      overlays.remove('message');
+    });
+  }
+
+  void showSnackBar(String message) {
+    showMessage(message, durationSeconds: 2);
   }
 
   void showErrorDialog(String errorMessage) {
-    overlays.add('error');
-    addToGameWidgetBuild(() {
-      Future.delayed(Duration.zero, () {
-        ScaffoldMessenger.of(buildContext!)
-            .showSnackBar(
-              SnackBar(
-                content: Text(
-                  errorMessage,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                action: SnackBarAction(
-                  label: "X",
-                  onPressed: () {
-                    overlays.remove('error');
-                  },
-                ),
-              ),
-            )
-            .closed
-            .then((value) => overlays.remove('error'));
-      });
-    });
+    showMessage(errorMessage, isError: true, durationSeconds: 4);
   }
 
   @override
   Color backgroundColor() => const Color(0xff0f1118);
+
+  @override
+  void onRemove() {
+    _messageTimer?.cancel();
+    super.onRemove();
+  }
 }
