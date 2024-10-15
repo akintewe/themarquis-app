@@ -1,275 +1,143 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:flame/components.dart';
+import 'package:flame/game.dart';
 import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/models/ludo_session.dart';
+import 'package:flutter/material.dart';
+
+class MockLudoSessionProvider {
+  final Random random = Random();
+
+  Future<int> rollDice() async {
+    return random.nextInt(6) + 1;
+  }
+
+  Future<void> playMove(String pieceIndex) async {
+    // Simulate a delay for the move
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+}
 
 class LudoGameTest extends LudoGame {
-  Map<int, int> playerTurns = {0: 0, 1: 0, 2: 0, 3: 0};
-  Timer? autoPlayTimer;
+  late MockLudoSessionProvider mockSessionProvider;
 
   LudoGameTest() : super();
 
   @override
   Future<void> onLoad() async {
+    mockSessionProvider = MockLudoSessionProvider();
     await super.onLoad();
+    // Initialize the game state directly instead of using overlays
+    playState = PlayState.playing;
+    startAutoPlay();
   }
 
   @override
-  Future<void> rollDice() async {
-    if (autoPlayTimer == null) {
-      startAutoPlay();
-    }
+  Future<List<int>> generateMove() async {
+    int diceValue = await mockSessionProvider.rollDice();
+    return [diceValue];
   }
 
-  void startRandomPlay() {
-    autoPlayTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      // Roll the dice
-      dice.value = 6;
-
-      // Get all movable pins for the current player
-      final movablePins = getMovablePins(currentPlayer, dice.value);
-
-      if (movablePins.isNotEmpty) {
-        // Randomly select a pin to move
-        final randomPin = movablePins[dice.random.nextInt(movablePins.length)];
-        randomPin.movePin(null);
-
-        // Check if the game is over
-        if (isPlayerFinished(currentPlayer)) {
-          timer.cancel();
-          print("Player $currentPlayer has won the game!");
-          return;
-        }
-      } else if (dice.value == 6) {
-        // Try to move a pin out of the home
-        final playerHome = playerHomes[currentPlayer];
-        final availableHomePins =
-            playerHome.homePins.where((pin) => pin != null).toList();
-
-        if (availableHomePins.isNotEmpty) {
-          final randomHomePin =
-              availableHomePins[dice.random.nextInt(availableHomePins.length)];
-          final homeIndex = playerHome.homePins.indexOf(randomHomePin);
-          board.addPin(playerHome.removePin(homeIndex));
-        }
-      }
-
-      // Move to the next player
-    });
+  @override
+  Future<void> playMove(int index) async {
+    await mockSessionProvider.playMove(index.toString());
+    await super.playMove(index);
   }
 
-  List<PlayerPin> getMovablePins(int playerIndex, int diceValue) {
-    List<PlayerPin> movablePins = [];
-
-    // Check pins on the board
-    for (var pin in board.children.whereType<PlayerPin>()) {
-      if (pin.playerIndex == playerIndex &&
-          pin.currentPosIndex + diceValue <= 56) {
-        movablePins.add(pin);
-      }
-    }
-
-    return movablePins;
+  // Override overlay methods to prevent errors
+  @override
+  void showMessage(String message,
+      {bool isError = false, int durationSeconds = 3}) {
+    print("Message: $message");
   }
 
-  bool isPlayerFinished(int playerIndex) {
-    return destination.children
-            .whereType<PlayerPin>()
-            .where((pin) => pin.playerIndex == playerIndex)
-            .length ==
-        4;
+  @override
+  void showSnackBar(String message) {
+    print("SnackBar: $message");
+  }
+
+  @override
+  void showErrorDialog(String errorMessage) {
+    print("Error: $errorMessage");
   }
 
   void startAutoPlay() {
-    autoPlayTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (playerTurns[currentPlayer]! >=
-          mockPlayerRouteMap[currentPlayer]!.length) {
-        timer.cancel();
-        print("Auto-play finished for player $currentPlayer");
-        return;
-      }
-
-      final move =
-          mockPlayerRouteMap[currentPlayer]![playerTurns[currentPlayer]!];
-      dice.value = move[0];
-      final pinToMove = board.getPinWithIndex(currentPlayer, move[1]);
-
-      if (pinToMove != null) {
-        pinToMove.movePin(null);
-        playerTurns[currentPlayer] = playerTurns[currentPlayer]! + 1;
-        // nextPlayer();
-      } else {
-        if (dice.value == 6) {
-          final playerHome = playerHomes[currentPlayer];
-          board.addPin(playerHome.removePin(move[1]));
-          playerTurns[currentPlayer] = playerTurns[currentPlayer]! + 1;
-          // nextPlayer();
-        } else {
-          print("Error: Pin not found for move $move player $currentPlayer");
-          timer.cancel();
-        }
+    Future.delayed(const Duration(seconds: 1), () async {
+      while (playState == PlayState.playing) {
+        await autoPlayMove();
+        await Future.delayed(const Duration(milliseconds: 500));
       }
     });
   }
 
-  @override
-  void onRemove() {
-    autoPlayTimer?.cancel();
-    super.onRemove();
+  Future<void> autoPlayMove() async {
+    if (playState != PlayState.playing) return;
+
+    if (!playerCanMove) {
+      await rollDice();
+    }
+
+    List<PlayerPin> movablePins = getMovablePins();
+
+    if (movablePins.isNotEmpty) {
+      PlayerPin pinToMove = movablePins[Random().nextInt(movablePins.length)];
+      await playMove(pinToMove.homeIndex);
+    } else if (dice.value == 6) {
+      List<PlayerPin?> homePins = playerHomes[currentPlayer].homePins;
+      List<PlayerPin> availableHomePins =
+          homePins.whereType<PlayerPin>().toList();
+      if (availableHomePins.isNotEmpty) {
+        PlayerPin pinToMove =
+            availableHomePins[Random().nextInt(availableHomePins.length)];
+        await playMove(pinToMove.homeIndex);
+      }
+    }
+
+    checkForWinner();
+    printGameState();
+  }
+
+  List<PlayerPin> getMovablePins() {
+    List<PlayerPin> movablePins = [];
+    for (var pin in board.children.whereType<PlayerPin>()) {
+      if (pin.playerIndex == currentPlayer && pin.canMove) {
+        movablePins.add(pin);
+      }
+    }
+    return movablePins;
+  }
+
+  void checkForWinner() {
+    for (int i = 0; i < 4; i++) {
+      if (playerHomes[i].isHomeEmpty && board.getPlayerPinsOnBoard(i).isEmpty) {
+        winnerIndex = i;
+        playState = PlayState.finished;
+        print("Player $i has won the game!");
+        break;
+      }
+    }
+  }
+
+  void printGameState() {
+    print('Current player: $currentPlayer');
+    print('Dice value: ${dice.value}');
+    print('Game state: $playState');
+    print('Pins on board:');
+    for (var pin in board.children.whereType<PlayerPin>()) {
+      print(
+          'Player ${pin.playerIndex}, Pin ${pin.homeIndex}, Position ${pin.currentPosIndex}');
+    }
+    print('---');
   }
 }
 
-const mockPlayerRouteMap = {
-  0: [
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [5, 0],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [5, 1],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [5, 2],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [5, 3],
-  ],
-  1: [
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [5, 0],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [5, 1],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [5, 2],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [5, 3],
-  ],
-  2: [
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [5, 0],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [5, 1],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [5, 2],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [5, 3],
-  ],
-  3: [
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [6, 0],
-    [5, 0],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [6, 1],
-    [5, 1],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [6, 2],
-    [5, 2],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [6, 3],
-    [5, 3],
-  ]
-};
+void main() {
+  runApp(
+    GameWidget(
+      game: LudoGameTest(),
+    ),
+  );
+}

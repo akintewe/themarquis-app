@@ -6,17 +6,29 @@ import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
+enum DiceState {
+  inactive,
+  active,
+  rollingDice,
+  rolledDice,
+  playingMove,
+}
+
 class Dice extends PositionComponent
     with TapCallbacks, HasGameReference<LudoGame> {
-  int value = 1;
-  bool _isLoading = false;
+  List<int> values = [1];
+  DiceState _state = DiceState.inactive;
   late SpriteSheet diceSpriteSheet;
-  Sprite? currentSprite;
+  List<Sprite?> currentSprites = [];
+  double _emphasisAngle = 0;
 
   final Random random = Random();
 
-  set isLoading(bool value) {
-    _isLoading = value;
+  int get value => values.fold(0, (sum, value) => sum + value);
+
+  DiceState get state => _state;
+  set state(DiceState newState) {
+    _state = newState;
     update(0);
   }
 
@@ -24,89 +36,196 @@ class Dice extends PositionComponent
       : super(
           size: size,
           position: position,
-          // paint: Paint()..color = Colors.white,
           anchor: Anchor.center,
         );
+
   @override
   Future<void> onLoad() async {
     super.onLoad();
     diceSpriteSheet = SpriteSheet(
       image: await game.images.load('dice_interface.png'),
-      srcSize: Vector2(267, 267), //1602 * 267
+      srcSize: Vector2(267, 267),
     );
-    currentSprite = diceSpriteSheet.getSprite(0, 0); // Start with face 1
+    currentSprites = [diceSpriteSheet.getSprite(0, 0)];
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (_state == DiceState.active) {
+      _emphasisAngle += dt * 5; // Adjust speed as needed
+      if (_emphasisAngle > 2 * pi) {
+        _emphasisAngle -= 2 * pi;
+      }
+    }
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
 
-    if (_isLoading) {
-      final center = Offset(size.x / 2, size.y / 2);
-      final radius = min(size.x, size.y) / 4;
-      final paint = Paint()
-        ..color = Colors.cyan
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4;
+    if (_state == DiceState.active) {
+      _renderEmphasis(canvas);
+    }
 
-      final sweepAngle =
-          2 * pi * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000;
+    switch (_state) {
+      case DiceState.inactive:
+      case DiceState.active:
+      case DiceState.rolledDice:
+        _renderDice(canvas);
+        break;
+      case DiceState.rollingDice:
+        _renderLoadingIndicator(canvas);
+        break;
+      case DiceState.playingMove:
+        _renderDice(canvas);
+        _renderLoadingIndicator(canvas);
+        break;
+    }
+
+    _renderStateIndicator(canvas);
+  }
+
+  void _renderEmphasis(Canvas canvas) {
+    final center = Offset(size.x / 2, size.y / 2);
+    final radius = min(size.x, size.y) / 2 + 10;
+    final paint = Paint()
+      ..color = Colors.yellow.withOpacity(0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4;
+
+    for (int i = 0; i < 4; i++) {
+      final startAngle = _emphasisAngle + i * pi / 2;
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
-        -pi / 2,
-        sweepAngle,
+        startAngle,
+        pi / 4,
         false,
         paint,
       );
-    } else {
-      currentSprite = diceSpriteSheet.getSprite(
-          0, min(value - 1, 5)); // value between 1 and 6
-      if (currentSprite != null) {
-        currentSprite!.render(
+    }
+  }
+
+  void _renderLoadingIndicator(Canvas canvas) {
+    final center = Offset(size.x / 2, size.y / 2);
+    final radius = min(size.x, size.y) / 4;
+    final paint = Paint()
+      ..color = Colors.cyan
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4;
+
+    final sweepAngle =
+        2 * pi * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      sweepAngle,
+      false,
+      paint,
+    );
+  }
+
+  void _renderDice(Canvas canvas) {
+    final diceCount = currentSprites.length;
+    final spacing = 10.0; // Space between dice
+    final totalSpacing = (diceCount - 1) * spacing;
+    final diceWidth = (size.x - totalSpacing) / diceCount;
+    final diceSize = Vector2(diceWidth, diceWidth); // Make dice square
+
+    for (int i = 0; i < diceCount; i++) {
+      final sprite = currentSprites[i];
+      final xPosition = i * (diceWidth + spacing);
+      final yPosition = (size.y - diceWidth) / 2; // Center vertically
+
+      if (sprite != null) {
+        sprite.render(
           canvas,
-          size: size, // Draw sprite to fill the dice component's size
+          position: Vector2(xPosition, yPosition),
+          size: diceSize,
         );
       } else {
-        final paint = Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.fill;
-
-        final rect = Rect.fromLTWH(0, 0, size.x, size.y);
-        canvas.drawRect(rect, paint);
-
-        final borderPaint = Paint()
-          ..color = Colors.black
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 4;
-
-        canvas.drawRect(rect, borderPaint);
+        _renderDefaultDice(canvas, xPosition, yPosition, diceSize);
       }
     }
   }
 
+  void _renderDefaultDice(Canvas canvas, double x, double y, Vector2 diceSize) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final rect = Rect.fromLTWH(x, y, diceSize.x, diceSize.y);
+    canvas.drawRect(rect, paint);
+
+    final borderPaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    canvas.drawRect(rect, borderPaint);
+  }
+
+  void _renderStateIndicator(Canvas canvas) {
+    final indicatorPaint = Paint()..style = PaintingStyle.fill;
+
+    switch (_state) {
+      case DiceState.inactive:
+        indicatorPaint.color = Colors.red;
+        break;
+      case DiceState.active:
+        indicatorPaint.color = Colors.green;
+        break;
+      case DiceState.rollingDice:
+        indicatorPaint.color = Colors.yellow;
+        break;
+      case DiceState.rolledDice:
+        indicatorPaint.color = Colors.orange;
+        break;
+      case DiceState.playingMove:
+        indicatorPaint.color = Colors.blue;
+        break;
+    }
+
+    canvas.drawCircle(Offset(size.x - 10, 10), 5, indicatorPaint);
+  }
+
   Future<void> roll() async {
-    _isLoading = true;
-    // Request a redraw to show the loading state
-    update(0);
+    state = DiceState.rollingDice;
     try {
       final moveResults = await game.generateMove();
-      value = moveResults.reduce((a, b) => a + b);
-      // if (moveResults.length > 1) {
-      //   game.pendingMoves =  - value;
-      // }
+      values = moveResults;
+      currentSprites = values
+          .map((value) => diceSpriteSheet.getSprite(0, min(value - 1, 5)))
+          .toList();
+      state = DiceState.rolledDice;
     } catch (e) {
       print(e);
+      state = DiceState.active;
     }
-    _isLoading = false;
-    update(0);
   }
 
   @override
   void onTapUp(TapUpEvent event) {
     super.onTapUp(event);
 
-    if (game.currentPlayer == game.userIndex) {
+    if (_state == DiceState.active) {
       game.rollDice();
     }
+  }
+
+  void setInactive() {
+    state = DiceState.inactive;
+  }
+
+  void setActive() {
+    state = DiceState.active;
+  }
+
+  void setRolledDice() {
+    state = DiceState.rolledDice;
+  }
+
+  void setPlayingMove() {
+    state = DiceState.playingMove;
   }
 }

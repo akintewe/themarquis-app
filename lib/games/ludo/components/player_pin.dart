@@ -94,11 +94,13 @@ class PlayerPin extends SpriteComponent
         ),
       );
 
-      canvas.drawCircle(Offset(size.x - 8, 8), 8, badgePaint);
+      final badgeRadius = size.x * 0.1;
+      final badgeOffset = Offset(size.x - badgeRadius, badgeRadius);
+      canvas.drawCircle(badgeOffset, badgeRadius, badgePaint);
       textPaint.render(
         canvas,
         badgeCount.toString(),
-        Vector2(size.x - 12, 2),
+        Vector2(size.x - badgeRadius * 1.5, badgeRadius * 0.25),
       );
     }
   }
@@ -159,9 +161,8 @@ class PlayerPin extends SpriteComponent
     currentPosIndex = targetIndex;
 
     // Create a list of move effects for each step
-
-    double timePerStep = 0.1;
-    if (targetIndex - startIndex > 15) {
+    double timePerStep = 1;
+    if (targetIndex - startIndex > 7) {
       timePerStep = 1 / (targetIndex - startIndex);
     }
 
@@ -179,15 +180,22 @@ class PlayerPin extends SpriteComponent
     }
 
     if (moveEffects.isNotEmpty && !isRemoved) {
+      // Create a Completer to wait for the animation to finish
+      final completer = Completer<void>();
+
       moveEffects.last.onComplete = () {
         position = moveEffects.last.target.position;
         if (parent is Board) {
           (parent as Board).updateOverlappingPins();
         }
+        completer.complete();
       };
+
       // Add sequential effect to combine all move effects
-      await add(SequenceEffect(moveEffects));
-      await Future.delayed(Duration(milliseconds: 100 * moveEffects.length));
+      add(SequenceEffect(moveEffects));
+
+      // Wait for the animation to complete
+      await completer.future;
     } else {
       print("No movement required: start and target positions are the same");
     }

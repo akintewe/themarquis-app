@@ -177,7 +177,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
   Future<void> addPin(PlayerPin pin, {int location = 0}) async {
     await add(pin
       ..onTap = (event, pin) {
-        if ((pin.currentPosIndex >= 0 || game.dice.value == 6) &&
+        if ((pin.currentPosIndex >= 0 || game.dice.values.length > 1) &&
             (pin.currentPosIndex + game.dice.value <= 56)) {
           return true;
         }

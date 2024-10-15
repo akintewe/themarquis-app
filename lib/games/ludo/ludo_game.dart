@@ -85,12 +85,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   Future<void> playMove(int index) async {
     try {
-      dice.isLoading = true;
+      dice.state = DiceState.playingMove;
       await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
     } catch (e) {
+      dice.state = DiceState.rolledDice;
       showErrorDialog(e.toString());
     }
-    dice.isLoading = false;
   }
 
   late PlayState _playState;
@@ -170,8 +170,16 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
               playerCanMove = false;
               updateTurnText();
               if (_sessionData!.currentDiceValue != null) {
-                dice.value = _sessionData!.currentDiceValue!;
-                dice.isLoading = false;
+                int diceValue = _sessionData!.currentDiceValue!;
+                dice.values = [
+                  ...List.filled(diceValue ~/ 6, 6),
+                  if (diceValue % 6 != 0) diceValue % 6
+                ];
+                if (_currentPlayer == _userIndex) {
+                  dice.state = DiceState.active;
+                } else {
+                  dice.state = DiceState.inactive;
+                }
               }
             } catch (e) {
               showErrorDialog(e.toString());
@@ -215,6 +223,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     dice = Dice(
         size: Vector2(100, 100), position: Vector2(size.x / 2, size.y - 200));
     await add(dice);
+
+    if (_currentPlayer == _userIndex) {
+      dice.state = DiceState.active;
+    } else {
+      dice.state = DiceState.inactive;
+    }
 
     turnText = TextComponent(
       text: '',
@@ -291,7 +305,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       return;
     }
 
-    if (movablePins.length == 1 && dice.value != 6) {
+    if (movablePins.length == 1 && dice.value < 6) {
       // Automatically play move on the only movable pin
       await playMove(movablePins[0].homeIndex);
       return;
