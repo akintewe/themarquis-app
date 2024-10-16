@@ -108,7 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             width: 19,
                           ),
                           const SizedBox(width: 5),
-                          FutureBuilder<int>(
+                          FutureBuilder<BigInt>(
                             future: ref.read(userProvider.notifier).getTokenBalance(
                                 "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
                             builder: (context, snapshot) {
@@ -120,7 +120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 return Container();
                               }
                               return Text(
-                                (snapshot.data! / 1e18).toStringAsPrecision(2),
+                                (snapshot.data! / BigInt.from(1e18)).toString(),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,

@@ -118,7 +118,7 @@ class PlayerPin extends SpriteComponent
     ));
   }
 
-  Future<void> movePin(int? index) async {
+  Future<void> movePin(int? index, {double maxDuration = 7}) async {
     await mounted;
     int startIndex = currentPosIndex;
     int targetIndex;
@@ -161,9 +161,9 @@ class PlayerPin extends SpriteComponent
     currentPosIndex = targetIndex;
 
     // Create a list of move effects for each step
-    double timePerStep = 1;
-    if (targetIndex - startIndex > 7) {
-      timePerStep = 1 / (targetIndex - startIndex);
+    double timePerStep = 0.5;
+    if (targetIndex - startIndex > maxDuration) {
+      timePerStep = 0.5 * maxDuration / (targetIndex - startIndex);
     }
 
     for (int i = startIndex + 1; i <= targetIndex; i++) {
@@ -172,9 +172,9 @@ class PlayerPin extends SpriteComponent
         MoveEffect.to(
           newPosition,
           EffectController(
-            duration: timePerStep,
-            curve: Curves.easeInOut,
-          ),
+              duration: timePerStep,
+              curve: Curves.easeInOut,
+              startDelay: moveEffects.isEmpty ? 0 : timePerStep),
         ),
       );
     }

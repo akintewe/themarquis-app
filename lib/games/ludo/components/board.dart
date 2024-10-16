@@ -174,7 +174,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     await playerHome.returnPin(pin);
   }
 
-  Future<void> addPin(PlayerPin pin, {int location = 0}) async {
+  Future<void> addPin(PlayerPin pin, {int location = 0, isInit = false}) async {
     await add(pin
       ..onTap = (event, pin) {
         if ((pin.currentPosIndex >= 0 || game.dice.values.length > 1) &&
@@ -184,7 +184,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
         return false;
       });
     print("moving pin");
-    await pin.movePin(location);
+    await pin.movePin(location, maxDuration: isInit ? 2 : 7);
     // updateOverlappingPins();
   }
 

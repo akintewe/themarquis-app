@@ -98,11 +98,11 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                           child: _buildMenuButton(
                               icon: Icons.play_arrow,
                               text: 'Resume Game',
-                              onTap: () {
-                                ref
+                              onTap: () async {
+                                await ref
                                     .read(ludoSessionProvider.notifier)
                                     .getLudoSession();
-                                widget.game.playState = PlayState.waiting;
+                                widget.game.playState = PlayState.playing;
                               }),
                         ),
                       if (user.sessionId == null)
@@ -727,8 +727,8 @@ class CreateRoomDialog extends ConsumerStatefulWidget {
 }
 
 class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
-  double _sliderValue = 0;
-  int? _tokenBalance;
+  BigInt _sliderValue = BigInt.from(0);
+  BigInt? _tokenBalance;
   String _selectedTokenAddress = '';
   final _tokenAmountController = TextEditingController();
   List<Map<String, String>>? _supportedTokens;
@@ -917,7 +917,8 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                             if (value != null &&
                                                 _tokenBalance != null &&
                                                 value <=
-                                                    _tokenBalance! / 1e18) {
+                                                    _tokenBalance! /
+                                                        BigInt.from(1e18)) {
                                               return newValue;
                                             }
                                             return oldValue;
@@ -927,7 +928,8 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                           if (value.isNotEmpty) {
                                             stste(() {
                                               _sliderValue =
-                                                  double.parse(value) * 1e18;
+                                                  BigInt.parse(value) *
+                                                      BigInt.from(1e18);
                                             });
                                           }
                                         },
@@ -946,15 +948,15 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                         : () async {
                                             if (_selectedTokenAddress ==
                                                 "0x0000000000000000000000000000000000000000000000000000000000000000") {
-                                              _sliderValue = 0;
-                                              _tokenBalance = 0;
+                                              _sliderValue = BigInt.from(0);
+                                              _tokenBalance = BigInt.from(0);
                                               return;
                                             }
                                             final res = await ref
                                                 .read(userProvider.notifier)
                                                 .getTokenBalance(
                                                     _selectedTokenAddress);
-                                            _sliderValue = 0;
+                                            _sliderValue = BigInt.from(0);
                                             _tokenBalance = res;
                                           }(),
                                     builder: (context, snapshot) {
@@ -979,19 +981,22 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                             max: _tokenBalance!
                                                 .toDouble(), // Convert int to double
                                             divisions: 100,
-                                            label: '${_sliderValue.round()}',
-                                            value: _sliderValue,
+                                            label:
+                                                '${_sliderValue / BigInt.from(1e18)}',
+                                            value: _sliderValue.toDouble(),
                                             onChanged: (double value) {
                                               stste(() {
-                                                _sliderValue = value;
+                                                _sliderValue =
+                                                    BigInt.from(value);
                                                 _tokenAmountController.text =
-                                                    (_sliderValue / 1e18)
+                                                    (_sliderValue /
+                                                            BigInt.from(1e18))
                                                         .toString();
                                               });
                                             },
                                           ),
                                           Text(
-                                            'Max: ${_tokenBalance! / 1e18}',
+                                            'Max: ${_tokenBalance! / BigInt.from(1e18)}',
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 12,
@@ -1016,7 +1021,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                               child: TextButton(
                                 onPressed: () async {
                                   print(
-                                      "${_sliderValue.round()}   ${_tokenAmountController.text}   $_selectedTokenAddress");
+                                      "${_sliderValue / BigInt.from(1e18)}   ${_tokenAmountController.text}   $_selectedTokenAddress");
                                   try {
                                     if (_selectedColor == null) {
                                       showErrorDialog(
@@ -1029,7 +1034,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                     await ref
                                         .read(ludoSessionProvider.notifier)
                                         .createSession(
-                                          _sliderValue.round().toString(),
+                                          _sliderValue.toString(),
                                           _selectedColor!,
                                           _selectedTokenAddress,
                                         );

@@ -26,6 +26,7 @@ class LudoSession extends _$LudoSession {
   Box<LudoSessionData>? _hiveBox;
   late WebSocketChannel _channel;
   String? _id;
+  int? _currentDiceValue;
 
   @override
   LudoSessionData? build() {
@@ -49,7 +50,7 @@ class LudoSession extends _$LudoSession {
               print('Data String ${dataStr}');
               final data = jsonDecode(dataStr) as Map;
               if (decodedResponse['event'] == 'play_move') {
-                await setDiceValue(int.parse(data['steps']));
+                _currentDiceValue = int.parse(data['steps']);
               }
               print('Data $data');
               if (data["session_id"] == _id) {
@@ -76,12 +77,6 @@ class LudoSession extends _$LudoSession {
         _connectWebSocket();
       });
     }
-  }
-
-  Future<void> setDiceValue(int value) async {
-    if (state == null) return;
-    state = state!.copyWith(currentDiceValue: value);
-    await _hiveBox!.put(_id, state!);
   }
 
   Future<LudoSessionData?> getLudoSession([String? id]) async {
@@ -146,7 +141,7 @@ class LudoSession extends _$LudoSession {
       createdAt: DateTime.fromMillisecondsSinceEpoch(
           decodedResponse['created_at'] * 1000),
       creator: "",
-      currentDiceValue: state?.currentDiceValue ?? -1,
+      currentDiceValue: _currentDiceValue ?? -1,
     );
     if (id == null) {
       await _hiveBox!.put(_id, ludoSession);

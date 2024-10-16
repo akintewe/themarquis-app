@@ -122,8 +122,8 @@ class User extends _$User {
     return results;
   }
 
-  Future<int> getTokenBalance(String tokenAddress) async {
-    if (state == null) return 0;
+  Future<BigInt> getTokenBalance(String tokenAddress) async {
+    if (state == null) return BigInt.from(0);
     final url = Uri.parse(
         '$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
     final response = await http.get(
@@ -138,6 +138,6 @@ class User extends _$User {
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    return int.parse(decodedResponse['balance']);
+    return BigInt.parse(decodedResponse['balance']);
   }
 }
