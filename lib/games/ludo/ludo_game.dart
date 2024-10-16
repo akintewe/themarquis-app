@@ -1,4 +1,3 @@
-import 'package:marquis_v2/games/ludo/widgets/message_overlay.dart';
 import 'dart:async' as dart_async;
 
 // ignore_for_file: unused_field
@@ -127,6 +126,25 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           // Update pin locations
           if (_playState == PlayState.playing && isInit) {
             try {
+              _currentPlayer = _sessionData!.nextPlayerIndex;
+              playerCanMove = false;
+              updateTurnText();
+
+              if (_sessionData!.currentDiceValue != null) {
+                int diceValue = _sessionData!.currentDiceValue!;
+                dice.values = [
+                  ...List.filled(diceValue ~/ 6, 6),
+                  if (diceValue % 6 != 0) diceValue % 6
+                ];
+                print("Update Dice Value to ${dice.values}");
+                dice.update(0);
+                if (_currentPlayer == _userIndex) {
+                  dice.state = DiceState.preparing;
+                } else {
+                  dice.state = DiceState.inactive;
+                }
+              }
+
               for (final player in _sessionData!.sessionUserStatus) {
                 final pinLocations = player.playerTokensPosition;
                 final currentPinLocations = playerPinLocations[player.playerId];
@@ -166,20 +184,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                   }
                 }
               }
-              _currentPlayer = _sessionData!.nextPlayerIndex;
-              playerCanMove = false;
-              updateTurnText();
-              if (_sessionData!.currentDiceValue != null) {
-                int diceValue = _sessionData!.currentDiceValue!;
-                dice.values = [
-                  ...List.filled(diceValue ~/ 6, 6),
-                  if (diceValue % 6 != 0) diceValue % 6
-                ];
-                if (_currentPlayer == _userIndex) {
+              if (_currentPlayer == _userIndex) {
+                Future.delayed(const Duration(seconds: 5), () {
                   dice.state = DiceState.active;
-                } else {
-                  dice.state = DiceState.inactive;
-                }
+                });
               }
             } catch (e) {
               showErrorDialog(e.toString());

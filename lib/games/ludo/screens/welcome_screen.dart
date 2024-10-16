@@ -981,8 +981,11 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                             max: _tokenBalance!
                                                 .toDouble(), // Convert int to double
                                             divisions: 100,
-                                            label:
-                                                '${_sliderValue / BigInt.from(1e18)}',
+                                            label: (_sliderValue /
+                                                    BigInt.from(1e18))
+                                                .toStringAsFixed(6)
+                                                .replaceAll(RegExp(r'0+$'), '')
+                                                .replaceAll(RegExp(r'\.$'), ''),
                                             value: _sliderValue.toDouble(),
                                             onChanged: (double value) {
                                               stste(() {
@@ -991,12 +994,16 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                                 _tokenAmountController.text =
                                                     (_sliderValue /
                                                             BigInt.from(1e18))
-                                                        .toString();
+                                                        .toStringAsFixed(6)
+                                                        .replaceAll(
+                                                            RegExp(r'0+$'), '')
+                                                        .replaceAll(
+                                                            RegExp(r'\.$'), '');
                                               });
                                             },
                                           ),
                                           Text(
-                                            'Max: ${_tokenBalance! / BigInt.from(1e18)}',
+                                            'Max: ${(_tokenBalance! / BigInt.from(1e18)).toStringAsFixed(6).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}',
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 12,
@@ -1021,7 +1028,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                               child: TextButton(
                                 onPressed: () async {
                                   print(
-                                      "${_sliderValue / BigInt.from(1e18)}   ${_tokenAmountController.text}   $_selectedTokenAddress");
+                                      "${(_sliderValue / BigInt.from(1e18)).toStringAsFixed(6).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}   ${_tokenAmountController.text}   $_selectedTokenAddress");
                                   try {
                                     if (_selectedColor == null) {
                                       showErrorDialog(
@@ -1387,7 +1394,9 @@ class _JoinRoomChooseColorDialogState
                                 (BigInt.parse(
                                             widget.selectedSession.playAmount) /
                                         BigInt.from(1e18))
-                                    .toStringAsPrecision(4),
+                                    .toStringAsFixed(6)
+                                    .replaceAll(RegExp(r'0+$'), '')
+                                    .replaceAll(RegExp(r'\.$'), ''),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,

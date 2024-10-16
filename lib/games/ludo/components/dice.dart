@@ -8,6 +8,7 @@ import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
 enum DiceState {
   inactive,
+  preparing,
   active,
   rollingDice,
   rolledDice,
@@ -16,15 +17,23 @@ enum DiceState {
 
 class Dice extends PositionComponent
     with TapCallbacks, HasGameReference<LudoGame> {
-  List<int> values = [1];
+  List<int> _values = [1];
   DiceState _state = DiceState.inactive;
   late SpriteSheet diceSpriteSheet;
-  List<Sprite?> currentSprites = [];
+  List<Sprite?> _currentSprites = [];
   double _emphasisAngle = 0;
 
   final Random random = Random();
 
-  int get value => values.fold(0, (sum, value) => sum + value);
+  int get value => _values.fold(0, (sum, value) => sum + value);
+  List<int> get values => _values;
+  set values(List<int> newValues) {
+    _values = newValues;
+    _currentSprites = values
+        .map((value) => diceSpriteSheet.getSprite(0, min(value - 1, 5)))
+        .toList();
+    update(0);
+  }
 
   DiceState get state => _state;
   set state(DiceState newState) {
@@ -46,7 +55,7 @@ class Dice extends PositionComponent
       image: await game.images.load('dice_interface.png'),
       srcSize: Vector2(267, 267),
     );
-    currentSprites = [diceSpriteSheet.getSprite(0, 0)];
+    _currentSprites = [diceSpriteSheet.getSprite(0, 0)];
   }
 
   @override
@@ -78,6 +87,7 @@ class Dice extends PositionComponent
         _renderLoadingIndicator(canvas);
         break;
       case DiceState.playingMove:
+      case DiceState.preparing:
         _renderDice(canvas);
         _renderLoadingIndicator(canvas);
         break;
@@ -126,14 +136,14 @@ class Dice extends PositionComponent
   }
 
   void _renderDice(Canvas canvas) {
-    final diceCount = currentSprites.length;
+    final diceCount = _currentSprites.length;
     final spacing = 10.0; // Space between dice
     final totalSpacing = (diceCount - 1) * spacing;
     final diceWidth = (size.x - totalSpacing) / diceCount;
     final diceSize = Vector2(diceWidth, diceWidth); // Make dice square
 
     for (int i = 0; i < diceCount; i++) {
-      final sprite = currentSprites[i];
+      final sprite = _currentSprites[i];
       final xPosition = i * (diceWidth + spacing);
       final yPosition = (size.y - diceWidth) / 2; // Center vertically
 
@@ -173,6 +183,7 @@ class Dice extends PositionComponent
         indicatorPaint.color = Colors.red;
         break;
       case DiceState.active:
+      case DiceState.preparing:
         indicatorPaint.color = Colors.green;
         break;
       case DiceState.rollingDice:
@@ -193,8 +204,8 @@ class Dice extends PositionComponent
     state = DiceState.rollingDice;
     try {
       final moveResults = await game.generateMove();
-      values = moveResults;
-      currentSprites = values
+      _values = moveResults;
+      _currentSprites = _values
           .map((value) => diceSpriteSheet.getSprite(0, min(value - 1, 5)))
           .toList();
       state = DiceState.rolledDice;

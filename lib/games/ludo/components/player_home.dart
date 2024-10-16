@@ -156,7 +156,11 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     final paint = Paint()
       ..color = game.listOfColors[playerIndex]
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = playerIndex == game.currentPlayer
+          ? 3
+          : playerIndex == game.userIndex
+              ? 2
+              : 2;
     canvas.drawRRect(
       rrect,
       paint,
@@ -164,8 +168,18 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     canvas.drawRRect(
         rrect,
         paint
-          ..strokeWidth = 3
-          ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 15));
+          ..strokeWidth = playerIndex == game.currentPlayer
+              ? 5
+              : playerIndex == game.userIndex
+                  ? 3
+                  : 0
+          ..maskFilter = MaskFilter.blur(
+              BlurStyle.outer,
+              playerIndex == game.currentPlayer
+                  ? 20
+                  : playerIndex == game.userIndex
+                      ? 15
+                      : 0));
 
     //player avatar bg
     final avatarBgRRect = RRect.fromLTRBR(
@@ -184,14 +198,22 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       avatarBgRRect,
       avatarBgPaint,
     );
-    if (game.userIndex == playerIndex) {
-      canvas.drawRRect(
-        avatarBgRRect,
-        avatarBgPaint
-          ..strokeWidth = 5
-          ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 15),
-      );
-    }
+    canvas.drawRRect(
+      avatarBgRRect,
+      avatarBgPaint
+        ..strokeWidth = playerIndex == game.currentPlayer
+            ? 8
+            : playerIndex == game.userIndex
+                ? 4
+                : 0
+        ..maskFilter = MaskFilter.blur(
+            BlurStyle.outer,
+            playerIndex == game.currentPlayer
+                ? 30
+                : playerIndex == game.userIndex
+                    ? 15
+                    : 0),
+    );
   }
 
   PlayerPin removePin(int homePinIndex) {

@@ -172,9 +172,9 @@ class PlayerPin extends SpriteComponent
         MoveEffect.to(
           newPosition,
           EffectController(
-              duration: timePerStep,
+              duration: timePerStep * 0.8,
               curve: Curves.easeInOut,
-              startDelay: moveEffects.isEmpty ? 0 : timePerStep),
+              startDelay: moveEffects.isEmpty ? 0 : timePerStep * 1.2),
         ),
       );
     }
