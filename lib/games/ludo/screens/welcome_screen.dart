@@ -873,7 +873,8 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                       items: [
                                         ...?_supportedTokens,
                                         {
-                                          "tokenAddress": "0",
+                                          "tokenAddress":
+                                              "0x0000000000000000000000000000000000000000000000000000000000000000",
                                           "tokenName": "No Token",
                                         },
                                       ].map((Map<String, String> value) {
@@ -890,9 +891,11 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                       },
                                     ),
                                   ),
-                                  if (_selectedTokenAddress != "0")
+                                  if (_selectedTokenAddress !=
+                                      "0x0000000000000000000000000000000000000000000000000000000000000000")
                                     const SizedBox(width: 16),
-                                  if (_selectedTokenAddress != "0")
+                                  if (_selectedTokenAddress !=
+                                      "0x0000000000000000000000000000000000000000000000000000000000000000")
                                     Expanded(
                                       flex: 3,
                                       child: TextField(
@@ -932,7 +935,8 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                     ),
                                 ],
                               ),
-                              if (_selectedTokenAddress != "0" &&
+                              if (_selectedTokenAddress !=
+                                      "0x0000000000000000000000000000000000000000000000000000000000000000" &&
                                   _selectedTokenAddress != "")
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -940,7 +944,8 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                     future: _tokenBalance != null
                                         ? null
                                         : () async {
-                                            if (_selectedTokenAddress == "0") {
+                                            if (_selectedTokenAddress ==
+                                                "0x0000000000000000000000000000000000000000000000000000000000000000") {
                                               _sliderValue = 0;
                                               _tokenBalance = 0;
                                               return;
@@ -1330,7 +1335,8 @@ class _JoinRoomChooseColorDialogState
                               .read(userProvider.notifier)
                               .getSupportedTokens();
                           _supportedTokens!.add({
-                            "tokenAddress": "0",
+                            "tokenAddress":
+                                "0x0000000000000000000000000000000000000000000000000000000000000000",
                             "tokenName": "No Token",
                           });
                         }()
@@ -1368,12 +1374,15 @@ class _JoinRoomChooseColorDialogState
                               ),
                             ),
                           ),
-                          if (widget.selectedSession.playToken != "0")
+                          if (widget.selectedSession.playToken !=
+                              "0x0000000000000000000000000000000000000000000000000000000000000000")
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                widget.selectedSession
-                                    .playAmount, // Replace with actual play amount
+                                (BigInt.parse(
+                                            widget.selectedSession.playAmount) /
+                                        BigInt.from(1e18))
+                                    .toStringAsPrecision(4),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,

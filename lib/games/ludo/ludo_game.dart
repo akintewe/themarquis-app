@@ -273,7 +273,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   void updateTurnText() {
     turnText.text =
-        '${_currentPlayer == _userIndex ? 'Your' : 'Player ${playerNames[_currentPlayer]}'} ${playerCanMove ? 'move turn' : 'roll dice'}';
+        '${_currentPlayer == _userIndex ? 'You' : 'Player ${playerNames[_currentPlayer]}'} ${playerCanMove ? 'move turn' : 'roll dice!!'}';
     turnText.textRenderer = TextPaint(
         style: TextStyle(
             fontSize: unitSize * 0.8,

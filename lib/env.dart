@@ -6,6 +6,6 @@ const environment = {
   'wsUrl': 'wss://api.themarquis.xyz/ws',
   'wsUrlDebug': 'wss://themarquis.wmtech.cc/ws',
   // 'wsUrlDebug': 'wss://themarquis.home.wmtech.cc/ws',
-  // 'build': 'PROD',
-  'build': 'DEBUG',
+  'build': 'PROD',
+  // 'build': 'DEBUG',
 };
