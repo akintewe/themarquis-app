@@ -136,15 +136,17 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                   ...List.filled(diceValue ~/ 6, 6),
                   if (diceValue % 6 != 0) diceValue % 6
                 ];
-                print("Update Dice Value to ${dice.values}");
                 dice.update(0);
-                if (_currentPlayer == _userIndex) {
-                  dice.state = DiceState.preparing;
-                } else {
-                  dice.state = DiceState.inactive;
-                }
               }
-
+              if (_currentPlayer == _userIndex) {
+                if (_sessionData!.playMoveFailed ?? false) {
+                  dice.state = DiceState.active;
+                } else {
+                  dice.state = DiceState.preparing;
+                }
+              } else {
+                dice.state = DiceState.inactive;
+              }
               for (final player in _sessionData!.sessionUserStatus) {
                 final pinLocations = player.playerTokensPosition;
                 final currentPinLocations = playerPinLocations[player.playerId];
@@ -184,8 +186,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                   }
                 }
               }
-              if (_currentPlayer == _userIndex) {
-                Future.delayed(const Duration(seconds: 5), () {
+              if (_currentPlayer == _userIndex &&
+                  dice.state == DiceState.preparing) {
+                Future.delayed(const Duration(seconds: 8), () {
                   dice.state = DiceState.active;
                 });
               }
@@ -358,11 +361,11 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   }
 
   void showSnackBar(String message) {
-    showMessage(message, durationSeconds: 2);
+    showMessage(message, durationSeconds: 5);
   }
 
   void showErrorDialog(String errorMessage) {
-    showMessage(errorMessage, isError: true, durationSeconds: 4);
+    showMessage(errorMessage, isError: true, durationSeconds: 5);
   }
 
   @override

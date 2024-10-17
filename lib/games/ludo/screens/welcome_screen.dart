@@ -99,10 +99,40 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                               icon: Icons.play_arrow,
                               text: 'Resume Game',
                               onTap: () async {
-                                await ref
-                                    .read(ludoSessionProvider.notifier)
-                                    .getLudoSession();
-                                widget.game.playState = PlayState.playing;
+                                try {
+                                  final session = await ref
+                                      .read(ludoSessionProvider.notifier)
+                                      .getLudoSession();
+                                  if (session == null) return;
+                                  if (session.sessionUserStatus
+                                          .where((e) => e.status == "ACTIVE")
+                                          .length ==
+                                      4) {
+                                    widget.game.playState = PlayState.playing;
+                                  } else {
+                                    widget.game.playState = PlayState.waiting;
+                                  }
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  showErrorDialog(e.toString(), context);
+                                }
+                              }),
+                        ),
+                      if (user.sessionId != null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _buildMenuButton(
+                              icon: Icons.exit_to_app,
+                              text: 'Exit Game',
+                              onTap: () async {
+                                try {
+                                  await ref
+                                      .read(ludoSessionProvider.notifier)
+                                      .exitSession();
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  showErrorDialog(e.toString(), context);
+                                }
                               }),
                         ),
                       if (user.sessionId == null)
@@ -917,8 +947,8 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                             if (value != null &&
                                                 _tokenBalance != null &&
                                                 value <=
-                                                    _tokenBalance! /
-                                                        BigInt.from(1e18)) {
+                                                    _tokenBalance!.toDouble() /
+                                                        1e18) {
                                               return newValue;
                                             }
                                             return oldValue;
@@ -927,9 +957,8 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                         onChanged: (value) {
                                           if (value.isNotEmpty) {
                                             stste(() {
-                                              _sliderValue =
-                                                  BigInt.parse(value) *
-                                                      BigInt.from(1e18);
+                                              _sliderValue = BigInt.from(
+                                                  double.parse(value) * 1e18);
                                             });
                                           }
                                         },
@@ -981,9 +1010,9 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                             max: _tokenBalance!
                                                 .toDouble(), // Convert int to double
                                             divisions: 100,
-                                            label: (_sliderValue /
-                                                    BigInt.from(1e18))
-                                                .toStringAsFixed(6)
+                                            label: (_sliderValue.toDouble() /
+                                                    1e18)
+                                                .toStringAsFixed(8)
                                                 .replaceAll(RegExp(r'0+$'), '')
                                                 .replaceAll(RegExp(r'\.$'), ''),
                                             value: _sliderValue.toDouble(),
@@ -992,9 +1021,9 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                                 _sliderValue =
                                                     BigInt.from(value);
                                                 _tokenAmountController.text =
-                                                    (_sliderValue /
-                                                            BigInt.from(1e18))
-                                                        .toStringAsFixed(6)
+                                                    (_sliderValue.toDouble() /
+                                                            1e18)
+                                                        .toStringAsFixed(8)
                                                         .replaceAll(
                                                             RegExp(r'0+$'), '')
                                                         .replaceAll(
@@ -1003,7 +1032,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                             },
                                           ),
                                           Text(
-                                            'Max: ${(_tokenBalance! / BigInt.from(1e18)).toStringAsFixed(6).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}',
+                                            'Max: ${(_tokenBalance!.toDouble() / 1e18).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}',
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 12,
@@ -1028,7 +1057,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                               child: TextButton(
                                 onPressed: () async {
                                   print(
-                                      "${(_sliderValue / BigInt.from(1e18)).toStringAsFixed(6).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}   ${_tokenAmountController.text}   $_selectedTokenAddress");
+                                      "${(_sliderValue.toDouble() / 1e18).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}   ${_tokenAmountController.text}   $_selectedTokenAddress");
                                   try {
                                     if (_selectedColor == null) {
                                       showErrorDialog(
@@ -1263,6 +1292,8 @@ class _JoinRoomChooseColorDialogState
     extends ConsumerState<JoinRoomChooseColorDialog> {
   String _selectedColor = "";
   bool _isLoading = false;
+  BigInt? _tokenBalance;
+  BigInt _sliderValue = BigInt.from(0);
   List<Map<String, String>>? _supportedTokens;
 
   @override
@@ -1391,10 +1422,10 @@ class _JoinRoomChooseColorDialogState
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                (BigInt.parse(
+                                (double.parse(
                                             widget.selectedSession.playAmount) /
-                                        BigInt.from(1e18))
-                                    .toStringAsFixed(6)
+                                        1e18)
+                                    .toStringAsFixed(8)
                                     .replaceAll(RegExp(r'0+$'), '')
                                     .replaceAll(RegExp(r'\.$'), ''),
                                 style: const TextStyle(
@@ -1409,6 +1440,56 @@ class _JoinRoomChooseColorDialogState
                     );
                   }),
             ),
+            if (widget.selectedSession.playToken !=
+                "0x0000000000000000000000000000000000000000000000000000000000000000")
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FutureBuilder(
+                  future: _tokenBalance != null
+                      ? null
+                      : () async {
+                          final res = await ref
+                              .read(userProvider.notifier)
+                              .getTokenBalance(
+                                  widget.selectedSession.playToken);
+                          _sliderValue =
+                              BigInt.parse(widget.selectedSession.playAmount);
+                          _tokenBalance = res;
+                        }(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    if (snapshot.hasError) {
+                      return Text(snapshot.error.toString());
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Slider(
+                          min: 0.0,
+                          max: _tokenBalance!
+                              .toDouble(), // Convert int to double
+                          divisions: 100,
+                          label: (_sliderValue.toDouble() / 1e18)
+                              .toStringAsFixed(8)
+                              .replaceAll(RegExp(r'0+$'), '')
+                              .replaceAll(RegExp(r'\.$'), ''),
+                          value: _sliderValue.toDouble(),
+                          onChanged: (_) {},
+                        ),
+                        Text(
+                          'Max: ${(_tokenBalance!.toDouble() / 1e18).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             _isLoading
                 ? const CircularProgressIndicator()
                 : Padding(

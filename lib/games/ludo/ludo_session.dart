@@ -27,6 +27,7 @@ class LudoSession extends _$LudoSession {
   late WebSocketChannel _channel;
   String? _id;
   int? _currentDiceValue;
+  bool _playMoveFailed = false;
 
   @override
   LudoSessionData? build() {
@@ -51,6 +52,11 @@ class LudoSession extends _$LudoSession {
               final data = jsonDecode(dataStr) as Map;
               if (decodedResponse['event'] == 'play_move') {
                 _currentDiceValue = int.parse(data['steps']);
+              }
+              if (decodedResponse['event'] == 'play_move_failed') {
+                _playMoveFailed = true;
+              } else {
+                _playMoveFailed = false;
               }
               print('Data $data');
               if (data["session_id"] == _id) {
@@ -142,6 +148,7 @@ class LudoSession extends _$LudoSession {
           decodedResponse['created_at'] * 1000),
       creator: "",
       currentDiceValue: _currentDiceValue ?? -1,
+      playMoveFailed: _playMoveFailed,
     );
     if (id == null) {
       await _hiveBox!.put(_id, ludoSession);
@@ -207,6 +214,7 @@ class LudoSession extends _$LudoSession {
                 sessionData['created_at'] * 1000),
             creator: "",
             currentDiceValue: -1,
+            playMoveFailed: false,
           ),
         )
         .toList();
@@ -333,6 +341,31 @@ class LudoSession extends _$LudoSession {
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     print(decodedResponse);
     await ref.read(userProvider.notifier).getUser();
+  }
+
+  Future<void> exitSession() async {
+    if (_id == null) {
+      _id = ref.read(userProvider)?.sessionId;
+      if (_id == null) return;
+    }
+    final url = Uri.parse('$baseUrl/session/exit-game');
+    final response = await http.post(
+      url,
+      body: jsonEncode({'session_id': _id}),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken,
+      },
+    );
+    if (response.statusCode != 200) {
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+    }
+    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    print(decodedResponse);
+    await ref.read(userProvider.notifier).getUser();
+    _id = null;
+    state = null;
   }
 
   Future<void> editLudoSession(

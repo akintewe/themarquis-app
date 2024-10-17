@@ -121,7 +121,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               }
                               return Text(
                                 ((snapshot.data! / BigInt.from(1e18))
-                                    .toStringAsFixed(6)
+                                    .toStringAsFixed(8)
                                     .replaceAll(RegExp(r'0+$'), '')
                                     .replaceAll(RegExp(r'\.$'), '')),
                                 style: const TextStyle(

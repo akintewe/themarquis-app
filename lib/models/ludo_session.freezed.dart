@@ -45,6 +45,8 @@ mixin _$LudoSessionData {
   DateTime get createdAt => throw _privateConstructorUsedError;
   @HiveField(12)
   int? get currentDiceValue => throw _privateConstructorUsedError;
+  @HiveField(13)
+  bool? get playMoveFailed => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -70,7 +72,8 @@ abstract class $LudoSessionDataCopyWith<$Res> {
       @HiveField(9) int nextPlayerId,
       @HiveField(10) String creator,
       @HiveField(11) DateTime createdAt,
-      @HiveField(12) int? currentDiceValue});
+      @HiveField(12) int? currentDiceValue,
+      @HiveField(13) bool? playMoveFailed});
 }
 
 /// @nodoc
@@ -98,6 +101,7 @@ class _$LudoSessionDataCopyWithImpl<$Res, $Val extends LudoSessionData>
     Object? creator = null,
     Object? createdAt = null,
     Object? currentDiceValue = freezed,
+    Object? playMoveFailed = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -148,6 +152,10 @@ class _$LudoSessionDataCopyWithImpl<$Res, $Val extends LudoSessionData>
           ? _value.currentDiceValue
           : currentDiceValue // ignore: cast_nullable_to_non_nullable
               as int?,
+      playMoveFailed: freezed == playMoveFailed
+          ? _value.playMoveFailed
+          : playMoveFailed // ignore: cast_nullable_to_non_nullable
+              as bool?,
     ) as $Val);
   }
 }
@@ -172,7 +180,8 @@ abstract class _$$LudoSessionDataImplCopyWith<$Res>
       @HiveField(9) int nextPlayerId,
       @HiveField(10) String creator,
       @HiveField(11) DateTime createdAt,
-      @HiveField(12) int? currentDiceValue});
+      @HiveField(12) int? currentDiceValue,
+      @HiveField(13) bool? playMoveFailed});
 }
 
 /// @nodoc
@@ -198,6 +207,7 @@ class __$$LudoSessionDataImplCopyWithImpl<$Res>
     Object? creator = null,
     Object? createdAt = null,
     Object? currentDiceValue = freezed,
+    Object? playMoveFailed = freezed,
   }) {
     return _then(_$LudoSessionDataImpl(
       id: null == id
@@ -248,6 +258,10 @@ class __$$LudoSessionDataImplCopyWithImpl<$Res>
           ? _value.currentDiceValue
           : currentDiceValue // ignore: cast_nullable_to_non_nullable
               as int?,
+      playMoveFailed: freezed == playMoveFailed
+          ? _value.playMoveFailed
+          : playMoveFailed // ignore: cast_nullable_to_non_nullable
+              as bool?,
     ));
   }
 }
@@ -269,7 +283,8 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
       @HiveField(9) required this.nextPlayerId,
       @HiveField(10) required this.creator,
       @HiveField(11) required this.createdAt,
-      @HiveField(12) required this.currentDiceValue})
+      @HiveField(12) required this.currentDiceValue,
+      @HiveField(13) required this.playMoveFailed})
       : _sessionUserStatus = sessionUserStatus,
         super._();
 
@@ -319,10 +334,13 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
   @override
   @HiveField(12)
   final int? currentDiceValue;
+  @override
+  @HiveField(13)
+  final bool? playMoveFailed;
 
   @override
   String toString() {
-    return 'LudoSessionData(id: $id, status: $status, nextPlayer: $nextPlayer, nonce: $nonce, color: $color, playAmount: $playAmount, playToken: $playToken, sessionUserStatus: $sessionUserStatus, nextPlayerId: $nextPlayerId, creator: $creator, createdAt: $createdAt, currentDiceValue: $currentDiceValue)';
+    return 'LudoSessionData(id: $id, status: $status, nextPlayer: $nextPlayer, nonce: $nonce, color: $color, playAmount: $playAmount, playToken: $playToken, sessionUserStatus: $sessionUserStatus, nextPlayerId: $nextPlayerId, creator: $creator, createdAt: $createdAt, currentDiceValue: $currentDiceValue, playMoveFailed: $playMoveFailed)';
   }
 
   @override
@@ -348,7 +366,9 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.currentDiceValue, currentDiceValue) ||
-                other.currentDiceValue == currentDiceValue));
+                other.currentDiceValue == currentDiceValue) &&
+            (identical(other.playMoveFailed, playMoveFailed) ||
+                other.playMoveFailed == playMoveFailed));
   }
 
   @JsonKey(ignore: true)
@@ -366,7 +386,8 @@ class _$LudoSessionDataImpl extends _LudoSessionData {
       nextPlayerId,
       creator,
       createdAt,
-      currentDiceValue);
+      currentDiceValue,
+      playMoveFailed);
 
   @JsonKey(ignore: true)
   @override
@@ -397,7 +418,8 @@ abstract class _LudoSessionData extends LudoSessionData {
           @HiveField(9) required final int nextPlayerId,
           @HiveField(10) required final String creator,
           @HiveField(11) required final DateTime createdAt,
-          @HiveField(12) required final int? currentDiceValue}) =
+          @HiveField(12) required final int? currentDiceValue,
+          @HiveField(13) required final bool? playMoveFailed}) =
       _$LudoSessionDataImpl;
   _LudoSessionData._() : super._();
 
@@ -440,6 +462,9 @@ abstract class _LudoSessionData extends LudoSessionData {
   @override
   @HiveField(12)
   int? get currentDiceValue;
+  @override
+  @HiveField(13)
+  bool? get playMoveFailed;
   @override
   @JsonKey(ignore: true)
   _$$LudoSessionDataImplCopyWith<_$LudoSessionDataImpl> get copyWith =>

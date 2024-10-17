@@ -5,6 +5,7 @@ Sparta App
 */
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void showErrorDialog(String? message, BuildContext context,
     {bool isInfo = false}) {
@@ -14,9 +15,16 @@ void showErrorDialog(String? message, BuildContext context,
   showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
+      scrollable: true,
       title: Text(isInfo ? 'Info' : 'An Error Occurred!'),
-      content: Text(message!),
+      content: SelectableText(message!),
       actions: <Widget>[
+        TextButton(
+          child: const Text('Copy'),
+          onPressed: () {
+            Clipboard.setData(ClipboardData(text: message ?? ""));
+          },
+        ),
         TextButton(
           child: const Text('Okay'),
           onPressed: () {
