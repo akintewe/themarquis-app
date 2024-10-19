@@ -42,9 +42,9 @@ class LudoGameTest extends LudoGame {
   }
 
   @override
-  Future<void> playMove(int index) async {
+  Future<void> playMove(int index, {bool isAuto = false}) async {
     await mockSessionProvider.playMove(index.toString());
-    await super.playMove(index);
+    await super.playMove(index, isAuto: isAuto);
   }
 
   // Override overlay methods to prevent errors

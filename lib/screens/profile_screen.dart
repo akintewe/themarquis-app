@@ -274,16 +274,18 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                     final url =
                         'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}';
 
-                    // Construct the tweet URL with text and referral link
+                    // Use the Twitter app's URL scheme
                     final tweetUrl = Uri.encodeFull(
-                        'https://twitter.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz');
+                        'twitter://post?message=$tweetText\n$url');
 
-                    // Launch the URL
-                    if (await canLaunchUrl(Uri.parse(tweetUrl))) {
+                    // Fallback to web URL if the app isn't installed
+                    final webTweetUrl = Uri.encodeFull(
+                        'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz');
+
+                    try {
                       await launchUrl(Uri.parse(tweetUrl));
-                    } else {
-                      // Handle error
-                      print('Could not launch $tweetUrl');
+                    } catch (e) {
+                      await launchUrl(Uri.parse(webTweetUrl));
                     }
                   }),
                   _buildActionButton(Icons.link, 'Copy Link', () {
@@ -295,14 +297,16 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                     );
                   }),
                   _buildActionButton(Icons.share, 'Share', () async {
-                    final image = await createImageFromWidget(
-                      QrImageView(
-                        data: widget.user.referralCode,
-                        size: 150,
-                      ),
-                    );
+                    // final image = await createImageFromWidget(
+                    //   QrImageView(
+                    //     data: widget.user.referralCode,
+                    //     size: 150,
+                    //   ),
+                    // );
+                    final image =
+                        await rootBundle.load('assets/images/share_banner.png');
                     Share.shareXFiles([
-                      XFile.fromData(image,
+                      XFile.fromData(image.buffer.asUint8List(),
                           mimeType: 'image/png', name: 'qr_code.png')
                     ],
                         subject: 'TheMarquis Referral Code',

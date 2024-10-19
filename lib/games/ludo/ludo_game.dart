@@ -82,10 +82,20 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
   }
 
-  Future<void> playMove(int index) async {
+  Future<void> playMove(int index, {bool isAuto = false}) async {
     try {
-      dice.state = DiceState.playingMove;
-      await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
+      if (!isAuto) {
+        dice.state = DiceState.preparing;
+        await Future.delayed(const Duration(seconds: 8), () async {
+          dice.state = DiceState.playingMove;
+          await ref
+              .read(ludoSessionProvider.notifier)
+              .playMove(index.toString());
+        });
+      } else {
+        dice.state = DiceState.playingMove;
+        await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
+      }
     } catch (e) {
       dice.state = DiceState.rolledDice;
       showErrorDialog(e.toString());
@@ -309,17 +319,17 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       showSnackBar("Can not move from Basement, try to get a 6!!");
       final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
       if (pinsAtHome.isNotEmpty) {
-        await playMove(pinsAtHome[0]!.homeIndex);
+        await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
       } else {
         final pins = board.getPlayerPinsOnBoard(_userIndex);
-        await playMove(pins[0].homeIndex);
+        await playMove(pins[0].homeIndex, isAuto: true);
       }
       return;
     }
 
     if (movablePins.length == 1 && dice.value < 6) {
       // Automatically play move on the only movable pin
-      await playMove(movablePins[0].homeIndex);
+      await playMove(movablePins[0].homeIndex, isAuto: true);
       return;
     }
 

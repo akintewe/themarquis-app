@@ -287,7 +287,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8.0)),
                             child: const Text(
-                              'Comming Soon',
+                              'Coming Soon',
                               style: TextStyle(fontSize: 12),
                             ),
                           ),
@@ -347,7 +347,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8.0)),
                             child: const Text(
-                              'Comming Soon',
+                              'Coming Soon',
                               style: TextStyle(fontSize: 12),
                             ),
                           ),
