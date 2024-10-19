@@ -22,6 +22,7 @@ class Dice extends PositionComponent
   late SpriteSheet diceSpriteSheet;
   List<Sprite?> _currentSprites = [];
   double _emphasisAngle = 0;
+  final int playerIndex;
 
   final Random random = Random();
 
@@ -35,14 +36,28 @@ class Dice extends PositionComponent
     update(0);
   }
 
+  void setValue(int value) {
+    _values = [
+      ...List.filled(value ~/ 6, 6),
+      if (value % 6 != 0) value % 6,
+    ];
+    _currentSprites = _values
+        .map((value) => diceSpriteSheet.getSprite(0, min(value - 1, 5)))
+        .toList();
+    update(0);
+  }
+
   DiceState get state => _state;
   set state(DiceState newState) {
     _state = newState;
     update(0);
   }
 
-  Dice({required Vector2 size, required Vector2 position})
-      : super(
+  Dice({
+    required Vector2 size,
+    required Vector2 position,
+    required this.playerIndex,
+  }) : super(
           size: size,
           position: position,
           anchor: Anchor.center,
@@ -72,6 +87,12 @@ class Dice extends PositionComponent
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+
+    final borderPaint = Paint()
+      ..color = game.listOfColors[playerIndex]
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawRect(size.toRect(), borderPaint);
 
     if (_state == DiceState.active) {
       _renderEmphasis(canvas);
@@ -137,7 +158,7 @@ class Dice extends PositionComponent
 
   void _renderDice(Canvas canvas) {
     final diceCount = _currentSprites.length;
-    final spacing = 10.0; // Space between dice
+    final spacing = size.x / 10; // Space between dice
     final totalSpacing = (diceCount - 1) * spacing;
     final diceWidth = (size.x - totalSpacing) / diceCount;
     final diceSize = Vector2(diceWidth, diceWidth); // Make dice square
@@ -197,7 +218,8 @@ class Dice extends PositionComponent
         break;
     }
 
-    canvas.drawCircle(Offset(size.x - 10, 10), 5, indicatorPaint);
+    canvas.drawCircle(
+        Offset(size.x * 0.9, size.y * 0.1), size.x / 20, indicatorPaint);
   }
 
   Future<void> roll() async {

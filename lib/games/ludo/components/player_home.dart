@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flame/components.dart';
+import 'package:marquis_v2/games/ludo/components/dice.dart';
 import 'package:marquis_v2/games/ludo/components/player_avatar.dart';
 import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
-import 'package:marquis_v2/models/ludo_session.dart';
+import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 
 class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
   final int playerIndex;
@@ -14,6 +16,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
   late List<PlayerPin?> _homePins;
   late List<Vector2> _homePinLocations;
   late List<Vector2> _avatarPositions;
+  late Dice _playerDice;
+  Dice? get playerDice => _playerDice;
 
   bool get isHomeFull =>
       _homePins[0] != null &&
@@ -52,11 +56,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         playerIndex,
         0,
         (event, pin) {
-          if (game.dice.value >= 6) {
-            // Move in websockets handler
-            // game.board.addPin(
-            //     removePin(pin, 0)..position = pin.position + position,
-            //     location: game.pendingMoves);
+          if (game.currentDice.value >= 6) {
             return true;
           } else {
             return false;
@@ -68,10 +68,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         playerIndex,
         1,
         (event, pin) {
-          if (game.dice.value >= 6) {
-            // game.board.addPin(
-            //     removePin(pin, 1)..position = pin.position + position,
-            //     location: game.pendingMoves);
+          if (game.currentDice.value >= 6) {
             return true;
           } else {
             return false;
@@ -83,10 +80,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         playerIndex,
         2,
         (event, pin) {
-          if (game.dice.value >= 6) {
-            // game.board.addPin(
-            //     removePin(pin, 2)..position = pin.position + position,
-            //     location: game.pendingMoves);
+          if (game.currentDice.value >= 6) {
             return true;
           } else {
             return false;
@@ -98,10 +92,7 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         playerIndex,
         3,
         (event, pin) {
-          if (game.dice.value >= 6) {
-            // game.board.addPin(
-            //     removePin(pin, 3)..position = pin.position + position,
-            //     location: game.pendingMoves);
+          if (game.currentDice.value >= 6) {
             return true;
           } else {
             return false;
@@ -145,6 +136,24 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     await add(playerName);
 
     await add(PlayerAvatar(_avatarPositions[playerIndex], playerIndex));
+
+    final targetPosition = switch (playerIndex) {
+      0 => _avatarPositions[playerIndex] +
+          Vector2(game.unitSize * 4, game.unitSize * 1.5),
+      1 => _avatarPositions[playerIndex] +
+          Vector2(-game.unitSize * 1.5, game.unitSize * 1.5),
+      2 => _avatarPositions[playerIndex] +
+          Vector2(-game.unitSize * 1.5, game.unitSize * 1.5),
+      3 => _avatarPositions[playerIndex] +
+          Vector2(game.unitSize * 4, game.unitSize * 1.5),
+      _ => throw Exception("Invalid player index"),
+    };
+    _playerDice = Dice(
+      size: Vector2(50, 50),
+      position: targetPosition,
+      playerIndex: playerIndex,
+    );
+    await add(_playerDice);
   }
 
   @override
@@ -228,7 +237,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
   Future<void> returnPin(PlayerPin pin) async {
     _homePins[pin.homeIndex] = pin
       ..onTap = (event, pin) {
-        if (game.dice.value >= 6 && game.currentPlayer == pin.playerIndex) {
+        if ((game.currentDice.value >= 6) &&
+            game.currentPlayer == pin.playerIndex) {
           return true;
         } else {
           return false;
@@ -237,5 +247,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       ..returnToHome(_homePinLocations[pin.homeIndex]);
     print("Player ${pin.playerIndex} pin ${pin.homeIndex} returned to home");
     await add(_homePins[pin.homeIndex]!);
+  }
+
+  Future<void> setDiceValue(int diceValue) async {
+    _playerDice.setValue(diceValue);
   }
 }

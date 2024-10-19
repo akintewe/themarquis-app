@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
-import 'package:marquis_v2/models/ludo_session.dart';
+import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
 
@@ -126,6 +126,34 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                               text: 'Exit Game',
                               onTap: () async {
                                 try {
+                                  // Show confirmation dialog
+                                  final bool confirmExit = await showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Exit Game'),
+                                        content: const Text(
+                                            'Are you sure you want to exit the current game?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text('Cancel'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop(false);
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text('Exit'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop(true);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+
+                                  // If user doesn't confirm, return early
+                                  if (!confirmExit) return;
                                   await ref
                                       .read(ludoSessionProvider.notifier)
                                       .exitSession();

@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:hive/hive.dart';
 import 'package:marquis_v2/env.dart';
-import 'package:marquis_v2/models/ludo_session.dart';
+import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

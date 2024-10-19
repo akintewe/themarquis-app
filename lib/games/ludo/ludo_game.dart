@@ -1,4 +1,5 @@
 import 'dart:async' as dart_async;
+import 'dart:async';
 
 // ignore_for_file: unused_field
 
@@ -16,14 +17,15 @@ import 'package:marquis_v2/games/ludo/components/player_home.dart';
 import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
-import 'package:marquis_v2/models/ludo_session.dart';
+import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
+import 'package:marquis_v2/games/ludo/components/dice_container.dart';
 
 enum PlayState { welcome, waiting, playing, finished }
 
 class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   bool isInit = false;
-  late Dice dice;
+  late DiceContainer diceContainer;
   late Board board;
   late TextComponent turnText;
   late Destination destination;
@@ -72,6 +74,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       .map((user) => user.email.split('@')[0])
       .toList();
 
+  Dice get currentDice => diceContainer.currentDice;
+  Dice? getPlayerDice(int playerIndex) => playerHomes[playerIndex].playerDice;
+
   Future<List<int>> generateMove() async {
     try {
       final res = await ref.read(ludoSessionProvider.notifier).generateMove();
@@ -85,19 +90,19 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> playMove(int index, {bool isAuto = false}) async {
     try {
       if (!isAuto) {
-        dice.state = DiceState.preparing;
+        diceContainer.currentDice.state = DiceState.preparing;
         await Future.delayed(const Duration(seconds: 8), () async {
-          dice.state = DiceState.playingMove;
+          diceContainer.currentDice.state = DiceState.playingMove;
           await ref
               .read(ludoSessionProvider.notifier)
               .playMove(index.toString());
         });
       } else {
-        dice.state = DiceState.playingMove;
+        diceContainer.currentDice.state = DiceState.playingMove;
         await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
       }
     } catch (e) {
-      dice.state = DiceState.rolledDice;
+      diceContainer.currentDice.state = DiceState.rolledDice;
       showErrorDialog(e.toString());
     }
   }
@@ -136,26 +141,23 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           // Update pin locations
           if (_playState == PlayState.playing && isInit) {
             try {
+              final prevPlayer = _currentPlayer;
               _currentPlayer = _sessionData!.nextPlayerIndex;
               playerCanMove = false;
               updateTurnText();
 
               if (_sessionData!.currentDiceValue != null) {
                 int diceValue = _sessionData!.currentDiceValue!;
-                dice.values = [
-                  ...List.filled(diceValue ~/ 6, 6),
-                  if (diceValue % 6 != 0) diceValue % 6
-                ];
-                dice.update(0);
+                await prepareNextPlayerDice(prevPlayer, diceValue);
               }
               if (_currentPlayer == _userIndex) {
                 if (_sessionData!.playMoveFailed ?? false) {
-                  dice.state = DiceState.active;
+                  diceContainer.currentDice.state = DiceState.active;
                 } else {
-                  dice.state = DiceState.preparing;
+                  diceContainer.currentDice.state = DiceState.preparing;
                 }
               } else {
-                dice.state = DiceState.inactive;
+                diceContainer.currentDice.state = DiceState.inactive;
               }
               for (final player in _sessionData!.sessionUserStatus) {
                 final pinLocations = player.playerTokensPosition;
@@ -197,9 +199,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                 }
               }
               if (_currentPlayer == _userIndex &&
-                  dice.state == DiceState.preparing) {
+                  diceContainer.currentDice.state == DiceState.preparing) {
                 Future.delayed(const Duration(seconds: 8), () {
-                  dice.state = DiceState.active;
+                  diceContainer.currentDice.state = DiceState.active;
                 });
               }
             } catch (e) {
@@ -241,15 +243,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     destination = Destination();
     await add(destination);
 
-    dice = Dice(
-        size: Vector2(100, 100), position: Vector2(size.x / 2, size.y - 200));
-    await add(dice);
-
-    if (_currentPlayer == _userIndex) {
-      dice.state = DiceState.active;
-    } else {
-      dice.state = DiceState.inactive;
-    }
+    await createAndSetCurrentPlayerDice();
 
     turnText = TextComponent(
       text: '',
@@ -304,7 +298,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   Future<void> rollDice() async {
     if (playerCanMove) return;
-    await dice.roll();
+    await diceContainer.currentDice.roll();
 
     List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(_userIndex);
     List<PlayerPin> movablePins = [];
@@ -315,7 +309,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       }
     }
 
-    if (movablePins.isEmpty && dice.value < 6) {
+    if (movablePins.isEmpty && diceContainer.currentDice.value < 6) {
       showSnackBar("Can not move from Basement, try to get a 6!!");
       final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
       if (pinsAtHome.isNotEmpty) {
@@ -327,7 +321,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       return;
     }
 
-    if (movablePins.length == 1 && dice.value < 6) {
+    if (movablePins.length == 1 && diceContainer.currentDice.value < 6) {
       // Automatically play move on the only movable pin
       await playMove(movablePins[0].homeIndex, isAuto: true);
       return;
@@ -335,18 +329,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
     playerCanMove = true;
 
+    // Commented out code should also be updated if uncommented in the future
     // playerCanMove = !movablePins.isEmpty ||
-    //     (dice.value >= 6 && !playerHomes[_currentPlayer].isHomeEmpty);
-
-    // if (!playerCanMove) {
-    //   final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
-    //   if (pinsAtHome.isNotEmpty) {
-    //     await playMove(pinsAtHome[0]!.homeIndex);
-    //   } else {
-    //     final pins = board.getPlayerPinsOnBoard(_userIndex);
-    //     await playMove(pins[0].homeIndex);
-    //   }
-    // }
+    //     (diceContainer.currentDice!.value >= 6 && !playerHomes[_currentPlayer].isHomeEmpty);
   }
 
   void showMessage(String message,
@@ -385,5 +370,29 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   void onRemove() {
     _messageTimer?.cancel();
     super.onRemove();
+  }
+
+  Future<void> createAndSetCurrentPlayerDice() async {
+    final newDice = Dice(
+      size: Vector2(100, 100),
+      position: Vector2(size.x / 2, size.y - 200),
+      playerIndex: _currentPlayer,
+    );
+    if (_currentPlayer == _userIndex) {
+      newDice.state = DiceState.active;
+    } else {
+      newDice.state = DiceState.inactive;
+    }
+    diceContainer = DiceContainer(
+      position: Vector2(size.x / 2, size.y - 150),
+      size: Vector2(100, 100),
+      dice: newDice,
+    );
+    await add(diceContainer);
+  }
+
+  Future<void> prepareNextPlayerDice(int playerIndex, int diceValue) async {
+    final playerHome = playerHomes[playerIndex];
+    await playerHome.setDiceValue(diceValue);
   }
 }
