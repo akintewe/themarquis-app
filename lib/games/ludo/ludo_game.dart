@@ -135,6 +135,18 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       ref.listen(ludoSessionProvider, (prev, next) async {
         _sessionData = next;
         if (_sessionData != null) {
+          if (_sessionData!.message != null) {
+            showErrorDialog(_sessionData!.message!);
+            if (_sessionData!.message!.startsWith("EXITED")) {
+              await ref
+                  .read(ludoSessionProvider.notifier)
+                  .clearData(refreshUser: true);
+              overlays.remove(PlayState.waiting.name);
+              overlays.remove(PlayState.finished.name);
+              playState = PlayState.welcome;
+              return;
+            }
+          }
           if (_playState == PlayState.welcome) {
             playState = PlayState.waiting;
           }
@@ -159,11 +171,11 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
               } else {
                 diceContainer.currentDice.state = DiceState.inactive;
               }
+              final movePinsCompleter = Completer<void>();
               for (final player in _sessionData!.sessionUserStatus) {
                 final pinLocations = player.playerTokensPosition;
                 final currentPinLocations = playerPinLocations[player.playerId];
                 final playerHome = playerHomes[player.playerId];
-
                 for (int i = 0; i < pinLocations.length; i++) {
                   final pinLocation = int.parse(pinLocations[i]) +
                       (player.playerTokensCircled?[i] ?? false ? 52 : 0);
@@ -181,13 +193,16 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                       final pin = playerHome.removePin(i);
                       await pin.removed;
                       print('Adding pin');
+
                       await board.addPin(pin,
                           location: pinLocation - player.playerId * 13 - 1);
                       print('Pin added');
                     } else if (currentPinLocations[i] != 0 &&
                         pinLocation == 0) {
                       final pin = board.getPinWithIndex(player.playerId, i);
-                      await board.attackPin(pin!);
+                      movePinsCompleter.future.then((_) {
+                        board.attackPin(pin!);
+                      });
                     } else {
                       final pin = board.getPinWithIndex(player.playerId, i);
                       await pin
@@ -198,6 +213,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                   }
                 }
               }
+              movePinsCompleter.complete();
               if (_currentPlayer == _userIndex &&
                   diceContainer.currentDice.state == DiceState.preparing) {
                 Future.delayed(const Duration(seconds: 8), () {

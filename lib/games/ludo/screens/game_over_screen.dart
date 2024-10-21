@@ -195,7 +195,9 @@ class MatchResultsScreen extends ConsumerWidget {
         if (!context.mounted) return;
         showDialog(
             context: context,
+            barrierColor: Colors.black.withAlpha(220),
             builder: (ctx) => Dialog(
+                  backgroundColor: Colors.transparent,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

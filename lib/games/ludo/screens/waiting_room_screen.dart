@@ -170,6 +170,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                           final imageBytes = await _buildShareImage(session);
                           if (!context.mounted) return;
                           showDialog(
+                            barrierColor: Colors.black.withAlpha(220),
                             context: context,
                             builder: (ctx) => Dialog(
                               backgroundColor: Colors.transparent,
@@ -349,7 +350,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                   ),
                   QrImageView(
                     data: 'https://themarquis.xyz',
-                    size: 80,
+                    size: 150,
                   )
                 ],
               ),

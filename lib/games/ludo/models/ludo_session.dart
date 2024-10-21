@@ -32,6 +32,7 @@ class LudoSessionData extends HiveObject with _$LudoSessionData {
     @HiveField(11) required DateTime createdAt,
     @HiveField(12) required int? currentDiceValue,
     @HiveField(13) required bool? playMoveFailed,
+    @HiveField(14) String? message,
   }) = _LudoSessionData;
 
   List<Color> get getListOfColors => sessionUserStatus

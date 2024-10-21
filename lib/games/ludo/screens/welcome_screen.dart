@@ -157,6 +157,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                                   await ref
                                       .read(ludoSessionProvider.notifier)
                                       .exitSession();
+                                  setState(() {});
                                 } catch (e) {
                                   if (!context.mounted) return;
                                   showErrorDialog(e.toString(), context);
@@ -1092,6 +1093,11 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                                           "Please select a color", context);
                                       return;
                                     }
+                                    if (_selectedTokenAddress == "") {
+                                      showErrorDialog(
+                                          "Please select a token", context);
+                                      return;
+                                    }
                                     setState(() {
                                       _isLoading = true;
                                     });
@@ -1419,7 +1425,7 @@ class _JoinRoomChooseColorDialogState
                     return Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: const Color.fromARGB(255, 0, 236, 255),
+                          color: Colors.grey,
                           width: 1.2,
                         ),
                         borderRadius: BorderRadius.circular(6),

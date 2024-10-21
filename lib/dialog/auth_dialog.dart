@@ -89,8 +89,8 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                                     await ref
                                         .read(appStateProvider.notifier)
                                         .signup(
-                                          _emailController.text,
-                                          _refCodeController.text,
+                                          _emailController.text.trim(),
+                                          _refCodeController.text.trim(),
                                         );
                                   }
                                   if (!context.mounted) return;
@@ -118,7 +118,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                                       .endsWith('@test.com')) {
                                     await ref
                                         .read(appStateProvider.notifier)
-                                        .login(_emailController.text);
+                                        .login(_emailController.text.trim());
                                   }
                                   if (!context.mounted) return;
                                   await showDialog<String>(
@@ -238,12 +238,12 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
     try {
       if (widget.email.endsWith('@test.com')) {
         if (widget.isSignUp) {
-          await appState.signupSandbox(widget.email);
+          await appState.signupSandbox(widget.email.trim());
         } else {
-          await appState.loginSandbox(widget.email);
+          await appState.loginSandbox(widget.email.trim());
         }
       } else {
-        await appState.verifyCode(widget.email, _otp);
+        await appState.verifyCode(widget.email.trim(), _otp);
       }
       if (!mounted) return;
       Navigator.of(context).pop(_otp);

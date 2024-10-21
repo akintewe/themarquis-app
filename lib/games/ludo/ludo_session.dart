@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:marquis_v2/env.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
+import 'package:marquis_v2/widgets/error_dialog.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -48,8 +50,8 @@ class LudoSession extends _$LudoSession {
             case 'player_joined':
             case 'play_move_failed':
               final dataStr = decodedResponse['data'] as String;
-              print('Data String ${dataStr}');
               final data = jsonDecode(dataStr) as Map;
+              if (data["session_id"] != _id) return;
               if (decodedResponse['event'] == 'play_move') {
                 _currentDiceValue = int.parse(data['steps']);
               }
@@ -59,9 +61,16 @@ class LudoSession extends _$LudoSession {
                 _playMoveFailed = false;
               }
               print('Data $data');
-              if (data["session_id"] == _id) {
-                await getLudoSession();
-              }
+              await getLudoSession();
+              break;
+            case 'player_exited':
+              final dataStr = decodedResponse['data'] as String;
+              final data = jsonDecode(dataStr) as Map;
+              if (data["session_id"] != _id) return;
+              state = state?.copyWith(
+                message:
+                    "EXITED: Player ${data['player_id']} has left the session, session ${data['session_id']} has finished.",
+              );
               break;
           }
         },
@@ -272,9 +281,13 @@ class LudoSession extends _$LudoSession {
     return decodedResponse.map((e) => e as Map).toList();
   }
 
-  Future<void> clearData() async {
+  Future<void> clearData({bool refreshUser = false}) async {
     _hiveBox!.delete("ludoSession");
     state = null;
+    _id = null;
+    if (refreshUser) {
+      await ref.read(userProvider.notifier).getUser();
+    }
   }
 
   Future<void> createSession(
@@ -363,9 +376,9 @@ class LudoSession extends _$LudoSession {
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     print(decodedResponse);
-    await ref.read(userProvider.notifier).getUser();
     _id = null;
     state = null;
+    await ref.read(userProvider.notifier).getUser();
   }
 
   Future<void> editLudoSession(
