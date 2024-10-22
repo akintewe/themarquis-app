@@ -185,7 +185,6 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       });
     print("moving pin");
     await pin.movePin(location, maxDuration: isInit ? 2 : 7);
-    // updateOverlappingPins();
   }
 
   Map<String, List<PlayerPin>> overlappingPins = {};

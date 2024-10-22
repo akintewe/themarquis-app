@@ -46,6 +46,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   String? currentMessage;
   bool isErrorMessage = false;
   dart_async.Timer? _messageTimer;
+  Completer<void>? ludoSessionLoadingCompleter;
 
   LudoGame()
       : super(
@@ -133,100 +134,111 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     _sessionData = ref.read(ludoSessionProvider);
     addToGameWidgetBuild(() {
       ref.listen(ludoSessionProvider, (prev, next) async {
-        _sessionData = next;
-        if (_sessionData != null) {
-          if (_sessionData!.message != null) {
-            showErrorDialog(_sessionData!.message!);
-            if (_sessionData!.message!.startsWith("EXITED")) {
-              await ref
-                  .read(ludoSessionProvider.notifier)
-                  .clearData(refreshUser: true);
-              overlays.remove(PlayState.waiting.name);
-              overlays.remove(PlayState.finished.name);
-              playState = PlayState.welcome;
-              return;
-            }
-          }
-          if (_playState == PlayState.welcome) {
-            playState = PlayState.waiting;
-          }
-          // Update pin locations
-          if (_playState == PlayState.playing && isInit) {
-            try {
-              final prevPlayer = _currentPlayer;
-              _currentPlayer = _sessionData!.nextPlayerIndex;
-              playerCanMove = false;
-              updateTurnText();
-
-              if (_sessionData!.currentDiceValue != null) {
-                int diceValue = _sessionData!.currentDiceValue!;
-                await prepareNextPlayerDice(prevPlayer, diceValue);
-              }
-              if (_currentPlayer == _userIndex) {
-                if (_sessionData!.playMoveFailed ?? false) {
-                  diceContainer.currentDice.state = DiceState.active;
-                } else {
-                  diceContainer.currentDice.state = DiceState.preparing;
-                }
-              } else {
-                diceContainer.currentDice.state = DiceState.inactive;
-              }
-              final movePinsCompleter = Completer<void>();
-              for (final player in _sessionData!.sessionUserStatus) {
-                final pinLocations = player.playerTokensPosition;
-                final currentPinLocations = playerPinLocations[player.playerId];
-                final playerHome = playerHomes[player.playerId];
-                for (int i = 0; i < pinLocations.length; i++) {
-                  final pinLocation = int.parse(pinLocations[i]) +
-                      (player.playerTokensCircled?[i] ?? false ? 52 : 0);
-                  if (player.playerWinningTokens[i] == true &&
-                      currentPinLocations[i] != -1) {
-                    playerPinLocations[player.playerId][i] = -1;
-                    final pin = board.getPinWithIndex(player.playerId, i);
-                    board.remove(pin!);
-                    await pin.removed;
-                    destination.addPin(pin);
-                  } else if (player.playerWinningTokens[i] != true &&
-                      currentPinLocations[i] != pinLocation) {
-                    if (currentPinLocations[i] == 0 && pinLocation != 0) {
-                      print('Removing pin');
-                      final pin = playerHome.removePin(i);
-                      await pin.removed;
-                      print('Adding pin');
-
-                      await board.addPin(pin,
-                          location: pinLocation - player.playerId * 13 - 1);
-                      print('Pin added');
-                    } else if (currentPinLocations[i] != 0 &&
-                        pinLocation == 0) {
-                      final pin = board.getPinWithIndex(player.playerId, i);
-                      movePinsCompleter.future.then((_) {
-                        board.attackPin(pin!);
-                      });
-                    } else {
-                      final pin = board.getPinWithIndex(player.playerId, i);
-                      await pin
-                          ?.movePin(pinLocation - player.playerId * 13 - 1);
-                    }
-
-                    playerPinLocations[player.playerId][i] = pinLocation;
-                  }
-                }
-              }
-              movePinsCompleter.complete();
-              if (_currentPlayer == _userIndex &&
-                  diceContainer.currentDice.state == DiceState.preparing) {
-                Future.delayed(const Duration(seconds: 8), () {
-                  diceContainer.currentDice.state = DiceState.active;
-                });
-              }
-            } catch (e) {
-              showErrorDialog(e.toString());
-            }
-          }
+        if (ludoSessionLoadingCompleter != null) {
+          await ludoSessionLoadingCompleter!.future;
         }
+        _handleLudoSessionUpdate(next);
       });
     });
+  }
+
+  Future<void> _handleLudoSessionUpdate(LudoSessionData? next) async {
+    ludoSessionLoadingCompleter = Completer<void>();
+    _sessionData = next;
+    if (_sessionData != null) {
+      if (_sessionData!.message != null) {
+        showErrorDialog(_sessionData!.message!);
+        if (_sessionData!.message!.startsWith("EXITED")) {
+          await ref
+              .read(ludoSessionProvider.notifier)
+              .clearData(refreshUser: true);
+          overlays.remove(PlayState.waiting.name);
+          overlays.remove(PlayState.finished.name);
+          playState = PlayState.welcome;
+          return;
+        }
+      }
+      if (_playState == PlayState.welcome) {
+        playState = PlayState.waiting;
+      }
+      // Update pin locations
+      if (_playState == PlayState.playing && isInit) {
+        try {
+          final prevPlayer = _currentPlayer;
+          _currentPlayer = _sessionData!.nextPlayerIndex;
+          playerCanMove = false;
+          updateTurnText();
+
+          if (_sessionData!.currentDiceValue != null) {
+            int diceValue = _sessionData!.currentDiceValue!;
+            await prepareNextPlayerDice(prevPlayer, diceValue);
+          }
+          if (_currentPlayer == _userIndex) {
+            if (_sessionData!.playMoveFailed ?? false) {
+              diceContainer.currentDice.state = DiceState.active;
+            } else {
+              diceContainer.currentDice.state = DiceState.preparing;
+            }
+          } else {
+            diceContainer.currentDice.state = DiceState.inactive;
+          }
+          final movePinsCompleter = Completer<void>();
+          for (final player in _sessionData!.sessionUserStatus) {
+            final pinLocations = player.playerTokensPosition;
+            final currentPinLocations = playerPinLocations[player.playerId];
+            final playerHome = playerHomes[player.playerId];
+            for (int i = 0; i < pinLocations.length; i++) {
+              final pinLocation = int.parse(pinLocations[i]) +
+                  (player.playerTokensCircled?[i] ?? false ? 52 : 0);
+              if (player.playerWinningTokens[i] == true &&
+                  currentPinLocations[i] != -1) {
+                // Remove from board and add to destination
+                playerPinLocations[player.playerId][i] = -1;
+                final pin = board.getPinWithIndex(player.playerId, i);
+                await pin?.movePin(56);
+                // board.remove(pin!);
+                // await pin.removed;
+                // destination.addPin(pin);
+              } else if (player.playerWinningTokens[i] != true &&
+                  currentPinLocations[i] != pinLocation) {
+                if (currentPinLocations[i] == 0 && pinLocation != 0) {
+                  // Remove from home and add to board
+                  final pin = playerHome.removePin(i);
+                  if (!pin.isRemoved) {
+                    await pin.removed;
+                  }
+
+                  await board.addPin(pin,
+                      location: pinLocation - player.playerId * 13 - 1);
+                } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
+                  // Pin attacked
+                  final pin = board.getPinWithIndex(player.playerId, i);
+                  movePinsCompleter.future.then((_) async {
+                    await board.attackPin(pin!);
+                  });
+                } else {
+                  // Move pin
+                  final pin = board.getPinWithIndex(player.playerId, i);
+                  await pin?.movePin(pinLocation - player.playerId * 13 - 1);
+                }
+                playerPinLocations[player.playerId][i] = pinLocation;
+              }
+            }
+          }
+          movePinsCompleter.complete();
+          if (_currentPlayer == _userIndex &&
+              diceContainer.currentDice.state == DiceState.preparing) {
+            Future.delayed(const Duration(seconds: 8), () {
+              diceContainer.currentDice.state = DiceState.active;
+            });
+          }
+        } catch (e) {
+          showErrorDialog(e.toString());
+        }
+      }
+    }
+    ludoSessionLoadingCompleter?.complete();
+    ludoSessionLoadingCompleter = null;
   }
 
   Future<void> initGame() async {
@@ -325,19 +337,25 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       }
     }
 
+    // If there are no movable pins and the dice value is less than 6, show a snackbar
     if (movablePins.isEmpty && diceContainer.currentDice.value < 6) {
       showSnackBar("Can not move from Basement, try to get a 6!!");
       final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
       if (pinsAtHome.isNotEmpty) {
+        // If there are pins at home, play the first one (dummy move)
         await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
       } else {
+        // If there are no pins at home, play the first pin on the board (dummy move)
         final pins = board.getPlayerPinsOnBoard(_userIndex);
         await playMove(pins[0].homeIndex, isAuto: true);
       }
       return;
     }
 
-    if (movablePins.length == 1 && diceContainer.currentDice.value < 6) {
+    if ((movablePins.length == 1 && diceContainer.currentDice.value < 6) ||
+        (movablePins.length == 1 &&
+            diceContainer.currentDice.value > 6 &&
+            playerHomes[_userIndex].pinsAtHome.isEmpty)) {
       // Automatically play move on the only movable pin
       await playMove(movablePins[0].homeIndex, isAuto: true);
       return;

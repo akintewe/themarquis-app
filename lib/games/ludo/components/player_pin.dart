@@ -119,7 +119,7 @@ class PlayerPin extends SpriteComponent
     ));
   }
 
-  Future<void> movePin(int? index, {double maxDuration = 7}) async {
+  Future<void> movePin(int index, {double maxDuration = 7}) async {
     await mounted;
     int startIndex = currentPosIndex;
     int targetIndex;
@@ -137,24 +137,16 @@ class PlayerPin extends SpriteComponent
         ));
         startIndex = 0;
       }
-      targetIndex = index ?? 0;
-    } else if (index == null) {
-      targetIndex = currentPosIndex + game.currentDice.value;
-    } else {
-      targetIndex = index;
     }
-
-    if (targetIndex == 56) {
-      game.destination.addPin(this);
-      game.board.remove(this);
-      return;
-    }
+    targetIndex = index;
 
     // Ensure we're actually moving
     if (targetIndex <= startIndex) {
-      print(
+      throw Exception(
           "Invalid move: target index ($targetIndex) is not greater than start index ($startIndex)");
-      return;
+    } else if (targetIndex > 56) {
+      throw Exception(
+          "Invalid move: target index ($targetIndex) is greater than 56");
     }
 
     print("Player $playerIndex moving to position $targetIndex");
@@ -184,9 +176,15 @@ class PlayerPin extends SpriteComponent
       // Create a Completer to wait for the animation to finish
       final completer = Completer<void>();
 
-      moveEffects.last.onComplete = () {
+      moveEffects.last.onComplete = () async {
         position = moveEffects.last.target.position;
-        if (parent is Board) {
+        if (currentPosIndex == 56) {
+          game.board.remove(this);
+          if (!isRemoved) {
+            await removed;
+          }
+          game.destination.addPin(this);
+        } else if (parent is Board) {
           (parent as Board).updateOverlappingPins();
         }
         completer.complete();

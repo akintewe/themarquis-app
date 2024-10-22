@@ -54,6 +54,7 @@ dependencies:
   share_plus: ^10.0.2
   gal: ^2.3.0
   url_launcher: ^6.3.0
+  async: ^2.11.0
   # magic_sdk: ^1.0.0
 
 dev_dependencies:

@@ -338,13 +338,13 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      "TRY LUDO NOW",
-                      style: TextStyle(
+                      "Our Room ID: ${session.id}",
+                      style: const TextStyle(
                           color: Colors.black,
-                          fontSize: 40,
+                          fontSize: 36,
                           fontWeight: FontWeight.bold),
                     ),
                   ),

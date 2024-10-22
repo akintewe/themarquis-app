@@ -6,11 +6,11 @@ class MessageOverlay extends StatelessWidget {
   final VoidCallback onDismiss;
 
   const MessageOverlay({
-    Key? key,
+    super.key,
     required this.message,
     this.backgroundColor = Colors.black87,
     required this.onDismiss,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
