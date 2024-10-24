@@ -206,6 +206,7 @@ class PlayerPin extends SpriteComponent
 
   Vector2 routeIndexToPos(int playerIndex, int positionIndex) {
     double x = 0, y = 0;
+    if (positionIndex >= 56) return game.center;
     final coords = playerRouteMap[playerIndex]![positionIndex];
     // print("Player $playerIndex moving to position $positionIndex: ($x, $y)");
     final index = coords[1];
