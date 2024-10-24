@@ -177,7 +177,7 @@ class PlayerPin extends SpriteComponent
       final completer = Completer<void>();
 
       moveEffects.last.onComplete = () async {
-        position = moveEffects.last.target.position;
+        position = routeIndexToPos(playerIndex, targetIndex);
         if (currentPosIndex == 56) {
           game.board.remove(this);
           if (!isRemoved) {
@@ -189,6 +189,10 @@ class PlayerPin extends SpriteComponent
         }
         completer.complete();
       };
+
+      if (parent is Board) {
+        (parent as Board).overlappingPins.clear();
+      }
 
       // Add sequential effect to combine all move effects
       add(SequenceEffect(moveEffects));

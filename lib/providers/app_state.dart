@@ -44,6 +44,11 @@ class AppState extends _$AppState {
     _hiveBox!.put("appState", state);
   }
 
+  void selectGameSessionId(String? game, String? id) {
+    state = state.copyWith(selectedGame: game, selectedGameSessionId: id);
+    _hiveBox!.put("appState", state);
+  }
+
   Future<void> login(String email) async {
     final url = Uri.parse('$baseUrl/auth/signin');
     final response = await http.post(
@@ -198,6 +203,7 @@ class AppState extends _$AppState {
           accessToken: null,
           refreshToken: null,
           selectedGame: null,
+          selectedGameSessionId: null,
           autoLoginResult: false,
         );
       },

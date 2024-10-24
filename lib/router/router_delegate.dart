@@ -6,7 +6,6 @@ import 'package:marquis_v2/router/app_shell.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/router/fade_animation.dart';
 import 'package:marquis_v2/router/route_path.dart';
-import 'package:marquis_v2/screens/achievements_screen.dart';
 import 'package:marquis_v2/screens/game_screen.dart';
 import 'package:marquis_v2/screens/home_screen.dart';
 import 'package:marquis_v2/screens/page_not_found_screen.dart';
@@ -37,7 +36,6 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
 
     ref.listen(appStateProvider, (previous, next) {
       _appState = next;
-      print(_appState.autoLoginResult);
       notifyListeners();
     });
   }
@@ -48,6 +46,9 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
       return PageNotFoundPath();
     }
     if (_appState.selectedGame != null) {
+      if (_appState.selectedGame == 'ludo') {
+        return LudoGameAppPath(_appState.selectedGameSessionId);
+      }
       return GamePath(_appState.selectedGame!);
     }
     switch (_appState.navigatorIndex) {
@@ -105,12 +106,10 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     return Navigator(
       key: navigatorKey,
       pages: stack,
-      onPopPage: (route, result) {
-        if (!route.didPop(result)) return false;
+      onDidRemovePage: (page) {
         if (_isSignUp) {
           _isSignUp = false;
         }
-        return true;
       },
     );
   }
@@ -130,6 +129,12 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
 
     if (configuration is ProfilePath) {
       ref.read(appStateProvider.notifier).changeNavigatorIndex(1);
+    }
+
+    if (configuration is LudoGameAppPath) {
+      ref
+          .read(appStateProvider.notifier)
+          .selectGameSessionId("ludo", configuration.id);
     }
 
     // if (configuration is AchievementsPath) {
@@ -208,11 +213,10 @@ class InnerRouterDelegate extends RouterDelegate<AppRoutePath>
               ),
           }
       ],
-      onPopPage: (route, result) {
+      onDidRemovePage: (page) {
         if (_appState.selectedGame != null) {
           ref.read(appStateProvider.notifier).selectGame(null);
         }
-        return route.didPop(result);
       },
     );
   }

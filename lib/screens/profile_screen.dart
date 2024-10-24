@@ -252,7 +252,8 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
             ),
             const SizedBox(height: 20),
             QrImageView(
-              data: widget.user.referralCode,
+              data:
+                  "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
               size: 150,
               backgroundColor: Colors.white,
             ),
@@ -262,60 +263,126 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
             _buildReferralField('Referral Link',
                 'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'),
             const SizedBox(height: 18),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildActionButton(FontAwesomeIcons.xTwitter, 'X', () async {
-                    // Prepare the tweet text
-                    final tweetText =
-                        'Join TheMarquis with my referral code: ${widget.user.referralCode}';
-                    final url =
-                        'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}';
+            FutureBuilder<Uint8List>(future: () async {
+              final image = await createImageFromWidget(
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: SizedBox(
+                    width: 500,
+                    height: 500,
+                    child: Stack(
+                      children: [
+                        Image.asset(
+                          'assets/images/share_referral_bg.png',
+                          fit: BoxFit.cover,
+                        ),
+                        Center(
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 80),
+                              const Padding(
+                                padding: EdgeInsets.all(6.0),
+                                child: Text(
+                                  "The Marquis",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Text(
+                                  "Referral Code: ${widget.user.referralCode}",
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              QrImageView(
+                                backgroundColor: Colors.transparent,
+                                eyeStyle: const QrEyeStyle(
+                                  color: Colors.white,
+                                  eyeShape: QrEyeShape.square,
+                                ),
+                                dataModuleStyle: const QrDataModuleStyle(
+                                  dataModuleShape: QrDataModuleShape.square,
+                                  color: Colors.white,
+                                ),
+                                data:
+                                    "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
+                                size: 250,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                logicalSize: const Size(500, 500),
+              );
+              return image;
+            }(), builder: (context, snapshot) {
+              return snapshot.connectionState == ConnectionState.waiting
+                  ? const CircularProgressIndicator()
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildActionButton(FontAwesomeIcons.xTwitter, 'X',
+                              () async {
+                            // Prepare the tweet text
+                            final tweetText =
+                                'Join TheMarquis with my referral code: ${widget.user.referralCode}';
+                            final url =
+                                'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}';
 
-                    // Use the Twitter app's URL scheme
-                    final tweetUrl = Uri.encodeFull(
-                        'twitter://post?message=$tweetText\n$url');
+                            // Use the Twitter app's URL scheme
+                            final tweetUrl = Uri.encodeFull(
+                                'twitter://post?message=$tweetText\n$url');
 
-                    // Fallback to web URL if the app isn't installed
-                    final webTweetUrl = Uri.encodeFull(
-                        'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz');
+                            // Fallback to web URL if the app isn't installed
+                            final webTweetUrl = Uri.encodeFull(
+                                'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz');
 
-                    try {
-                      await launchUrl(Uri.parse(tweetUrl));
-                    } catch (e) {
-                      await launchUrl(Uri.parse(webTweetUrl));
-                    }
-                  }),
-                  _buildActionButton(Icons.link, 'Copy Link', () {
-                    Clipboard.setData(ClipboardData(
-                        text:
-                            'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Copied to clipboard')),
+                            try {
+                              await launchUrl(Uri.parse(tweetUrl));
+                            } catch (e) {
+                              await launchUrl(Uri.parse(webTweetUrl));
+                            }
+                          }),
+                          _buildActionButton(Icons.link, 'Copy Link', () {
+                            Clipboard.setData(ClipboardData(
+                                text:
+                                    'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Copied to clipboard')),
+                            );
+                          }),
+                          _buildActionButton(Icons.share, 'Share', () async {
+                            final image = await rootBundle
+                                .load('assets/images/share_banner.png');
+                            // showDialog(
+                            //     context: context,
+                            //     builder: (context) => AlertDialog(
+                            //         content: Image.memory(snapshot.data!)));
+                            // final image = snapshot.data!;
+                            Share.shareXFiles([
+                              XFile.fromData(image.buffer.asUint8List(),
+                                  mimeType: 'image/png', name: 'qr_code.png')
+                            ],
+                                subject: 'TheMarquis Referral Code',
+                                text:
+                                    'Join TheMarquis with my referral code: ${widget.user.referralCode}\nhttps://themarquis.xyz/signup?referralcode=${widget.user.referralCode}');
+                          }),
+                        ],
+                      ),
                     );
-                  }),
-                  _buildActionButton(Icons.share, 'Share', () async {
-                    // final image = await createImageFromWidget(
-                    //   QrImageView(
-                    //     data: widget.user.referralCode,
-                    //     size: 150,
-                    //   ),
-                    // );
-                    final image =
-                        await rootBundle.load('assets/images/share_banner.png');
-                    Share.shareXFiles([
-                      XFile.fromData(image.buffer.asUint8List(),
-                          mimeType: 'image/png', name: 'qr_code.png')
-                    ],
-                        subject: 'TheMarquis Referral Code',
-                        text:
-                            'Join TheMarquis with my referral code: ${widget.user.referralCode}\nhttps://themarquis.xyz/signup?referralcode=${widget.user.referralCode}');
-                  }),
-                ],
-              ),
-            ),
+            }),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
+import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
 
@@ -100,9 +101,17 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                               text: 'Resume Game',
                               onTap: () async {
                                 try {
-                                  final session = await ref
-                                      .read(ludoSessionProvider.notifier)
-                                      .getLudoSession();
+                                  ref
+                                      .read(appStateProvider.notifier)
+                                      .selectGameSessionId(
+                                          "ludo", user.sessionId);
+                                  var session = ref.read(ludoSessionProvider);
+                                  if (session == null) {
+                                    await ref
+                                        .read(ludoSessionProvider.notifier)
+                                        .getLudoSession();
+                                    session = ref.read(ludoSessionProvider);
+                                  }
                                   if (session == null) return;
                                   if (session.sessionUserStatus
                                           .where((e) => e.status == "ACTIVE")
@@ -416,9 +425,8 @@ class _JoinRoomDialogState extends ConsumerState<JoinRoomDialog> {
                               _isLoading = true;
                             });
                             try {
-                              final ludoSession = await ref
-                                  .read(ludoSessionProvider.notifier)
-                                  .getLudoSession(_roomIdController.text);
+                              final ludoSession = await getLudoSessionFromId(
+                                  _roomIdController.text);
                               if (ludoSession == null) {
                                 if (!context.mounted) return;
                                 showErrorDialog("Room not found", context);

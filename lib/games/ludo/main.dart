@@ -3,13 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/screens/game_over_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/welcome_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/waiting_room_screen.dart';
 import 'package:marquis_v2/games/ludo/widgets/message_overlay.dart';
+import 'package:marquis_v2/router/route_path.dart';
 
 void main() {
   runApp(const LudoGameApp());
+}
+
+class LudoGameAppPath extends AppRoutePath {
+  final String? id;
+  const LudoGameAppPath(this.id);
+  @override
+  String getRouteInformation() {
+    return id == null ? '/game/ludo' : '/game/ludo/$id';
+  }
 }
 
 class LudoGameApp extends ConsumerStatefulWidget {
@@ -73,7 +84,10 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                                   game: game,
                                 ),
                             PlayState.finished.name: (context, game) =>
-                                MatchResultsScreen(game: game),
+                                MatchResultsScreen(
+                                  game: game,
+                                  session: ref.read(ludoSessionProvider)!,
+                                ),
                             'snackbar': (_, __) =>
                                 Container(), // Empty container for snackbar overlay
                             'error': (_, __) =>

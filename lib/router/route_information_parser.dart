@@ -1,3 +1,4 @@
+import 'package:marquis_v2/games/ludo/main.dart';
 import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/screens/game_screen.dart';
 import 'package:marquis_v2/screens/home_screen.dart';
@@ -21,7 +22,10 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
         case 'profile':
           return ProfilePath();
         case 'game':
-          if (uri.pathSegments.length == 2) {
+          if (uri.pathSegments.length >= 2) {
+            if (uri.pathSegments[1] == 'ludo') {
+              return LudoGameAppPath(uri.pathSegments[2]);
+            }
             return GamePath(uri.pathSegments[1]);
           }
           break;

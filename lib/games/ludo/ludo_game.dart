@@ -357,7 +357,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             diceContainer.currentDice.value > 6 &&
             playerHomes[_userIndex].pinsAtHome.isEmpty)) {
       // Automatically play move on the only movable pin
-      await playMove(movablePins[0].homeIndex, isAuto: true);
+      await playMove(movablePins[0].homeIndex);
       return;
     }
 

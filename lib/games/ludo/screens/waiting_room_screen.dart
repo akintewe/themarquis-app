@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:async';
@@ -5,14 +6,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gal/gal.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WaitingRoomScreen extends ConsumerStatefulWidget {
   const WaitingRoomScreen({super.key, required this.game});
@@ -168,6 +172,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           final imageBytes = await _buildShareImage(session);
+                          final qrImageBytes = await _buildQrImage(session);
                           if (!context.mounted) return;
                           showDialog(
                             barrierColor: Colors.black.withAlpha(220),
@@ -186,36 +191,81 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                                           MainAxisAlignment.spaceAround,
                                       children: [
                                         IconButton.filled(
-                                            onPressed: () {
-                                              Share.shareXFiles(
-                                                  [
-                                                    XFile.fromData(imageBytes,
-                                                        mimeType: 'image/png')
-                                                  ],
-                                                  subject: 'Ludo Invite',
-                                                  text:
-                                                      'I am playing Ludo, please join us!',
-                                                  fileNameOverrides: [
-                                                    'share.png'
-                                                  ]);
-                                            },
-                                            icon: const Icon(Icons.share)),
+                                          onPressed: () async {
+                                            final tweetText =
+                                                'Join my Ludo Session\nRoom Id: ${session.id}';
+                                            final url =
+                                                'https://themarquis.xyz/ludo?roomid=${session.id}';
+
+                                            // Use the Twitter app's URL scheme
+                                            final tweetUrl = Uri.encodeFull(
+                                                'twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
+
+                                            // Fallback to web URL if the app isn't installed
+                                            final webTweetUrl = Uri.encodeFull(
+                                                'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz&image=data:image/png;base64,${base64Encode(imageBytes)}');
+                                            if (await canLaunchUrl(
+                                                Uri.parse(tweetUrl))) {
+                                              await launchUrl(
+                                                  Uri.parse(tweetUrl));
+                                            } else {
+                                              await launchUrl(
+                                                  Uri.parse(webTweetUrl));
+                                            }
+                                          },
+                                          icon: const Icon(
+                                              FontAwesomeIcons.xTwitter),
+                                        ),
                                         IconButton.filled(
-                                            onPressed: () async {
-                                              await Gal.putImageBytes(
-                                                  imageBytes);
-                                              if (!context.mounted) return;
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                      'Image successfully saved to gallery'),
-                                                  duration:
-                                                      Duration(seconds: 2),
-                                                ),
-                                              );
-                                            },
-                                            icon: const Icon(Icons.download)),
+                                          onPressed: () async {
+                                            Clipboard.setData(ClipboardData(
+                                                text:
+                                                    "https://themarquis.xyz/ludo?roomid=${session.id}"));
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Link Copied to Clipboard'),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          },
+                                          icon:
+                                              const Icon(FontAwesomeIcons.link),
+                                        ),
+                                        IconButton.filled(
+                                          onPressed: () async {
+                                            await Gal.putImageBytes(
+                                                qrImageBytes);
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Image successfully saved to gallery'),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          },
+                                          icon: const Icon(Icons.qr_code),
+                                        ),
+                                        IconButton.filled(
+                                          onPressed: () {
+                                            Share.shareXFiles(
+                                                [
+                                                  XFile.fromData(imageBytes,
+                                                      mimeType: 'image/png')
+                                                ],
+                                                subject: 'Ludo Invite',
+                                                text:
+                                                    'I am playing Ludo, please join us!',
+                                                fileNameOverrides: [
+                                                  'share.png'
+                                                ]);
+                                          },
+                                          icon: const Icon(Icons.share),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -285,82 +335,158 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
     );
   }
 
+  Future<Uint8List> _buildQrImage(LudoSessionData session) async {
+    final image = await createImageFromWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          width: 500,
+          height: 500,
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/images/share_referral_bg.png',
+                fit: BoxFit.cover,
+              ),
+              Center(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 80),
+                    const Padding(
+                      padding: EdgeInsets.all(6.0),
+                      child: Text(
+                        "Game: Ludo",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(
+                        "Room ID: ${session.id}",
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    QrImageView(
+                      backgroundColor: Colors.transparent,
+                      eyeStyle: const QrEyeStyle(
+                        color: Colors.white,
+                        eyeShape: QrEyeShape.square,
+                      ),
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: Colors.white,
+                      ),
+                      data: "https://themarquis.xyz/ludo?roomid=${session.id}",
+                      size: 250,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      logicalSize: const Size(500, 500),
+    );
+    return image;
+  }
+
   Future<Uint8List> _buildShareImage(LudoSessionData session) async {
     final Widget shareWidget = Directionality(
       textDirection: ui.TextDirection.ltr,
-      child: Container(
-        color: const Color(0xff0f151a),
-        width: 675,
-        height: 675,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: SizedBox(
+        width: 800,
+        height: 418,
+        child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: SvgPicture.asset(
-                "assets/svg/themarquis_logo_rect.svg",
-                width: 300,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  4,
-                  (index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: playerAvatarCard(
-                        index: index,
-                        size: 108,
-                        isSelf: false,
-                        player: session.sessionUserStatus[index],
-                        color: session.getListOfColors[index],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'I am playing Ludo, please join us!',
-                style: TextStyle(fontSize: 36),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              margin: const EdgeInsets.all(8.0),
-              color: Colors.cyanAccent,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Our Room ID: ${session.id}",
-                      style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold),
+            Image.asset('assets/images/share_waiting_room_bg.png',
+                fit: BoxFit.cover),
+            Column(
+              children: [
+                SizedBox(height: 80),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Join Ludo Now!",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  QrImageView(
-                    data: 'https://themarquis.xyz',
-                    size: 150,
-                  )
-                ],
-              ),
-            )
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Text(
+                    "Room ID: ${session.id}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(28.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // SizedBox(width: 96),
+                      ...List.generate(
+                        4,
+                        (index) => Container(
+                          width: 108,
+                          margin: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Column(
+                            children: [
+                              playerAvatarCard(
+                                index: index,
+                                size: 40,
+                                isSelf: false,
+                                player: session.sessionUserStatus[index],
+                                color: session.getListOfColors[index],
+                                showText: false,
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 38.0),
+                                child: Text(
+                                  session.sessionUserStatus[index].email
+                                              .split("@")
+                                              .first ==
+                                          ""
+                                      ? "No Player"
+                                      : session.sessionUserStatus[index].email
+                                          .split("@")
+                                          .first,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
     return await createImageFromWidget(shareWidget,
-        logicalSize: const Size(675, 675));
+        logicalSize: const Size(800, 418));
   }
 
   Future<Uint8List> createImageFromWidget(Widget widget,
@@ -418,6 +544,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
     required bool isSelf,
     required LudoSessionUserStatus player,
     required Color color,
+    bool showText = true,
   }) {
     return Column(
       children: [
@@ -456,13 +583,14 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
             ),
           ),
         ),
-        Text(
-          player.email.split("@").first,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: isSelf ? 18 : 12,
+        if (showText)
+          Text(
+            player.email.split("@").first,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: isSelf ? 18 : 12,
+            ),
           ),
-        ),
       ],
     );
   }
