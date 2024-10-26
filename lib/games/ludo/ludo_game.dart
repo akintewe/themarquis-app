@@ -338,17 +338,31 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
 
     // If there are no movable pins and the dice value is less than 6, show a snackbar
-    if (movablePins.isEmpty && diceContainer.currentDice.value < 6) {
-      showSnackBar("Can not move from Basement, try to get a 6!!");
+    if (movablePins.isEmpty) {
       final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
-      if (pinsAtHome.isNotEmpty) {
-        // If there are pins at home, play the first one (dummy move)
-        await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+      if (diceContainer.currentDice.value < 6) {
+        showSnackBar("Can not move from Basement, try to get a 6!!");
+        if (pinsAtHome.isNotEmpty) {
+          // If there are pins at home, play the first one (dummy move)
+          await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+        } else {
+          // If there are no pins at home, play the first pin on the board (dummy move)
+          final pins = board.getPlayerPinsOnBoard(_userIndex);
+          await playMove(pins[0].homeIndex, isAuto: true);
+        }
       } else {
-        // If there are no pins at home, play the first pin on the board (dummy move)
-        final pins = board.getPlayerPinsOnBoard(_userIndex);
-        await playMove(pins[0].homeIndex, isAuto: true);
+        // If the dice value is greater or equal to 6, play the first pin on the board or the only pin at home
+        if (pinsAtHome.isEmpty) {
+          showSnackBar("No pins to move!!");
+          // If there are no pins at home, play the first pin on the board (dummy move)
+          final pins = board.getPlayerPinsOnBoard(_userIndex);
+          await playMove(pins[0].homeIndex, isAuto: true);
+        } else if (pinsAtHome.length == 1) {
+          // If there is only one pin at home, play it
+          await playMove(pinsAtHome[0]!.homeIndex);
+        }
       }
+
       return;
     }
 
