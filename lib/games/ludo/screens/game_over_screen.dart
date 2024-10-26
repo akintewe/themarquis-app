@@ -453,8 +453,13 @@ class MatchResultsScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(16.0),
       child: TextButton(
         onPressed: () async {
-          await ref.read(userProvider.notifier).getUser();
+          // await ref.read(userProvider.notifier).getUser();
           game.playState = PlayState.welcome;
+          game.overlays.remove(PlayState.finished.name);
+
+          await ref
+              .read(ludoSessionProvider.notifier)
+              .clearData(refreshUser: true);
         },
         child:
             const Text('Back to Menu', style: TextStyle(color: Colors.white)),
