@@ -405,7 +405,8 @@ class MatchResultsScreen extends ConsumerWidget {
                                           mimeType: 'image/png')
                                     ],
                                     subject: 'Ludo Results',
-                                    text: 'I am playing Ludo, please join us!',
+                                    text:
+                                        'Check out my results!\nRoom Id: ${session.id}',
                                     fileNameOverrides: ['share.png']);
                               },
                               icon: const Icon(Icons.share),
