@@ -135,8 +135,15 @@ class Destination extends PositionComponent with HasGameReference<LudoGame> {
     final index = (_players[pin.playerIndex]!..add(pin)).length - 1;
     _bars[pin.playerIndex]![index].lightUp();
     if (index == 3) {
-      game.playState = PlayState.finished;
-      game.winnerIndex = pin.playerIndex;
+      // Show winner announcement before changing game state
+      game.showMessage('The Winner is ${game.playerNames[pin.playerIndex]}!',
+          durationSeconds: 5);
+
+      // Delay the game over screen
+      Future.delayed(const Duration(seconds: 5), () {
+        game.playState = PlayState.finished;
+        game.winnerIndex = pin.playerIndex;
+      });
     }
   }
 }
