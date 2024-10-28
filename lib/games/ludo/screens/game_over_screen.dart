@@ -127,93 +127,100 @@ class MatchResultsScreen extends ConsumerWidget {
                                 (tx) {
                                   return Padding(
                                     padding: const EdgeInsets.all(2.0),
-                                    child: Card(
-                                      elevation: 3,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            // Transaction Type and ID
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                  tx['transaction_type_name'],
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  'ID: ${tx['id']}',
-                                                  style: TextStyle(
-                                                    color: Colors.grey[600],
-                                                    fontSize: 10,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            // Transaction Hash with copy functionality
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(2.0),
-                                              child: Row(
+                                    child: InkWell(
+                                      onTap: () {
+                                        launchUrl(Uri.parse(
+                                            "https://sepolia.starkscan.co/tx/${tx['transaction_hash']}"));
+                                      },
+                                      child: Card(
+                                        elevation: 3,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              // Transaction Type and ID
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    'Hash: ${_shortenHash(tx['transaction_hash'])}',
+                                                    tx['transaction_type_name'],
                                                     style: const TextStyle(
-                                                        fontSize: 10),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
-                                                  InkWell(
-                                                    child: const Icon(
-                                                        Icons.copy,
-                                                        size: 12),
-                                                    onTap: () {
-                                                      Clipboard.setData(
-                                                          ClipboardData(
-                                                              text: tx[
-                                                                  'transaction_hash']));
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(
-                                                        const SnackBar(
-                                                            content: Text(
-                                                                'Hash copied to clipboard')),
-                                                      );
-                                                    },
+                                                  Text(
+                                                    'ID: ${tx['id']}',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 10,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
-                                            ),
-                                            // Session ID
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(2.0),
-                                              child: Text(
-                                                'Session ID: ${tx['session_id']}',
-                                                style: const TextStyle(
-                                                    fontSize: 10),
+                                              // Transaction Hash with copy functionality
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(2.0),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      'Hash: ${_shortenHash(tx['transaction_hash'])}',
+                                                      style: const TextStyle(
+                                                          fontSize: 10),
+                                                    ),
+                                                    InkWell(
+                                                      child: const Icon(
+                                                          Icons.copy,
+                                                          size: 12),
+                                                      onTap: () {
+                                                        Clipboard.setData(
+                                                            ClipboardData(
+                                                                text: tx[
+                                                                    'transaction_hash']));
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(
+                                                          const SnackBar(
+                                                              content: Text(
+                                                                  'Hash copied to clipboard')),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                            // Created and Updated At
-                                            Text(
-                                              'Created: ${_formatDate(tx['created_at'])}',
-                                              style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: Colors.grey[700]),
-                                            ),
-                                            Text(
-                                              'Updated: ${_formatDate(tx['updated_at'])}',
-                                              style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: Colors.grey[700]),
-                                            ),
-                                          ],
+                                              // Session ID
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(2.0),
+                                                child: Text(
+                                                  'Session ID: ${tx['session_id']}',
+                                                  style: const TextStyle(
+                                                      fontSize: 10),
+                                                ),
+                                              ),
+                                              // Created and Updated At
+                                              Text(
+                                                'Created: ${_formatDate(tx['created_at'])}',
+                                                style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: Colors.grey[700]),
+                                              ),
+                                              Text(
+                                                'Updated: ${_formatDate(tx['updated_at'])}',
+                                                style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: Colors.grey[700]),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
