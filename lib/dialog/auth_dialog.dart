@@ -7,6 +7,7 @@ import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
 import 'package:marquis_v2/widgets/primary_button.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
+import 'package:otp_pin_field/otp_pin_field.dart';
 import '../widgets/outline_button.dart';
 import '../widgets/text_form_field.dart';
 
@@ -205,7 +206,6 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                             ),
                           ],
                         ),
-
                       ],
                     ),
             )
@@ -226,49 +226,23 @@ class OTPDialog extends ConsumerStatefulWidget {
 }
 
 class _OTPDialogState extends ConsumerState<OTPDialog> {
-  final List<TextEditingController> _controllers =
-      List.generate(4, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
-  bool _isLoading = false;
 
-  // Add this getter to combine the OTP digits
-  String get _otp => _controllers.map((controller) => controller.text).join();
+  final _otpPinFieldController = GlobalKey<OtpPinFieldState>();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Request focus for the first digit input after the widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNodes[0].requestFocus();
-    });
   }
 
   @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
     super.dispose();
   }
 
-  void _onOTPDigitChanged(int index) {
-    if (_controllers[index].text.length == 1) {
-      if (index < 3) {
-        _focusNodes[index + 1].requestFocus();
-      } else {
-        _focusNodes[index].unfocus();
-        _submitOTP();
-      }
-    }
-  }
 
   void _submitOTP() {
-    if (_otp.length == 4) {
-      _verifyOTP();
-    }
+    _verifyOTP();
   }
 
   Future<void> _verifyOTP() async {
@@ -284,10 +258,10 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
           await appState.loginSandbox(widget.email.trim());
         }
       } else {
-        await appState.verifyCode(widget.email.trim(), _otp);
+        await appState.verifyCode(widget.email.trim(), _otpPinFieldController.currentState?.controller.text ?? '');
       }
       if (!mounted) return;
-      Navigator.of(context).pop(_otp);
+      Navigator.of(context).pop(_otpPinFieldController.currentState?.controller.text);
     } catch (e) {
       if (!mounted) return;
       if (e.toString().contains('Invalid')) {
@@ -312,7 +286,7 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return AlertDialog(
-      //title: const Text('Enter OTP'),
+      contentPadding: const EdgeInsets.all(8.0),
       content: Container(
         width: deviceSize.aspectRatio > 1
             ? deviceSize.width * 0.5
@@ -357,29 +331,33 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
               ),
             ),
             verticalSpace(16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(
-                4,
-                (index) => SizedBox(
-                  width: 50,
-                  child: TextField(
-                    controller: _controllers[index],
-                    focusNode: _focusNodes[index],
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    maxLength: 1,
-                    decoration: const InputDecoration(
-                      counterText: '',
-                      border: OutlineInputBorder(),
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    onChanged: (_) => _onOTPDigitChanged(index),
-                  ),
+            OtpPinField(
+              key: _otpPinFieldController,
+              fieldWidth: 60,
+              fieldHeight: 60,
+              autoFillEnable: false,
+              textInputAction: TextInputAction.done,
+              onSubmit: (text) {
+                if(text.length == 4){
+                  _submitOTP();
+                }
+              },
+              onChange: (text) {},
+              otpPinFieldStyle: OtpPinFieldStyle(
+                textStyle: const TextStyle(
+                  color: Colors.white
                 ),
+                activeFieldBorderColor: Theme.of(context).colorScheme.primary,
+                defaultFieldBorderColor: const Color(0xff32363A),
+                fieldBorderWidth: 1,
               ),
+              maxLength: 4,
+              showCursor: true,
+              cursorColor: Colors.white,
+              cursorWidth: 2,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              otpPinFieldDecoration:
+              OtpPinFieldDecoration.defaultPinBoxDecoration,
             ),
             verticalSpace(16.0),
             Row(
@@ -391,7 +369,6 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
                     child: OutlineButton(
                       onTaps: () => Navigator.of(context).pop(),
                       buttonTitle: 'Cancel',
-
                     ),
                   ),
                 ),
@@ -403,16 +380,13 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
                       child: PrimaryButton(
                         onTaps: _submitOTP,
                         buttonTitle: 'Submit',
-
                       ),
-                    ),
+                ),
               ],
             )
           ],
         ),
       ),
-      //actionsAlignment: MainAxisAlignment.center,
-      //actions: <Widget>[],
     );
   }
 }
