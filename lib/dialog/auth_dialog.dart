@@ -23,6 +23,28 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
   String? _refCodeError;
   bool _isLoading = false;
   bool _isSignUp = false;
+  bool _emailHasError = false;
+
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email);
+  }
+
+  void _validateEmail() {
+    setState(() {
+       if (!_isValidEmail(_emailController.text) && _emailController.text.isNotEmpty) {
+        _emailError = 'Invalid email';
+        _emailHasError = true;
+      } else {
+        _emailError = '';
+        _emailHasError = false;
+      }
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
@@ -59,9 +81,9 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
               label: 'Email',
               hintText: 'Input your email',
               controller: _emailController,
-              hasError: false,
+              hasError: _emailHasError,
               errorMessage: _emailError,
-              onTextChanged: (){},
+              onTextChanged: (value)=> _validateEmail(),
             ),
             verticalSpace(16.0),
             AnimatedSize(
@@ -76,7 +98,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                     controller: _refCodeController,
                     hasError: false,
                     errorMessage: _refCodeError,
-                    onTextChanged: (){},
+                    onTextChanged: (value){},
                   )
                   : const SizedBox(),
             ),
@@ -87,7 +109,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                   : Column(
                       children: [
                         PrimaryButton(
-                            isEnabled: true,
+                            isEnabled: _emailController.text.isNotEmpty && !_emailHasError,
                             onTaps: () async {
                               setState(() {
                                 _isLoading = true;
@@ -149,7 +171,6 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                                   }
                                 }
                               }
-
                               setState(() {
                                 _isLoading = false;
                               });
