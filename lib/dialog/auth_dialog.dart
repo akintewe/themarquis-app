@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 // import 'package:magic_sdk/magic_sdk.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
+import 'package:marquis_v2/widgets/primary_button.dart';
+import 'package:marquis_v2/widgets/ui_widgets.dart';
+import '../widgets/text_form_field.dart';
 
 class AuthDialog extends ConsumerStatefulWidget {
   const AuthDialog({super.key});
@@ -23,148 +27,163 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return AlertDialog(
+      contentPadding: const EdgeInsets.all(8.0),
       content: Container(
         width: deviceSize.aspectRatio > 1
             ? deviceSize.width * 0.5
             : deviceSize.width * 0.85,
-        margin: const EdgeInsets.all(16.0),
+        margin: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                decoration: InputDecoration(
-                  label: const Text("Email"),
-                  errorText: _emailError,
-                ),
-                controller: _emailController,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: (){
+                    Navigator.pop(context);
+                  },
+                    child: SvgPicture.asset("assets/svg/cancel_icon.svg"))
+              ],
             ),
+            verticalSpace(4.0),
+            const Text("Welcome to The Marquis",
+                style: TextStyle(
+                    fontSize: 20,
+                  fontWeight: FontWeight.bold
+                )
+            ),
+            verticalSpace(24.0),
+            CustomTextFormField(
+              label: 'Email',
+              hintText: 'Input your email',
+              controller: _emailController,
+              hasError: false,
+              errorMessage: _emailError,
+              onTextChanged: (){},
+            ),
+            verticalSpace(16.0),
             AnimatedSize(
               duration: const Duration(
                 milliseconds: 100,
               ),
               alignment: Alignment.centerRight,
               child: _isSignUp
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          label: const Text("Referral Code"),
-                          errorText: _refCodeError,
-                        ),
-                        controller: _refCodeController,
-                      ),
-                    )
+                  ? CustomTextFormField(
+                    label: 'Referral Code',
+                    hintText: 'Input your code',
+                    controller: _refCodeController,
+                    hasError: false,
+                    errorMessage: _refCodeError,
+                    onTextChanged: (){},
+                  )
                   : const SizedBox(),
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(top:24.0),
               child: _isLoading
                   ? const CircularProgressIndicator()
                   : Column(
                       children: [
-                        OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              width: 1.8,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(7.5),
-                            ),
-                          ),
-                          onPressed: () async {
-                            setState(() {
-                              _isLoading = true;
-                            });
-                            if (_isSignUp) {
-                              if (_emailController.text != "" &&
-                                  _refCodeController.text != "") {
-                                try {
-                                  if (!_emailController.text
-                                      .endsWith('@test.com')) {
-                                    await ref
-                                        .read(appStateProvider.notifier)
-                                        .signup(
-                                          _emailController.text.trim(),
-                                          _refCodeController.text.trim(),
-                                        );
+                        PrimaryButton(
+                            isEnabled: true,
+                            onTaps: () async {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              if (_isSignUp) {
+                                if (_emailController.text != "" &&
+                                    _refCodeController.text != "") {
+                                  try {
+                                    if (!_emailController.text
+                                        .endsWith('@test.com')) {
+                                      await ref
+                                          .read(appStateProvider.notifier)
+                                          .signup(
+                                        _emailController.text.trim(),
+                                        _refCodeController.text.trim(),
+                                      );
+                                    }
+                                    if (!context.mounted) return;
+                                    await showDialog<String>(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (BuildContext context) =>
+                                          OTPDialog(
+                                            email: _emailController.text,
+                                            isSignUp: true,
+                                          ),
+                                    );
+                                    if (!context.mounted) return;
+                                    Navigator.of(context).pop();
+                                  } catch (e) {
+                                    showErrorDialog(e.toString(), context);
                                   }
-                                  if (!context.mounted) return;
-                                  await showDialog<String>(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (BuildContext context) =>
-                                        OTPDialog(
-                                      email: _emailController.text,
-                                      isSignUp: true,
-                                    ),
-                                  );
-                                  if (!context.mounted) return;
-                                  Navigator.of(context).pop();
-                                } catch (e) {
-                                  showErrorDialog(e.toString(), context);
+                                }
+                                //sign up
+                              } else {
+                                //login
+                                if (_emailController.text != "") {
+                                  try {
+                                    if (!_emailController.text
+                                        .endsWith('@test.com')) {
+                                      await ref
+                                          .read(appStateProvider.notifier)
+                                          .login(_emailController.text.trim());
+                                    }
+                                    if (!context.mounted) return;
+                                    await showDialog<String>(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (BuildContext context) =>
+                                          OTPDialog(
+                                            email: _emailController.text,
+                                            isSignUp: false,
+                                          ),
+                                    );
+                                    if (!context.mounted) return;
+                                    Navigator.of(context).pop();
+                                  } catch (e) {
+                                    showErrorDialog(e.toString(), context);
+                                  }
                                 }
                               }
-                              //sign up
-                            } else {
-                              //login
-                              if (_emailController.text != "") {
-                                try {
-                                  if (!_emailController.text
-                                      .endsWith('@test.com')) {
-                                    await ref
-                                        .read(appStateProvider.notifier)
-                                        .login(_emailController.text.trim());
-                                  }
-                                  if (!context.mounted) return;
-                                  await showDialog<String>(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (BuildContext context) =>
-                                        OTPDialog(
-                                      email: _emailController.text,
-                                      isSignUp: false,
-                                    ),
-                                  );
-                                  if (!context.mounted) return;
-                                  Navigator.of(context).pop();
-                                } catch (e) {
-                                  showErrorDialog(e.toString(), context);
-                                }
-                              }
-                            }
 
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              _isSignUp ? 'Sign Up' : 'Login',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            },
+                            buttonTitle: _isSignUp ? 'Sign Up' : 'Login'
+                        ),
+                        verticalSpace(12.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(_isSignUp ? "Already have an account? " : "Don’t have an account? " ,
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xffCACACA)
+                                )
+                            ),
+                            GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  _isSignUp = !_isSignUp;
+                                });
+                              },
+                              child: Text(
+                                _isSignUp ? "Login" : "Sign up",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _isSignUp = !_isSignUp;
-                            });
-                          },
-                          child: Text(
-                            _isSignUp ? "Back to Login" : "Sign Up",
-                            style: const TextStyle(
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
+
                       ],
                     ),
             )
