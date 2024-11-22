@@ -14,7 +14,7 @@ class OutlineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
-        onPressed: () => onTaps,
+        onPressed: () => onTaps!(),
         style: OutlinedButton.styleFrom(
           side: BorderSide(
             width: 1,
