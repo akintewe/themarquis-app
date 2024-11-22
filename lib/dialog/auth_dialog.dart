@@ -7,6 +7,7 @@ import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
 import 'package:marquis_v2/widgets/primary_button.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
+import '../widgets/outline_button.dart';
 import '../widgets/text_form_field.dart';
 
 class AuthDialog extends ConsumerStatefulWidget {
@@ -309,44 +310,109 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final deviceSize = MediaQuery.of(context).size;
     return AlertDialog(
-      title: const Text('Enter OTP'),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(
-          4,
-          (index) => SizedBox(
-            width: 50,
-            child: TextField(
-              controller: _controllers[index],
-              focusNode: _focusNodes[index],
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              maxLength: 1,
-              decoration: const InputDecoration(
-                counterText: '',
-                border: OutlineInputBorder(),
-              ),
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
+      //title: const Text('Enter OTP'),
+      content: Container(
+        width: deviceSize.aspectRatio > 1
+            ? deviceSize.width * 0.5
+            : deviceSize.width * 0.85,
+        margin: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                    child: SvgPicture.asset("assets/svg/cancel_icon.svg"))
               ],
-              onChanged: (_) => _onOTPDigitChanged(index),
             ),
-          ),
+            verticalSpace(4.0),
+            const Text(
+              "Verification",
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+              ),
+            ),
+            verticalSpace(4.0),
+            const Text(
+              "Verification code has been sent to",
+              style: TextStyle(
+                fontSize: 12,
+                color: Color(0xff8E8E8E)
+              ),
+            ),
+            verticalSpace(4.0),
+             Text(
+              widget.email,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xffF3F3F3)
+              ),
+            ),
+            verticalSpace(16.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(
+                4,
+                (index) => SizedBox(
+                  width: 50,
+                  child: TextField(
+                    controller: _controllers[index],
+                    focusNode: _focusNodes[index],
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    maxLength: 1,
+                    decoration: const InputDecoration(
+                      counterText: '',
+                      border: OutlineInputBorder(),
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    onChanged: (_) => _onOTPDigitChanged(index),
+                  ),
+                ),
+              ),
+            ),
+            verticalSpace(16.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    child: OutlineButton(
+                      onTaps: () => Navigator.of(context).pop(),
+                      buttonTitle: 'Cancel',
+
+                    ),
+                  ),
+                ),
+                horizontalSpace(8.0),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : Expanded(
+                    flex: 1,
+                      child: PrimaryButton(
+                        onTaps: _submitOTP,
+                        buttonTitle: 'Submit',
+
+                      ),
+                    ),
+              ],
+            )
+          ],
         ),
       ),
-      actions: <Widget>[
-        TextButton(
-          child: const Text('Cancel'),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        _isLoading
-            ? const CircularProgressIndicator()
-            : TextButton(
-                child: const Text('Submit'),
-                onPressed: _submitOTP,
-              ),
-      ],
+      //actionsAlignment: MainAxisAlignment.center,
+      //actions: <Widget>[],
     );
   }
 }
