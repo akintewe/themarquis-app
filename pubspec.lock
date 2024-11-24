@@ -902,7 +902,7 @@ packages:
     source: hosted
     version: "1.11.1"
   starknet:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: starknet
       sha256: "6504af2a42d3ba421c117a5f30f3e79aa2d69ede3b840a24de0f35eb1ea2962d"

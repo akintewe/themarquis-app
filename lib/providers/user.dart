@@ -137,7 +137,7 @@ class User extends _$User {
           entryPointSelector: getSelectorByName('balanceOf'),
           calldata: [accountAddress],
         ),
-        blockId: BlockId.blockTag("latest"),
+        blockId: const BlockId.blockTag("latest"),
       );
 
       return response.when(

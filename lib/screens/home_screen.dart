@@ -102,7 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               fontSize: 14,
                             ),
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 5),
                           SvgPicture.asset(
                             "assets/svg/STRK_logo.svg",
                             width: 19,
@@ -121,7 +121,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               }
                               return Text(
                                 ((snapshot.data! / BigInt.from(1e18))
-                                    .toStringAsFixed(8)
+                                    .toStringAsFixed(3)
+                                    .replaceAll(RegExp(r'0+$'), '')
+                                    .replaceAll(RegExp(r'\.$'), '')),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 5),
+                          SvgPicture.asset("assets/svg/ethereum-eth-logo.svg",
+                              width: 15),
+                          const SizedBox(width: 5),
+                          FutureBuilder<BigInt>(
+                            future: ref.read(userProvider.notifier).getTokenBalance(
+                                "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              }
+                              if (snapshot.hasError) {
+                                return Container();
+                              }
+                              return Text(
+                                ((snapshot.data! / BigInt.from(1e18))
+                                    .toStringAsFixed(3)
                                     .replaceAll(RegExp(r'0+$'), '')
                                     .replaceAll(RegExp(r'\.$'), '')),
                                 style: const TextStyle(
