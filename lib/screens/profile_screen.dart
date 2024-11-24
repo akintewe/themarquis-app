@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -6,12 +7,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gal/gal.dart';
 import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/dialog/auth_dialog.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -219,11 +222,14 @@ class InviteFriendDialog extends StatefulWidget {
 
   final UserData user;
 
+
   @override
   State<InviteFriendDialog> createState() => _InviteFriendDialogState();
 }
 
 class _InviteFriendDialogState extends State<InviteFriendDialog> {
+  final ScreenshotController screenshotController = ScreenshotController();
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -251,11 +257,14 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
               ],
             ),
             const SizedBox(height: 20),
-            QrImageView(
-              data:
-                  "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
-              size: 150,
-              backgroundColor: Colors.white,
+            Screenshot(
+              controller: screenshotController,
+              child: QrImageView(
+                data:
+                    "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
+                size: 150,
+                backgroundColor: Colors.white,
+              ),
             ),
             const SizedBox(height: 20),
             _buildReferralField('Referral Code', widget.user.referralCode),
@@ -362,6 +371,23 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                               const SnackBar(
                                   content: Text('Copied to clipboard')),
                             );
+                          }),
+                          _buildActionButton(Icons.photo_outlined, 'Save image', () {
+                            screenshotController
+                                .capture(delay: const Duration(milliseconds: 10))
+                                .then((capturedImage) async {
+                              Uint8List? qrImageBytes = capturedImage;
+                              await Gal.putImageBytes(
+                                  qrImageBytes!);
+                              if(context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Saved to device')),
+                                );
+                              }
+                            }).catchError((onError) {
+                              print(onError);
+                            });
                           }),
                           _buildActionButton(Icons.share, 'Share', () async {
                             final image = await rootBundle
