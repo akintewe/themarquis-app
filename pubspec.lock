@@ -917,6 +917,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.1"
+  starknet_provider:
+    dependency: "direct main"
+    description:
+      name: starknet_provider
+      sha256: e43082939b0ef82839fdd33346663070970c5cf1e0cca58d42049f6c974410a3
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   state_notifier:
     dependency: transitive
     description:

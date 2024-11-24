@@ -9,6 +9,7 @@ import 'package:marquis_v2/providers/app_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 import 'package:starknet/starknet.dart';
+// import 'package:starknet_provider/starknet_provider.dart';
 
 part "user.g.dart";
 
@@ -126,8 +127,13 @@ class User extends _$User {
   Future<BigInt> getTokenBalance(String tokenAddress) async {
     if (state == null) return BigInt.from(0);
 
-    final provider = JsonRpcProvider.infuraMainnet;
+    final sepoliaURI = Uri.parse(
+        'https://starknet-sepolia.infura.io/v3/2E9u9FUJucyGntaYzan2LNJdEGK');
+
+    final provider = JsonRpcProvider(nodeUri: sepoliaURI);
     final accountAddress = Felt.fromHexString(state!.accountAddress);
+    // final accountAddress = Felt.fromHexString(
+    //     '0x04c1d9da136846ab084ae18cf6ce7a652df7793b666a16ce46b1bf5850cc739d');
     final ethContractAddress = Felt.fromHexString(tokenAddress);
 
     try {
