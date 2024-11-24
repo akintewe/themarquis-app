@@ -379,12 +379,11 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                               Uint8List? qrImageBytes = capturedImage;
                               await Gal.putImageBytes(
                                   qrImageBytes!);
-                              if(context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Saved to device')),
-                                );
-                              }
+                              if(!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Saved to device')),
+                              );
                             }).catchError((onError) {
                               print(onError);
                             });
