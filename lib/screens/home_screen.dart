@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -52,6 +53,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 AppBar(
                   backgroundColor: Colors.white.withOpacity(0.02),
+                  systemOverlayStyle: const SystemUiOverlayStyle(
+                      statusBarIconBrightness: Brightness.light,
+                      statusBarBrightness: Brightness.light,
+                  ),
                   title: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
