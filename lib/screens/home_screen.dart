@@ -64,7 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             : Expanded(
                               child: Container(
                                  decoration: BoxDecoration(
-                                   color: Colors.white.withOpacity(0.1),
+                                   color: Colors.white.withOpacity(0.04),
                                    borderRadius: const BorderRadius.all(Radius.circular(8.0))
                                  ),
                                 child: Padding(
@@ -96,6 +96,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                   "assets/svg/STRK_logo.svg",
                                                   width: 19,
                                                 ),
+                                                horizontalSpace(4.0),
                                                 const Text(
                                                   'STRK',
                                                   style: TextStyle(
@@ -135,6 +136,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           ],
                                         ),
                                         horizontalSpace(12.0),
+                                        Container(
+                                          width: 2,
+                                          height: 30,
+                                          decoration: const BoxDecoration(
+                                            gradient: RadialGradient(
+                                              colors: [
+                                                Color(0xff00ECFF),
+                                                Color(0xff000000),
+                                              ],
+                                              center: Alignment.center,
+                                              radius: 10.0,
+                                            ),
+                                          ),
+                                        ),
+                                        horizontalSpace(8.0),
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
@@ -144,6 +160,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                   "assets/images/eth_icon.png",
                                                   width: 19,
                                                 ),
+                                                horizontalSpace(4.0),
                                                 const Text(
                                                   'ETH',
                                                   style: TextStyle(
@@ -164,6 +181,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           ],
                                         ),
                                         horizontalSpace(12.0),
+                                        Container(
+                                          width: 2,
+                                          height: 30,
+                                          decoration: const BoxDecoration(
+                                            gradient: RadialGradient(
+                                              colors: [
+                                                Color(0xff00ECFF),
+                                                Color(0xff000000),
+                                              ],
+                                              center: Alignment.center,
+                                              radius: 10.0,
+                                            ),
+                                          ),
+                                        ),
+                                        horizontalSpace(8.0),
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
@@ -173,6 +205,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                   "assets/images/lords_icon.png",
                                                   width: 19,
                                                 ),
+                                                horizontalSpace(4.0),
                                                 const Text(
                                                   'LORDS',
                                                   style: TextStyle(
@@ -192,7 +225,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             ),
                                           ],
                                         ),
-                                    const SizedBox(width: 10),
+                                    const SizedBox(width: 12),
+                                        Container(
+                                          width: 2,
+                                          height: 30,
+                                          decoration: const BoxDecoration(
+                                            gradient: RadialGradient(
+                                              colors: [
+                                                Color(0xff00ECFF),
+                                                Color(0xff000000),
+                                              ],
+                                              center: Alignment.center,
+                                              radius: 10.0,
+                                            ),
+                                          ),
+                                        ),
+                                        horizontalSpace(8.0),
                                     GestureDetector(
                                       onTap: () {
                                         showDialog(
