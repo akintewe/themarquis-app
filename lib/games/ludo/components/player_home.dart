@@ -199,16 +199,25 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
     );
 
     final avatarBgPaint = Paint()
-      ..color = game.listOfColors[playerIndex]
-      ..style = PaintingStyle.fill
+      ..color = Colors.transparent
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
+    
+    // Draw border
     canvas.drawRRect(
       avatarBgRRect,
-      avatarBgPaint,
+      Paint()
+        ..color = game.listOfColors[playerIndex]
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
     );
+
+    // Draw glow effect
     canvas.drawRRect(
       avatarBgRRect,
-      avatarBgPaint
+      Paint()
+        ..color = game.listOfColors[playerIndex]
+        ..style = PaintingStyle.stroke
         ..strokeWidth = playerIndex == game.currentPlayer
             ? 8
             : playerIndex == game.userIndex

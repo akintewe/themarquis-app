@@ -40,22 +40,16 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       final x = dxStart + (i % 6) * game.unitSize;
       final y = dyStart + (i ~/ 6) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
-          const Radius.circular(10.0));
+          const Radius.circular(7.0));
       canvas.drawRRect(
-        
         rrect,
         Paint()
           ..color = coloredBox.contains(i)
               ? game.listOfColors[0]
               : const Color(0xff606060)
-          ..style = PaintingStyle.stroke,
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = coloredBox.contains(i) ? 2.0 : 1.0,
       );
-      if (coloredBox.contains(i)) {
-        canvas.drawRRect(
-          rrect,
-          Paint()..color = game.listOfColors[0].withOpacity(0.2),
-        );
-      }
     }
 
     dxStart = center.x - 1.5 * game.unitSize;
@@ -65,21 +59,17 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       final x = dxStart + (i % 3) * game.unitSize;
       final y = dyStart + (i ~/ 3) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
-          const Radius.circular(10.0));
+          const Radius.circular(7.0));
+      
       canvas.drawRRect(
         rrect,
         Paint()
           ..color = coloredBox.contains(i)
               ? game.listOfColors[1]
               : const Color(0xff606060)
-          ..style = PaintingStyle.stroke,
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = coloredBox.contains(i) ? 2.0 : 1.0,
       );
-      if (coloredBox.contains(i)) {
-        canvas.drawRRect(
-          rrect,
-          Paint()..color = game.listOfColors[1].withOpacity(0.2),
-        );
-      }
     }
     dxStart = center.x + 1.75 * game.unitSize;
     dyStart = center.y - 1.5 * game.unitSize;
@@ -88,21 +78,16 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       final x = dxStart + (i % 6) * game.unitSize;
       final y = dyStart + (i ~/ 6) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
-          const Radius.circular(10.0));
+          const Radius.circular(7.0));
       canvas.drawRRect(
         rrect,
         Paint()
           ..color = coloredBox.contains(i)
               ? game.listOfColors[2]
               : const Color(0xff606060)
-          ..style = PaintingStyle.stroke,
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = coloredBox.contains(i) ? 2.0 : 1.0,
       );
-      if (coloredBox.contains(i)) {
-        canvas.drawRRect(
-          rrect,
-          Paint()..color = game.listOfColors[2].withOpacity(0.2),
-        );
-      }
     }
 
     dxStart = center.x - 1.5 * game.unitSize;
@@ -112,21 +97,16 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       final x = dxStart + (i % 3) * game.unitSize;
       final y = dyStart + (i ~/ 3) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
-          const Radius.circular(10.0));
+          const Radius.circular(7.0));
       canvas.drawRRect(
         rrect,
         Paint()
           ..color = coloredBox.contains(i)
               ? game.listOfColors[3]
               : const Color(0xff606060)
-          ..style = PaintingStyle.stroke,
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = coloredBox.contains(i) ? 2.0 : 1.0,
       );
-      if (coloredBox.contains(i)) {
-        canvas.drawRRect(
-          rrect,
-          Paint()..color = game.listOfColors[3].withOpacity(0.2),
-        );
-      }
     }
 
     // Draw center pattern

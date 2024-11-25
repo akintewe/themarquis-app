@@ -552,6 +552,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
           width: size, // Width of the displayed sprite
           height: size, // Height of the displayed sprite
           decoration: BoxDecoration(
+            
             color: color, // Background color
             borderRadius: BorderRadius.circular(
                 size / 8), // Rounded corners with radius 24
