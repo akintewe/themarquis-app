@@ -121,14 +121,14 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
               ? Vector2(size.x / 2, size.y / -2)
               : Vector2(size.x / 0.95, size.y / -2)
           : (playerIndex % 2 == 0)
-              ? Vector2(size.x / 0.95, size.y / 0.295) //btm right
-              : Vector2(size.x / 2, size.y / 0.295), //btm left
+              ? Vector2(size.x / 0.95, size.y / 0.295)
+              : Vector2(size.x / 2, size.y / 0.295),
       anchor: Anchor.center,
       textRenderer: TextPaint(
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
+        style: TextStyle(
           color: Colors.white,
+          fontSize: playerIndex == game.userIndex ? 18 : 12,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

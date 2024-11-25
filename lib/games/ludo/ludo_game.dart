@@ -276,13 +276,25 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
     turnText = TextComponent(
       text: '',
-      position: Vector2(size.x / 2, 50),
+      position: Vector2(size.x / 2, size.y * 0.15),
       anchor: Anchor.center,
       textRenderer: TextPaint(
         style: TextStyle(
-          fontSize: 34,
+          fontSize: unitSize * 1.2,
           fontWeight: FontWeight.w600,
-          color: _sessionData!.getListOfColors[_currentPlayer],
+          color: Colors.white,
+          shadows: [
+            Shadow(
+              color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+              offset: const Offset(0, 0),
+              blurRadius: 20,
+            ),
+            Shadow(
+              color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+              offset: const Offset(0, 0),
+              blurRadius: 10,
+            ),
+          ],
         ),
       ),
     );
@@ -317,12 +329,30 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   }
 
   void updateTurnText() {
-    turnText.text =
-        '${_currentPlayer == _userIndex ? 'You' : 'Player ${playerNames[_currentPlayer]}'} ${playerCanMove ? 'move turn' : 'roll dice!!'}';
+    final playerName = playerNames[_currentPlayer];
+    turnText.text = _currentPlayer == _userIndex 
+        ? 'Your Turn'
+        : "$playerName's Turn";
     turnText.textRenderer = TextPaint(
-        style: TextStyle(
-            fontSize: unitSize * 0.8,
-            color: _sessionData!.getListOfColors[_currentPlayer]));
+      style: TextStyle(
+        fontSize: unitSize * 1.2,
+        color: Colors.white,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Orbitron',
+        shadows: [
+          Shadow(
+            color: Color.fromRGBO(9, 138, 238, 1),
+            offset: const Offset(0, 0),
+            blurRadius: 10,
+          ),
+          Shadow(
+            color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+            offset: const Offset(0, 0),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> rollDice() async {

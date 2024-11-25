@@ -36,6 +36,8 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     double dxStart = game.unitSize * 0.75;
     double dyStart = center.y - 1.5 * game.unitSize;
     List<int> coloredBox = [1, 7, 8, 9, 10, 11];
+    List<int> starBox = [1];
+    List<int> arrowBox = [6];
     for (var i = 0; i < 18; i++) {
       final x = dxStart + (i % 6) * game.unitSize;
       final y = dyStart + (i ~/ 6) * game.unitSize;
@@ -50,11 +52,21 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
           ..style = PaintingStyle.stroke
           ..strokeWidth = coloredBox.contains(i) ? 2.0 : 1.0,
       );
+      
+      if (starBox.contains(i)) {
+        _drawStar(canvas, x + game.unitSize / 2, y + game.unitSize / 2, game.unitSize * 0.2, game.listOfColors[0]);
+      }
+      
+      if (arrowBox.contains(i)) {
+        _drawArrow(canvas, x + game.unitSize / 2, y + game.unitSize / 2, game.unitSize * 0.3, 0, game.listOfColors[0]);
+      }
     }
 
     dxStart = center.x - 1.5 * game.unitSize;
     dyStart = center.y - 7.75 * game.unitSize;
     coloredBox = [4, 5, 7, 10, 13, 16];
+    starBox = [5];
+    arrowBox = [1];
     for (var i = 0; i < 18; i++) {
       final x = dxStart + (i % 3) * game.unitSize;
       final y = dyStart + (i ~/ 3) * game.unitSize;
@@ -70,10 +82,20 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
           ..style = PaintingStyle.stroke
           ..strokeWidth = coloredBox.contains(i) ? 2.0 : 1.0,
       );
+      
+      if (starBox.contains(i)) {
+        _drawStar(canvas, x + game.unitSize / 2, y + game.unitSize / 2, game.unitSize * 0.2, game.listOfColors[1]);
+      }
+      
+      if (arrowBox.contains(i)) {
+        _drawArrow(canvas, x + game.unitSize / 2, y + game.unitSize / 2, game.unitSize * 0.3, pi/2, game.listOfColors[1]);
+      }
     }
     dxStart = center.x + 1.75 * game.unitSize;
     dyStart = center.y - 1.5 * game.unitSize;
     coloredBox = [6, 7, 8, 9, 10, 16];
+    starBox = [16];
+    arrowBox = [11];
     for (var i = 0; i < 18; i++) {
       final x = dxStart + (i % 6) * game.unitSize;
       final y = dyStart + (i ~/ 6) * game.unitSize;
@@ -88,11 +110,21 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
           ..style = PaintingStyle.stroke
           ..strokeWidth = coloredBox.contains(i) ? 2.0 : 1.0,
       );
+      
+      if (starBox.contains(i)) {
+        _drawStar(canvas, x + game.unitSize / 2, y + game.unitSize / 2, game.unitSize * 0.2, game.listOfColors[2]);
+      }
+      
+      if (arrowBox.contains(i)) {
+        _drawArrow(canvas, x + game.unitSize / 2, y + game.unitSize / 2, game.unitSize * 0.3, pi, game.listOfColors[2]);
+      }
     }
 
     dxStart = center.x - 1.5 * game.unitSize;
     dyStart = center.y + 1.75 * game.unitSize;
     coloredBox = [1, 4, 7, 10, 12, 13];
+    starBox = [12];
+    arrowBox = [16];
     for (var i = 0; i < 18; i++) {
       final x = dxStart + (i % 3) * game.unitSize;
       final y = dyStart + (i ~/ 3) * game.unitSize;
@@ -107,6 +139,14 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
           ..style = PaintingStyle.stroke
           ..strokeWidth = coloredBox.contains(i) ? 2.0 : 1.0,
       );
+      
+      if (starBox.contains(i)) {
+        _drawStar(canvas, x + game.unitSize / 2, y + game.unitSize / 2, game.unitSize * 0.2, game.listOfColors[3]);
+      }
+      
+      if (arrowBox.contains(i)) {
+        _drawArrow(canvas, x + game.unitSize / 2, y + game.unitSize / 2, game.unitSize * 0.3, -pi/2, game.listOfColors[3]);
+      }
     }
 
     // Draw center pattern
@@ -225,7 +265,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
   //   updateOverlappingPins();
   // }
 
-  void _drawStar(Canvas canvas, double x, double y, double size) {
+  void _drawStar(Canvas canvas, double x, double y, double size, Color color) {
     final path = Path();
     final angle = (2 * pi) / 5;
     final halfAngle = angle / 2;
@@ -257,9 +297,36 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     canvas.drawPath(
       path,
       Paint()
-        ..color = const Color(0xff606060)
+        ..color = color
         ..style = PaintingStyle.fill,
     );
+  }
+
+  void _drawArrow(Canvas canvas, double x, double y, double size, double rotation, Color color) {
+    canvas.save();
+    canvas.translate(x, y);
+    canvas.rotate(rotation);
+    
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(Icons.arrow_forward_ios.codePoint),
+        style: TextStyle(
+          fontSize: size,
+          color: color,
+          fontFamily: Icons.arrow_forward_ios.fontFamily,
+          package: Icons.arrow_forward_ios.fontPackage,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(-textPainter.width / 2, -textPainter.height / 2),
+    );
+    
+    canvas.restore();
   }
 
   

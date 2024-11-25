@@ -121,7 +121,7 @@ class Dice extends PositionComponent
     final center = Offset(size.x / 2, size.y / 2);
     final radius = min(size.x, size.y) / 2 + 10;
     final paint = Paint()
-      ..color = Colors.yellow.withOpacity(0.5)
+      ..color = Colors.white.withOpacity(0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
 
@@ -182,14 +182,14 @@ class Dice extends PositionComponent
 
   void _renderDefaultDice(Canvas canvas, double x, double y, Vector2 diceSize) {
     final paint = Paint()
-      ..color = Colors.white
+      ..color = Colors.white.withOpacity(0.8)
       ..style = PaintingStyle.fill;
 
     final rect = Rect.fromLTWH(x, y, diceSize.x, diceSize.y);
     canvas.drawRect(rect, paint);
 
     final borderPaint = Paint()
-      ..color = Colors.black
+      ..color = game.listOfColors[playerIndex]
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -208,7 +208,7 @@ class Dice extends PositionComponent
         indicatorPaint.color = Colors.green;
         break;
       case DiceState.rollingDice:
-        indicatorPaint.color = Colors.yellow;
+        indicatorPaint.color = Colors.white;
         break;
       case DiceState.rolledDice:
         indicatorPaint.color = Colors.orange;

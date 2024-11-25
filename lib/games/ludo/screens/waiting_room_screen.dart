@@ -604,6 +604,6 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
   bool _isRoomFull(LudoSessionData? session) {
     return session != null &&
         session.sessionUserStatus.where((e) => e.status == "ACTIVE").length ==
-            2;
+            4;
   }
 }
