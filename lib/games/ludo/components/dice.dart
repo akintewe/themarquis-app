@@ -121,7 +121,7 @@ class Dice extends PositionComponent
     final center = Offset(size.x / 2, size.y / 2);
     final radius = min(size.x, size.y) / 2 + 10;
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.5)
+      ..color = Colors.yellow.withOpacity(0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
 
@@ -182,14 +182,14 @@ class Dice extends PositionComponent
 
   void _renderDefaultDice(Canvas canvas, double x, double y, Vector2 diceSize) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.8)
+      ..color = Colors.white
       ..style = PaintingStyle.fill;
 
     final rect = Rect.fromLTWH(x, y, diceSize.x, diceSize.y);
     canvas.drawRect(rect, paint);
 
     final borderPaint = Paint()
-      ..color = game.listOfColors[playerIndex]
+      ..color = Colors.black
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -208,7 +208,7 @@ class Dice extends PositionComponent
         indicatorPaint.color = Colors.green;
         break;
       case DiceState.rollingDice:
-        indicatorPaint.color = Colors.white;
+        indicatorPaint.color = Colors.yellow;
         break;
       case DiceState.rolledDice:
         indicatorPaint.color = Colors.orange;
@@ -240,8 +240,10 @@ class Dice extends PositionComponent
   @override
   void onTapUp(TapUpEvent event) {
     super.onTapUp(event);
+    print("Dice tapped, current state: $_state"); // Debug print
 
     if (_state == DiceState.active) {
+      print("Calling game.rollDice()"); // Debug print
       game.rollDice();
     }
   }

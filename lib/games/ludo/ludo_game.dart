@@ -356,8 +356,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   }
 
   Future<void> rollDice() async {
+    print("rollDice called, playerCanMove: $playerCanMove"); // Debug print
     if (playerCanMove) return;
+    
+    print("Rolling dice..."); // Debug print
     await diceContainer.currentDice.roll();
+    print("Dice rolled, value: ${diceContainer.currentDice.value}"); // Debug print
 
     List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(_userIndex);
     List<PlayerPin> movablePins = [];
@@ -476,5 +480,34 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> prepareNextPlayerDice(int playerIndex, int diceValue) async {
     final playerHome = playerHomes[playerIndex];
     await playerHome.setDiceValue(diceValue);
+  }
+
+  Future<void> showDiceDialog() async {
+    if (!buildContext!.mounted) return;
+
+    showDialog(
+      context: buildContext!,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: SizedBox(
+            width: 120,
+            height: 120,
+            child: GameWidget(
+              game: this,
+            ),
+          ),
+        );
+      },
+    );
+
+    // Roll the dice
+    await rollDice();
+
+    // Close dialog after roll animation
+    if (buildContext!.mounted) {
+      Navigator.of(buildContext!).pop();
+    }
   }
 }
