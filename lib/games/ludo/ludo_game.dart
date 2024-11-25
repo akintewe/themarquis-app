@@ -20,6 +20,7 @@ import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/games/ludo/components/dice_container.dart';
+import 'package:marquis_v2/games/ludo/components/game_top_bar.dart';
 
 enum PlayState { welcome, waiting, playing, finished }
 

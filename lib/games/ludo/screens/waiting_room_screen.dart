@@ -595,9 +595,14 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
     );
   }
 
+  // bool _isRoomFull(LudoSessionData? session) {
+  //   return session != null &&
+  //       session.sessionUserStatus.where((e) => e.status == "ACTIVE").length ==
+  //           4;
+  // }
   bool _isRoomFull(LudoSessionData? session) {
     return session != null &&
         session.sessionUserStatus.where((e) => e.status == "ACTIVE").length ==
-            4;
+            2;
   }
 }
