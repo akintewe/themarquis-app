@@ -8,6 +8,8 @@ import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
+import 'package:starknet/starknet.dart';
+// import 'package:starknet_provider/starknet_provider.dart';
 
 part "user.g.dart";
 
@@ -124,20 +126,36 @@ class User extends _$User {
 
   Future<BigInt> getTokenBalance(String tokenAddress) async {
     if (state == null) return BigInt.from(0);
-    final url = Uri.parse(
-        '$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': ref.read(appStateProvider).bearerToken
-      },
-    );
-    if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+
+    final sepoliaURI = Uri.parse(
+        'https://starknet-sepolia.infura.io/v3/2E9u9FUJucyGntaYzan2LNJdEGK');
+
+    final provider = JsonRpcProvider(nodeUri: sepoliaURI);
+    final accountAddress = Felt.fromHexString(state!.accountAddress);
+    // final accountAddress = Felt.fromHexString(
+    //     '0x04c1d9da136846ab084ae18cf6ce7a652df7793b666a16ce46b1bf5850cc739d');
+    final ethContractAddress = Felt.fromHexString(tokenAddress);
+
+    try {
+      final response = await provider.call(
+        request: FunctionCall(
+          contractAddress: ethContractAddress,
+          entryPointSelector: getSelectorByName('balanceOf'),
+          calldata: [accountAddress],
+        ),
+        blockId: const BlockId.blockTag("latest"),
+      );
+
+      return response.when(
+        error: (error) {
+          throw Exception("Error fetching balance: $error");
+        },
+        result: (result) {
+          return Uint256.fromFeltList(result).toBigInt();
+        },
+      );
+    } catch (e) {
+      throw Exception("Failed to fetch token balance: $e");
     }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    return BigInt.parse(decodedResponse['balance']);
   }
 }
