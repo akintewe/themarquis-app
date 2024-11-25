@@ -15,7 +15,7 @@ class GameTopBar extends StatelessWidget {
       height: kToolbarHeight,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: Color.fromRGBO(48, 239, 253, 0.25),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(16),
           bottomRight: Radius.circular(16),
@@ -24,26 +24,19 @@ class GameTopBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Back Button
+
           GestureDetector(
-            onTap: () => game.playState = PlayState.welcome,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2FA9D0).withOpacity(0.3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
-          
+            onTap: () {
+              if (game.playState == PlayState.welcome || 
+                  game.playState == PlayState.waiting) {
+                Navigator.of(context).pushReplacementNamed('/');
+              } else {
+                game.playState = PlayState.welcome;
+              }
+            },
+            child: SvgPicture.asset('assets/images/Group 1171276336.svg')),
+          // Back Button
+         
           // STRK Balance
           Consumer(
             builder: (context, ref, _) {

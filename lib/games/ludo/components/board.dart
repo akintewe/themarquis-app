@@ -1,15 +1,20 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 
 final playerFirstTile = {
   0: Vector2(0, 0),
 };
 
 class Board extends RectangleComponent with HasGameReference<LudoGame> {
+  late PictureInfo centerSvgInfo;
+
   Board()
       : super(
           paint: Paint()..color = const Color(0xff0f1118),
@@ -18,6 +23,10 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
   FutureOr<void> onLoad() async {
     super.onLoad();
     size = Vector2(game.width, game.height);
+    
+    final ByteData data = await rootBundle.load('assets/svg/center_board_box.svg');
+    final String svgString = String.fromCharCodes(data.buffer.asUint8List());
+    centerSvgInfo = await vg.loadPicture(SvgStringLoader(svgString), null);
   }
 
   @override
@@ -31,8 +40,9 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       final x = dxStart + (i % 6) * game.unitSize;
       final y = dyStart + (i ~/ 6) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
-          const Radius.circular(3.0));
+          const Radius.circular(10.0));
       canvas.drawRRect(
+        
         rrect,
         Paint()
           ..color = coloredBox.contains(i)
@@ -55,7 +65,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       final x = dxStart + (i % 3) * game.unitSize;
       final y = dyStart + (i ~/ 3) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
-          const Radius.circular(3.0));
+          const Radius.circular(10.0));
       canvas.drawRRect(
         rrect,
         Paint()
@@ -78,7 +88,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       final x = dxStart + (i % 6) * game.unitSize;
       final y = dyStart + (i ~/ 6) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
-          const Radius.circular(3.0));
+          const Radius.circular(10.0));
       canvas.drawRRect(
         rrect,
         Paint()
@@ -102,7 +112,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
       final x = dxStart + (i % 3) * game.unitSize;
       final y = dyStart + (i ~/ 3) * game.unitSize;
       final rrect = RRect.fromLTRBR(x, y, x + game.unitSize, y + game.unitSize,
-          const Radius.circular(3.0));
+          const Radius.circular(10.0));
       canvas.drawRRect(
         rrect,
         Paint()
@@ -118,6 +128,25 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
         );
       }
     }
+
+    // Draw center pattern
+    canvas.save();
+    canvas.translate(
+      center.x - 1.5 * game.unitSize,
+      center.y - 1.5 * game.unitSize,
+    );
+    
+    // Draw the SVG
+    canvas.scale(
+      (game.unitSize * 3) / centerSvgInfo.size.width,
+      (game.unitSize * 3) / centerSvgInfo.size.height,
+    );
+    canvas.drawPicture(centerSvgInfo.picture);
+    
+    canvas.restore();
+
+   
+   
   }
 
   int convertToGlobalIndex(int playerIndex, int positionIndex) {
@@ -215,4 +244,43 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
   //   super.update(dt);
   //   updateOverlappingPins();
   // }
+
+  void _drawStar(Canvas canvas, double x, double y, double size) {
+    final path = Path();
+    final angle = (2 * pi) / 5;
+    final halfAngle = angle / 2;
+    
+    for (int i = 0; i < 5; i++) {
+      final distance = size;
+      final currAngle = (i * angle) - pi / 2;
+      final innerDistance = size / 2;
+      
+      if (i == 0) {
+        path.moveTo(
+          x + cos(currAngle) * distance,
+          y + sin(currAngle) * distance,
+        );
+      } else {
+        path.lineTo(
+          x + cos(currAngle) * distance,
+          y + sin(currAngle) * distance,
+        );
+      }
+      
+      path.lineTo(
+        x + cos(currAngle + halfAngle) * innerDistance,
+        y + sin(currAngle + halfAngle) * innerDistance,
+      );
+    }
+    path.close();
+    
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xff606060)
+        ..style = PaintingStyle.fill,
+    );
+  }
+
+  
 }
