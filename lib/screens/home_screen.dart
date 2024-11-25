@@ -62,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             user == null
                                 ? const Icon(
-                                    Icons.account_circle,
+                                    Icons.person,
                                     size: 25,
                                   )
                                 : const CircleAvatar(
@@ -87,7 +87,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ],
                         ),
                       ),
-                      Row(
+                      user == null
+                          ? Container()
+                          : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
@@ -96,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            user?.points.toString() ?? "0",
+                            user.points.toString() ?? "0",
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
