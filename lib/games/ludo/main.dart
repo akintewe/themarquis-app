@@ -2,6 +2,7 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/ludo/components/game_top_bar.dart';
+import 'package:marquis_v2/games/ludo/components/welcome_top_bar.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
@@ -39,11 +40,17 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
 
   @override
   Widget build(BuildContext context) {
-    // ref.watch(ludoSessionProvider);
+    ref.listen<PlayState>(
+      Provider((ref) => _game.playState), 
+      (previous, next) {
+        setState(() {});  
+      },
+    );
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: GameTopBar(game: _game),
+        title: _game.buildTopBar(context),
         elevation: 0,
         backgroundColor: Colors.transparent,
         titleSpacing: 0,

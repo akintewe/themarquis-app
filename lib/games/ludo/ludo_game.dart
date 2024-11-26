@@ -22,6 +22,7 @@ import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/games/ludo/components/dice_container.dart';
 import 'package:marquis_v2/games/ludo/components/game_top_bar.dart';
+import 'package:marquis_v2/games/ludo/components/welcome_top_bar.dart';
 
 enum PlayState { welcome, waiting, playing, finished }
 
@@ -49,6 +50,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   bool isErrorMessage = false;
   dart_async.Timer? _messageTimer;
   Completer<void>? ludoSessionLoadingCompleter;
+
+  PlayState _playState = PlayState.welcome;
 
   LudoGame()
       : super(
@@ -110,22 +113,25 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
   }
 
-  late PlayState _playState;
   PlayState get playState => _playState;
   set playState(PlayState playState) {
     _playState = playState;
     switch (playState) {
       case PlayState.welcome:
+        overlays.clear();
+        overlays.add(playState.name);
+        break;
       case PlayState.waiting:
       case PlayState.finished:
+        overlays.clear();
         overlays.add(playState.name);
+        break;
       case PlayState.playing:
-        overlays.remove(PlayState.welcome.name);
-        overlays.remove(PlayState.waiting.name);
-        overlays.remove(PlayState.finished.name);
+        overlays.clear();
         if (_sessionData != null) {
           initGame();
         }
+        break;
     }
   }
 
@@ -553,5 +559,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     if (buildContext!.mounted) {
       Navigator.of(buildContext!).pop();
     }
+  }
+
+  Widget? buildTopBar(BuildContext context) {
+    if (playState == PlayState.welcome) {
+      return WelcomeTopBar(game: this);
+    }
+    return GameTopBar(game: this);
   }
 }

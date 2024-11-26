@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:marquis_v2/games/ludo/components/welcome_top_bar.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
@@ -35,238 +36,262 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
         child: SizedBox(
           width: deviceSize.height * widget.game.width / widget.game.height,
           height: deviceSize.height,
-          child: Center(
-            child: Column(
-              children: [
-                Container(
-                  width: deviceSize.height *
-                      widget.game.width /
-                      widget.game.height,
-                  height: deviceSize.height * 0.5,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: const AssetImage('assets/images/banner.png'),
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.5),
-                        BlendMode.darken,
-                      ),
-                      fit: BoxFit.cover,
+          child: Column(
+            children: [
+              Container(
+                width: deviceSize.height * widget.game.width / widget.game.height,
+                height: deviceSize.height * 0.5,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: const AssetImage('assets/images/image 21.png'),
+                    colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.5),
+                      BlendMode.darken,
                     ),
-                  ),
-                  padding: const EdgeInsets.all(16.0),
-                  child: const Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 128,
-                        ),
-                        Text(
-                          'LUDO',
-                          style: TextStyle(
-                            fontSize: 72,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 10.0,
-                                color: Colors.cyan,
-                                offset: Offset(0, 0),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          'MENU',
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
-                            letterSpacing: 8,
-                          ),
-                        ),
-                        SizedBox(height: 35),
-                      ],
-                    ),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                Expanded(
+                padding: const EdgeInsets.all(16.0),
+                child: const Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (user.sessionId != null)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildMenuButton(
-                              icon: Icons.play_arrow,
-                              text: 'Resume Game',
-                              onTap: () async {
-                                try {
-                                  ref
-                                      .read(appStateProvider.notifier)
-                                      .selectGameSessionId(
-                                          "ludo", user.sessionId);
-                                  var session = ref.read(ludoSessionProvider);
-                                  if (session == null) {
-                                    await ref
-                                        .read(ludoSessionProvider.notifier)
-                                        .getLudoSession();
-                                    session = ref.read(ludoSessionProvider);
-                                  }
-                                  if (session == null) return;
-                                  if (session.sessionUserStatus
-                                          .where((e) => e.status == "ACTIVE")
-                                          .length ==
-                                      4) {
-                                    widget.game.playState = PlayState.playing;
-                                  } else {
-                                    widget.game.playState = PlayState.waiting;
-                                  }
-                                } catch (e) {
-                                  if (!context.mounted) return;
-                                  showErrorDialog(e.toString(), context);
-                                }
-                              }),
+                      SizedBox(
+                        height: 128,
+                      ),
+                      Text(
+                        'LUDO',
+                        style: TextStyle(
+                          fontSize: 72,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 40.0,
+                              color: Colors.cyan,
+                              
+                              offset: Offset(0, 0),
+                            ),
+                          ],
                         ),
-                      if (user.sessionId != null)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildMenuButton(
-                              icon: Icons.exit_to_app,
-                              text: 'Exit Game',
-                              onTap: () async {
-                                try {
-                                  // Show confirmation dialog
-                                  final bool confirmExit = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Exit Game'),
-                                        content: const Text(
-                                            'Are you sure you want to exit the current game?'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            child: const Text('Cancel'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop(false);
-                                            },
-                                          ),
-                                          TextButton(
-                                            child: const Text('Exit'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop(true);
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-
-                                  // If user doesn't confirm, return early
-                                  if (!confirmExit) return;
-                                  await ref
-                                      .read(ludoSessionProvider.notifier)
-                                      .exitSession();
-                                  setState(() {});
-                                } catch (e) {
-                                  if (!context.mounted) return;
-                                  showErrorDialog(e.toString(), context);
-                                }
-                              }),
+                      ),
+                      Text(
+                        'MENU',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.white,
+                          letterSpacing: 8,
                         ),
-                      if (user.sessionId == null)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildMenuButton(
-                              icon: Icons.add,
-                              text: 'Create Room',
-                              onTap: () {
-                                createRoomDialog(
-                                  ctx: context,
-                                  game: widget.game,
-                                );
-                              }),
-                        ),
-                      if (user.sessionId == null)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildMenuButton(
-                              icon: Icons.group,
-                              text: 'Join Room',
-                              onTap: () {
-                                joinRoomDialog(
-                                  ctx: context,
-                                  game: widget.game,
-                                );
-                              }),
-                        ),
-                      if (user.sessionId == null)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: _buildMenuButton(
-                              icon: Icons.casino,
-                              text: 'Open Sessions',
-                              onTap: () {
-                                openSessionDialog(
-                                  ctx: context,
-                                  game: widget.game,
-                                );
-                              }),
-                        ),
+                      ),
+                      SizedBox(height: 35),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (user.sessionId != null)
+                      _buildMenuButton(
+                        icon: Icons.gamepad_rounded,
+                        text: 'Resume Game',
+                        onTap: () async {
+                          try {
+                            ref
+                                .read(appStateProvider.notifier)
+                                .selectGameSessionId(
+                                    "ludo", user.sessionId);
+                            var session = ref.read(ludoSessionProvider);
+                            if (session == null) {
+                              await ref
+                                  .read(ludoSessionProvider.notifier)
+                                  .getLudoSession();
+                              session = ref.read(ludoSessionProvider);
+                            }
+                            if (session == null) return;
+                            if (session.sessionUserStatus
+                                    .where((e) => e.status == "ACTIVE")
+                                    .length ==
+                                4) {
+                              widget.game.playState = PlayState.playing;
+                            } else {
+                              widget.game.playState = PlayState.waiting;
+                            }
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            showErrorDialog(e.toString(), context);
+                          }
+                        },
+                      ),
+                    if (user.sessionId != null)
+                      _buildMenuButton(
+                        icon: Icons.exit_to_app,
+                        text: 'Exit Game',
+                        onTap: () async {
+                          try {
+                            // Show confirmation dialog
+                            final bool confirmExit = await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Exit Game'),
+                                  content: const Text(
+                                      'Are you sure you want to exit the current game?'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('Cancel'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop(false);
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text('Exit'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop(true);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            // If user doesn't confirm, return early
+                            if (!confirmExit) return;
+                            await ref
+                                .read(ludoSessionProvider.notifier)
+                                .exitSession();
+                            setState(() {});
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            showErrorDialog(e.toString(), context);
+                          }
+                        },
+                      ),
+                    if (user.sessionId == null)
+                      _buildMenuButton(
+                        icon: Icons.add,
+                        text: 'Create Room',
+                        onTap: () {
+                          createRoomDialog(
+                            ctx: context,
+                            game: widget.game,
+                          );
+                        },
+                      ),
+                    if (user.sessionId == null)
+                      _buildMenuButton(
+                        icon: Icons.group,
+                        text: 'Join Room',
+                        onTap: () {
+                          joinRoomDialog(
+                            ctx: context,
+                            game: widget.game,
+                          );
+                        },
+                      ),
+                    if (user.sessionId == null)
+                      _buildMenuButton(
+                        icon: Icons.casino,
+                        text: 'Open Sessions',
+                        onTap: () {
+                          openSessionDialog(
+                            ctx: context,
+                            game: widget.game,
+                          );
+                        },
+                      ),
+                    _buildMenuButton(
+                      icon: Icons.home,
+                      text: 'Back to Home',
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildMenuButton(
-      {required IconData icon,
-      required String text,
-      required Function() onTap}) {
-    return InkWell(
-      onTap: onTap,
+  Widget _buildMenuButton({
+    required IconData icon,
+    required String text,
+    required Function() onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 15.0),
       child: Stack(
-        clipBehavior: Clip.none, // Allow children to be drawn outside the stack
         children: [
-          Card(
-            child: Container(
-              width: 320,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 96), // Space for the overlapping icon
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+         
+          Padding(
+            padding: const EdgeInsets.only(left: 40.0),
+            child: InkWell(
+              onTap: onTap,
+              child: Transform.translate(
+                offset: Offset(0, 6),
+                child: Container(
+                  width: 280,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Color.fromRGBO(14, 39, 47, 0.3),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.7, 1.0],
                     ),
+                    borderRadius: BorderRadius.circular(25),
                   ),
-                ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 50.0),
+                        child: Text(
+                          text,
+                          style: const TextStyle(
+                            color: Color(0xFF00ECFF),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 50.0),
+                        child: Container(
+                          width: 60,
+                          height: 2,
+                          color: const Color(0xFF00ECFF),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-          Positioned(
-            left: -5, // Adjust this value to control how much it extends out
-            top: -7, // Adjust this value to center vertically
-            child: ClipOval(
-              child: Container(
-                width: 64,
-                height: 64,
-                color: Colors.grey.withOpacity(0.3),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              ),
+          // Protruding circle
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFF00ECFF), width: 3),
+              shape: BoxShape.circle,
+              color: const Color(0xFF152A37),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 30,
             ),
           ),
         ],
@@ -718,8 +743,8 @@ class _OpenSessionDialogState extends ConsumerState<OpenSessionDialog> {
         right: 8.0,
       ),
       child: Container(
-        width: size, // Width of the displayed sprite
-        height: size, // Height of the displayed sprite
+        width: size, 
+        height: size, 
         decoration: BoxDecoration(
           color: color, // Background color
           borderRadius:
