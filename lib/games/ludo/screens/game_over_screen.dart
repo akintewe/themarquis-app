@@ -137,125 +137,98 @@ class MatchResultsScreen extends ConsumerWidget {
           onPressed: () {
             showDialog(
               context: context,
-              builder: (ctx) => AlertDialog(
-                scrollable: true,
-                title: const Text('Transactions'),
-                content: FutureBuilder<List<Map>>(
-                  future: () async {
-                    return await getTransactions(session.id);
-                  }(),
-                  builder: (context, snapshot) => snapshot.connectionState ==
-                          ConnectionState.waiting
-                      ? const CircularProgressIndicator()
-                      : snapshot.data!.isEmpty
-                          ? const Center(
-                              child: Text('No transactions available.'))
-                          : Column(
-                              children: snapshot.data!.map(
-                                (tx) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: InkWell(
-                                      onTap: () {
-                                        launchUrl(Uri.parse(
-                                            "https://sepolia.starkscan.co/tx/${tx['transaction_hash']}"));
-                                      },
-                                      child: Card(
-                                        elevation: 3,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
+              builder: (ctx) => Dialog(
+                backgroundColor: Colors.transparent,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF152A37),
+                    border: Border.all(color: const Color(0xFF00ECFF), width: 1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Transactions',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, color: Colors.white),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FutureBuilder<List<Map>>(
+                        future: () async {
+                          return await getTransactions(session.id);
+                        }(),
+                        builder: (context, snapshot) => snapshot.connectionState ==
+                                ConnectionState.waiting
+                            ? const CircularProgressIndicator()
+                            : snapshot.data!.isEmpty
+                                ? const Center(child: Text('No transactions available.'))
+                                : Container(
+                                  color: Colors.transparent,
+                                    constraints: BoxConstraints(
+                                      maxHeight: MediaQuery.of(context).size.height * 0.6,
+                                      
+                                    ),
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: snapshot.data!.length,
+                                      itemBuilder: (context, index) {
+                                        final tx = snapshot.data![index];
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0, vertical: 8.0),
+                                          child: Row(
                                             children: [
-                                              // Transaction Type and ID
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    tx['transaction_type_name'],
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    'ID: ${tx['id']}',
-                                                    style: TextStyle(
-                                                      color: Colors.grey[600],
-                                                      fontSize: 10,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              // Transaction Hash with copy functionality
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(2.0),
-                                                child: Row(
-                                                  children: [
-                                                    Text(
-                                                      'Hash: ${_shortenHash(tx['transaction_hash'])}',
-                                                      style: const TextStyle(
-                                                          fontSize: 10),
-                                                    ),
-                                                    InkWell(
-                                                      child: const Icon(
-                                                          Icons.copy,
-                                                          size: 12),
-                                                      onTap: () {
-                                                        Clipboard.setData(
-                                                            ClipboardData(
-                                                                text: tx[
-                                                                    'transaction_hash']));
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(
-                                                          const SnackBar(
-                                                              content: Text(
-                                                                  'Hash copied to clipboard')),
-                                                        );
-                                                      },
-                                                    ),
-                                                  ],
+                                              Container(
+                                                width: 16,
+                                                height: 16,
+                                                decoration: BoxDecoration(
+                                                  color: Color(0xFF00ECFF) ,
+                                                  border: Border.all(
+                                                      color: const Color(0xFF00ECFF)),
+                                                  borderRadius: BorderRadius.circular(4),
                                                 ),
                                               ),
-                                              // Session ID
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(2.0),
+                                              const SizedBox(width: 12),
+                                              Expanded(
                                                 child: Text(
-                                                  'Session ID: ${tx['session_id']}',
+                                                  _shortenHash(tx['transaction_hash']),
                                                   style: const TextStyle(
-                                                      fontSize: 10),
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                  ),
                                                 ),
                                               ),
-                                              // Created and Updated At
                                               Text(
-                                                'Created: ${_formatDate(tx['created_at'])}',
+                                                '2 mins ago',
                                                 style: TextStyle(
-                                                    fontSize: 10,
-                                                    color: Colors.grey[700]),
-                                              ),
-                                              Text(
-                                                'Updated: ${_formatDate(tx['updated_at'])}',
-                                                style: TextStyle(
-                                                    fontSize: 10,
-                                                    color: Colors.grey[700]),
+                                                  color: Colors.grey[400],
+                                                  fontSize: 14,
+                                                ),
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ),
+                                        );
+                                      },
                                     ),
-                                  );
-                                },
-                              ).toList(),
-                            ),
+                                  ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

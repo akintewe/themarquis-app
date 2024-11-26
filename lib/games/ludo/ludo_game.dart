@@ -9,6 +9,7 @@ import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:marquis_v2/games/ludo/components/board.dart';
 import 'package:marquis_v2/games/ludo/components/destination.dart';
@@ -356,69 +357,111 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   }
 
   Future<void> rollDice() async {
-    print("rollDice called, playerCanMove: $playerCanMove"); // Debug print
+    print("rollDice called, playerCanMove: $playerCanMove");
     if (playerCanMove) return;
     
-    print("Rolling dice..."); // Debug print
+    print("Rolling dice...");
     await diceContainer.currentDice.roll();
-    playState =PlayState.finished;
-    print("Dice rolled, value: ${diceContainer.currentDice.value}"); // Debug print
+    playState = PlayState.finished;
+    
+    if (playState == PlayState.finished) {
+      if (buildContext != null && buildContext!.mounted) {
+        await showDialog(
+          context: buildContext!,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              width: 300,
+              decoration: BoxDecoration(
+                color: const Color(0xFF152A37),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF00ECFF), width: 1),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1F3441),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'YOU WIN!',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Image.asset('assets/images/header.png', height: 80),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'REWARD',
+                    style: TextStyle(
+                      color: Color(0xFF00ECFF),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset('assets/images/starknet-token-strk-logo (4) 7.svg', height: 24),
+                      const SizedBox(width: 8),
+                      const Text(
+                        '400',
+                        style: TextStyle(
+                          color: Colors.yellow,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      SvgPicture.asset('assets/images/会员.svg', height: 24),
+                      const SizedBox(width: 8),
+                      const Text(
+                        '400 EXP',
+                        style: TextStyle(
+                          color: Color(0xFF00ECFF),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  GestureDetector(
+                    onTap: (){
+                       Navigator.pop(context);
+                        // overlays.add(PlayState.finished.name);
 
-    List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(_userIndex);
-    List<PlayerPin> movablePins = [];
-
-    for (PlayerPin pin in listOfPlayerPin) {
-      if (pin.canMove) {
-        movablePins.add(pin);
+                    },
+                    child: SvgPicture.asset('assets/images/ok_btn.svg')),
+                
+                ],
+              ),
+            ),
+          ),
+        );
       }
     }
 
-    // If there are no movable pins and the dice value is less than 6, show a snackbar
-    if (movablePins.isEmpty) {
-      final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
-      if (diceContainer.currentDice.value < 6) {
-        if (pinsAtHome.isNotEmpty) {
-          showSnackBar("Can not move from Basement, try to get a 6!!");
-          // If there are pins at home, play the first one (dummy move)
-          await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
-          return;
-        } else {
-          showSnackBar("No pins to move!!");
-          // If there are no pins at home, play the first pin on the board (dummy move)
-          final pins = board.getPlayerPinsOnBoard(_userIndex);
-          await playMove(pins[0].homeIndex, isAuto: true);
-          return;
-        }
-      } else {
-        // If the dice value is greater or equal to 6, play the first pin on the board or the only pin at home
-        if (pinsAtHome.isEmpty) {
-          showSnackBar("No pins to move!!");
-          // If there are no pins at home, play the first pin on the board (dummy move)
-          final pins = board.getPlayerPinsOnBoard(_userIndex);
-          await playMove(pins[0].homeIndex, isAuto: true);
-          return;
-        } else if (pinsAtHome.length == 1) {
-          // If there is only one pin at home, play it
-          await playMove(pinsAtHome[0]!.homeIndex);
-          return;
-        }
-      }
-    }
-
-    if ((movablePins.length == 1 && diceContainer.currentDice.value < 6) ||
-        (movablePins.length == 1 &&
-            diceContainer.currentDice.value > 6 &&
-            playerHomes[_userIndex].pinsAtHome.isEmpty)) {
-      // Automatically play move on the only movable pin
-      await playMove(movablePins[0].homeIndex);
-      return;
-    }
-
-    playerCanMove = true;
-
-    // Commented out code should also be updated if uncommented in the future
-    // playerCanMove = !movablePins.isEmpty ||
-    //     (diceContainer.currentDice!.value >= 6 && !playerHomes[_currentPlayer].isHomeEmpty);
+    print("Dice rolled, value: ${diceContainer.currentDice.value}");
+   
   }
 
   void showMessage(String message,
