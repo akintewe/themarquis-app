@@ -32,13 +32,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Column(
               children: [
-                const SizedBox(
-                  height: 64,
-                ),
-                Image.asset(
-                  'assets/images/banner.png',
-                  fit: BoxFit.fitWidth,
-                ),
+                const SizedBox(height: 64),
+                Image.asset('assets/images/banner.png', fit: BoxFit.fitWidth),
               ],
             ),
             Column(
@@ -51,9 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       GestureDetector(
                         onTap: user == null
                             ? () {
-                                showDialog(
-                                    context: context,
-                                    builder: (c) => const AuthDialog());
+                                showDialog(context: context, builder: (c) => const AuthDialog());
                               }
                             : () {
                                 //go to profile page
@@ -76,13 +69,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               width: 8,
                             ),
                             Text(
-                              user == null
-                                  ? "LOGIN"
-                                  : user.email.split("@").first,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall!
-                                  .copyWith(fontWeight: FontWeight.w600),
+                              user == null ? "LOGIN" : user.email.split("@").first,
+                              style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -109,21 +97,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           const SizedBox(width: 5),
                           FutureBuilder<BigInt>(
-                            future: ref.read(userProvider.notifier).getTokenBalance(
-                                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
+                            future: ref.read(userProvider.notifier).getTokenBalance("0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const CircularProgressIndicator();
                               }
                               if (snapshot.hasError) {
                                 return Container();
                               }
                               return Text(
-                                ((snapshot.data! / BigInt.from(1e18))
-                                    .toStringAsFixed(8)
-                                    .replaceAll(RegExp(r'0+$'), '')
-                                    .replaceAll(RegExp(r'\.$'), '')),
+                                ((snapshot.data! / BigInt.from(1e18)).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -176,10 +159,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         child: Stack(
                           children: [
-                            Image.asset('assets/images/ludo.png',
-                                fit: BoxFit.fitWidth,
-                                color: Colors.black.withAlpha(100),
-                                colorBlendMode: BlendMode.darken),
+                            Image.asset('assets/images/ludo.png', fit: BoxFit.fitWidth, color: Colors.black.withAlpha(100), colorBlendMode: BlendMode.darken),
                             const Positioned(
                               bottom: 0,
                               left: 0,
@@ -194,9 +174,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                     Text(
                                       'Ludo',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                     )
                                   ],
                                 ),
@@ -210,22 +188,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 child: IconButton(
                                   onPressed: () {
                                     if (!ref.read(appStateProvider).isAuth) {
-                                      showDialog(
-                                          context: context,
-                                          builder: (ctx) => const AuthDialog());
+                                      showDialog(context: context, builder: (ctx) => const AuthDialog());
                                       return;
                                     }
-                                    ref
-                                        .read(appStateProvider.notifier)
-                                        .selectGame("ludo");
+                                    ref.read(appStateProvider.notifier).selectGame("ludo");
                                   },
                                   icon: const Icon(
                                     Icons.arrow_forward,
                                     size: 32,
                                   ),
                                   style: IconButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.white.withAlpha(100),
+                                    backgroundColor: Colors.white.withAlpha(100),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -263,9 +236,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   children: [
                                     Text(
                                       'Yahtzee',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                     ),
                                     Text(
                                       'Dice Game',
@@ -284,8 +255,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                                 side: const BorderSide(color: Colors.cyan),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0)),
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0)),
                             child: const Text(
                               'Coming Soon',
                               style: TextStyle(fontSize: 12),
@@ -323,9 +293,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   children: [
                                     Text(
                                       '6 nimmt',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                     ),
                                     Text(
                                       'Card Game',
@@ -344,8 +312,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                                 side: const BorderSide(color: Colors.cyan),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0)),
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0)),
                             child: const Text(
                               'Coming Soon',
                               style: TextStyle(fontSize: 12),
@@ -443,10 +410,7 @@ class GameCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(fontWeight: FontWeight.w800),
+                            style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
                         if (isActive)
@@ -517,8 +481,7 @@ class MyChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration:
-          BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: Row(
         children: [
@@ -526,18 +489,14 @@ class MyChip extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(0, 0, iconPadding, 0),
             child: Icon(
               icon,
-              color: isLightColor
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).colorScheme.onSurface,
+              color: isLightColor ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
               size: 15,
             ),
           ),
           Text(
             title,
             style: TextStyle(
-              color: isLightColor
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).colorScheme.onSurface,
+              color: isLightColor ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
