@@ -55,7 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   backgroundColor: Colors.white.withOpacity(0.02),
                   systemOverlayStyle: const SystemUiOverlayStyle(
                       statusBarIconBrightness: Brightness.light,
-                      statusBarBrightness: Brightness.light,
+                      statusBarBrightness: Brightness.light
                   ),
                   title: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -176,12 +176,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               ],
                                             ),
                                             const SizedBox(width: 5),
-                                            Text(
-                                              showBalance ? '0' : '********',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                              ),
+                                            FutureBuilder<BigInt>(
+                                              future: ref.read(userProvider.notifier).getTokenBalance(
+                                                  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.waiting) {
+                                                  return Transform.scale(
+                                                      scale: 0.2,
+                                                      child: const CircularProgressIndicator());
+                                                }
+                                                if (snapshot.hasError) {
+                                                  return Container();
+                                                }
+                                                return Text(
+                                                  showBalance ?
+                                                  ((snapshot.data! / BigInt.from(1e18))
+                                                      .toStringAsFixed(8)
+                                                      .replaceAll(RegExp(r'0+$'), '')
+                                                      .replaceAll(RegExp(r'\.$'), '')) : '********',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ],
                                         ),
