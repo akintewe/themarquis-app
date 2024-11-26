@@ -240,10 +240,10 @@ class Dice extends PositionComponent
   @override
   void onTapUp(TapUpEvent event) {
     super.onTapUp(event);
-    print("Dice tapped, current state: $_state"); // Debug print
+    print("Dice tapped, current state: $_state"); 
 
     if (_state == DiceState.active) {
-      print("Calling game.rollDice()"); // Debug print
+      print("Calling game.rollDice()"); 
       game.rollDice();
     }
   }

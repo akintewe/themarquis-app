@@ -157,11 +157,11 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     );
     
     // Draw the SVG
-    canvas.scale(
-      (game.unitSize * 3) / centerSvgInfo.size.width,
-      (game.unitSize * 3) / centerSvgInfo.size.height,
-    );
-    canvas.drawPicture(centerSvgInfo.picture);
+    // canvas.scale(
+    //   (game.unitSize * 3) / centerSvgInfo.size.width,
+    //   (game.unitSize * 3) / centerSvgInfo.size.height,
+    // );
+    // canvas.drawPicture(centerSvgInfo.picture);
     
     canvas.restore();
 
