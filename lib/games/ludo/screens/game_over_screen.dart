@@ -590,6 +590,7 @@ class MatchResultsScreen extends ConsumerWidget {
         width: 800,
         height: 418,
         decoration: BoxDecoration(
+          image: DecorationImage(image: AssetImage('assets/images/bg (1).png'), fit: BoxFit.cover),
           color: const Color(0xFF152A37),
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -609,6 +610,7 @@ class MatchResultsScreen extends ConsumerWidget {
                 child: SvgPicture.asset(
                       'assets/images/Vector.svg',
                      width: 100,
+                     height: 65,
                     ),
               ),
             // Logo and Title Row
@@ -629,7 +631,7 @@ class MatchResultsScreen extends ConsumerWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: 26,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -641,7 +643,9 @@ class MatchResultsScreen extends ConsumerWidget {
               ),
             ),
             // Cyan line
-           Center(child: Image.asset('assets/images/divider.png', )),
+           Center(child: SizedBox(
+            width: 800,
+            child: Image.asset('assets/images/divider.png', fit: BoxFit.cover,))),
             const SizedBox(height: 16),
             // Results List
             ...results.map((result) => Padding(
@@ -649,17 +653,17 @@ class MatchResultsScreen extends ConsumerWidget {
                     horizontal: 16.0,
                     vertical: 8.0,
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 100.0, vertical: 10),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         // Rank and Name
-                        Expanded(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 1.0),
                           child: Row(
+                            
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 result['rank'] == 1 ? 'Winner' : 'Player ${result['rank']}',
