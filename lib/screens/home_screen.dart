@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:marquis_v2/dialog/deposit_dialog.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
@@ -11,6 +10,7 @@ import 'package:marquis_v2/dialog/auth_dialog.dart';
 import 'package:marquis_v2/widgets/locked_game_widget.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
 
+import '../widgets/gradient_separator.dart';
 import '../widgets/user_points_widget.dart';
 
 class HomePath extends AppRoutePath {
@@ -40,12 +40,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Column(
               children: [
-                const SizedBox(
+                 const SizedBox(
                   height: 64,
                 ),
-                Image.asset(
-                  'assets/images/banner.png',
-                  fit: BoxFit.fitWidth,
+                FittedBox(
+                  child: Image.asset(
+                    'assets/images/banner.png',
+                    width: MediaQuery.of(context).size.width,
+                    fit: BoxFit.fill,
+                  ),
                 ),
               ],
             ),
@@ -63,6 +66,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const UserPointsWidget(),
+                        horizontalSpace(4.0),
+                        const GradientSeparator(),
                         horizontalSpace(8.0),
                         user == null
                             ? Container()
@@ -92,6 +97,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             )
                                         ),
                                         horizontalSpace(8.0),
+                                        const GradientSeparator(),
+                                        horizontalSpace(8.0),
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
@@ -106,7 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                   'STRK',
                                                   style: TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 14,
+                                                    fontSize: 10,
                                                   ),
                                                 )
                                               ],
@@ -133,7 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                       .replaceAll(RegExp(r'\.$'), '')) : '********',
                                                   style: const TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 14,
+                                                    fontSize: 10,
                                                   ),
                                                 );
                                               },
@@ -141,20 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           ],
                                         ),
                                         horizontalSpace(12.0),
-                                        Container(
-                                          width: 2,
-                                          height: 30,
-                                          decoration: const BoxDecoration(
-                                            gradient: RadialGradient(
-                                              colors: [
-                                                Color(0xff00ECFF),
-                                                Color(0xff000000),
-                                              ],
-                                              center: Alignment.center,
-                                              radius: 10.0,
-                                            ),
-                                          ),
-                                        ),
+                                        const GradientSeparator(),
                                         horizontalSpace(8.0),
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,7 +191,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                       .replaceAll(RegExp(r'\.$'), '')) : '********',
                                                   style: const TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 14,
+                                                    fontSize: 10,
                                                   ),
                                                 );
                                               },
@@ -205,20 +199,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           ],
                                         ),
                                         horizontalSpace(12.0),
-                                        Container(
-                                          width: 2,
-                                          height: 30,
-                                          decoration: const BoxDecoration(
-                                            gradient: RadialGradient(
-                                              colors: [
-                                                Color(0xff00ECFF),
-                                                Color(0xff000000),
-                                              ],
-                                              center: Alignment.center,
-                                              radius: 10.0,
-                                            ),
-                                          ),
-                                        ),
+                                        const GradientSeparator(),
                                         horizontalSpace(8.0),
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,43 +225,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                 showBalance ? '0' : '********',
                                                 style: const TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 14,
+                                                  fontSize: 10,
                                                 )
                                             ),
                                           ],
                                         ),
                                     const SizedBox(width: 12),
-                                        Container(
-                                          width: 2,
-                                          height: 30,
-                                          decoration: const BoxDecoration(
-                                            gradient: RadialGradient(
-                                              colors: [
-                                                Color(0xff00ECFF),
-                                                Color(0xff000000),
-                                              ],
-                                              center: Alignment.center,
-                                              radius: 10.0,
-                                            ),
-                                          ),
-                                        ),
+                                        const GradientSeparator(),
                                         horizontalSpace(8.0),
-                                    GestureDetector(
-                                      onTap: () {
-                                        showDialog(
-                                            context: context,
-                                            builder: (c) {
-                                              return const DepositDialog();
-                                            });
-                                      },
-                                      child: const Icon(
-                                        Icons.add,
-                                        size: 24,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                                            ],
-                                                          ),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Image.asset(
+                                                  "assets/images/brother_logo.png",
+                                                  width: 19,
+                                                ),
+                                                horizontalSpace(4.0),
+                                                const Text(
+                                                  'BROTHER',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 10,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                                showBalance ? '0' : '********',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                )
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
