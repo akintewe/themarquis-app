@@ -22,16 +22,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
   @override
   FutureOr<void> onLoad() async {
     super.onLoad();
-    
-    // Make board take up most of the screen height while maintaining aspect ratio
-    final screenHeight = game.size.y * 0.8; // 80% of screen height
-    final boardSize = screenHeight;
-    
-    size = Vector2(boardSize, boardSize);
-    position = Vector2(
-      (game.size.x - size.x) / 2, // Center horizontally
-      (game.size.y - size.y) / 2, // Center vertically
-    );
+    size = Vector2(game.width, game.height);
     
     final ByteData data = await rootBundle.load('assets/svg/center_board_box.svg');
     final String svgString = String.fromCharCodes(data.buffer.asUint8List());

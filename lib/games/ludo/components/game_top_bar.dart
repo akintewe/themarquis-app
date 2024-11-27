@@ -25,16 +25,19 @@ class GameTopBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
 
-          GestureDetector(
-            onTap: () {
-              if (game.playState == PlayState.welcome || 
-                  game.playState == PlayState.waiting) {
-                Navigator.of(context).pushReplacementNamed('/');
-              } else {
-                game.playState = PlayState.welcome;
-              }
-            },
-            child: SvgPicture.asset('assets/images/Group 1171276336.svg')),
+          Transform.translate(
+            offset: Offset(-5, 4),
+            child: GestureDetector(
+              onTap: () {
+                if (game.playState == PlayState.welcome || 
+                    game.playState == PlayState.waiting) {
+                  Navigator.of(context).pushReplacementNamed('/');
+                } else {
+                  game.playState = PlayState.welcome;
+                }
+              },
+              child: SvgPicture.asset('assets/images/Group 1171276336.svg')),
+          ),
           // Back Button
          
           // STRK Balance

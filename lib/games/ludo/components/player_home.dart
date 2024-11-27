@@ -127,7 +127,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
       textRenderer: TextPaint(
         style: TextStyle(
           color: Colors.white,
-          fontSize: playerIndex == game.userIndex ? 18 : 12,
+           fontFamily: 'Orbitron',
+          fontSize: playerIndex == game.userIndex ? 20 : 20,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -138,17 +139,64 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
 
     final targetPosition = switch (playerIndex) {
       0 => _avatarPositions[playerIndex] +
-          Vector2(game.unitSize * 4, game.unitSize * 1.5),
+          Vector2(game.unitSize * 3.5, game.unitSize * 1.2),
       1 => _avatarPositions[playerIndex] +
-          Vector2(-game.unitSize * 1.5, game.unitSize * 1.5),
+          Vector2(-game.unitSize * 0.8, game.unitSize * 1.2),
       2 => _avatarPositions[playerIndex] +
-          Vector2(-game.unitSize * 1.5, game.unitSize * 1.5),
+          Vector2(-game.unitSize * 0.8, game.unitSize * 1.2),
       3 => _avatarPositions[playerIndex] +
-          Vector2(game.unitSize * 4, game.unitSize * 1.5),
+          Vector2(game.unitSize * 3.5, game.unitSize * 1.2),
       _ => throw Exception("Invalid player index"),
     };
+
+    // // Add background container for dice
+    // final diceContainer = RectangleComponent(
+      
+    //   position: targetPosition - Vector2(game.unitSize * 0.4, game.unitSize * 0.4),
+    //   size: Vector2(game.unitSize * 2, game.unitSize * 2),
+    //   paint: Paint()
+    //     ..color = Colors.black
+    //     ..style = PaintingStyle.fill,
+    // );
+
+    // Add colored background glow
+    final diceContainerGlow = RectangleComponent(
+      position: targetPosition - Vector2(game.unitSize * 0.4, game.unitSize * 0.4),
+      size: Vector2(game.unitSize * 0.8, game.unitSize * 0.8),
+      paint: Paint()
+        ..color = Colors.black
+        ..style = PaintingStyle.fill
+      
+    );
+
+    // Add border with glow
+    final diceContainerBorder = RectangleComponent(
+      position: targetPosition - Vector2(game.unitSize * 0.4, game.unitSize * 0.4),
+      size: Vector2(game.unitSize * 0.8, game.unitSize * 0.8),
+      paint: Paint()
+        ..color = game.listOfColors[playerIndex]
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+       
+    );
+
+    // Add inner border
+    final diceContainerInnerBorder = RectangleComponent(
+      position: targetPosition - Vector2(game.unitSize * 0.35, game.unitSize * 0.35),
+      size: Vector2(game.unitSize * 0.7, game.unitSize * 0.7),
+      paint: Paint()
+        ..color = game.listOfColors[playerIndex].withOpacity(0.5)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+
+    // await add(diceContainer);
+    await add(diceContainerGlow);
+    await add(diceContainerBorder);
+    await add(diceContainerInnerBorder);
+
     _playerDice = Dice(
-      size: Vector2(50, 50),
+      size: Vector2(40, 40),
       position: targetPosition,
       playerIndex: playerIndex,
     );

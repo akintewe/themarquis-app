@@ -59,9 +59,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             width: gameWidth,
             height: gameHeight,
           ),
-        ) {
-    camera.viewfinder.anchor = Anchor.center;
-  }
+        );
 
   double get width => size.x;
   double get height => size.y;
@@ -150,15 +148,6 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         _handleLudoSessionUpdate(next);
       });
     });
-
-    // Calculate the scale to fit the screen while maintaining aspect ratio
-    final screenHeight = size.y;
-    final screenWidth = size.x;
-    final scale = screenHeight / gameHeight;
-    
-    camera.viewfinder.zoom = scale;
-    // Center the camera
-    camera.viewfinder.position = Vector2(screenWidth / 2, screenHeight / 2);
   }
 
   Future<void> _handleLudoSessionUpdate(LudoSessionData? next) async {
@@ -264,6 +253,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     await Flame.images.load('spritesheet.png');
     await Flame.images.load('avatar_spritesheet.png');
     await Flame.images.load('dice_interface.png');
+    await Flame.images.load('active_button.png');
+    await Flame.images.load('play.png');
 
     camera.viewfinder.anchor = Anchor.topLeft;
     _userIndex = _sessionData!.sessionUserStatus.indexWhere(
@@ -386,91 +377,91 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         await showDialog(
           context: buildContext!,
           barrierDismissible: false,
-          builder: (context) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: Container(
-              width: 300,
-              decoration: BoxDecoration(
-                color: const Color(0xFF152A37),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF00ECFF), width: 1),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF1F3441),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'YOU WIN!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+          builder: (context) => Center(
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.topCenter,
+              children: [
+                // Main Dialog Container
+                Container(
+                  margin: const EdgeInsets.only(top: 40),
+                  width: 180,
+                  decoration: BoxDecoration(
+                    color: Color.fromRGBO(26, 32, 45, 1),
+                    borderRadius: BorderRadius.circular(30),
+                   
                   ),
-                  const SizedBox(height: 16),
-                  Image.asset('assets/images/header.png', height: 80),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'REWARD',
-                    style: TextStyle(
-                      color: Color(0xFF00ECFF),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      SvgPicture.asset('assets/images/starknet-token-strk-logo (4) 7.svg', height: 24),
-                      const SizedBox(width: 8),
+                      const SizedBox(height: 60),
                       const Text(
-                        '400',
-                        style: TextStyle(
-                          color: Colors.yellow,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      SvgPicture.asset('assets/images/会员.svg', height: 24),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '400 EXP',
+                        'REWARD',
                         style: TextStyle(
                           color: Color(0xFF00ECFF),
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/starknet-token-strk-logo (4) 7.svg',
+                            height: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '400',
+                            style: TextStyle(
+                              color: Colors.yellow,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/会员.svg',
+                            height: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '400 EXP',
+                            style: TextStyle(
+                              color: Color(0xFF00ECFF),
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: SvgPicture.asset('assets/images/ok_btn.svg'),
+                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  GestureDetector(
-                    onTap: (){
-                       Navigator.pop(context);
-                        // overlays.add(PlayState.finished.name);
-
-                    },
-                    child: SvgPicture.asset('assets/images/ok_btn.svg')),
-                
-                ],
-              ),
+                ),
+                // Header Image positioned on top
+                Positioned(
+                  top: -20,
+                  child: Image.asset(
+                    'assets/images/header.png',
+                    height: 100,
+                    width: 300,
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -521,9 +512,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   Future<void> createAndSetCurrentPlayerDice() async {
     final newDice = Dice(
-      size: Vector2(100, 100),
+      size: Vector2(140, 80),
       position: Vector2(size.x / 2, size.y - 200),
       playerIndex: _currentPlayer,
+      isCenterRoll: true,
     );
     if (_currentPlayer == _userIndex) {
       newDice.state = DiceState.active;
@@ -532,7 +524,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
     diceContainer = DiceContainer(
       position: Vector2(size.x / 2, size.y - 150),
-      size: Vector2(100, 100),
+      size: Vector2(120, 80),
       dice: newDice,
     );
     await add(diceContainer);
