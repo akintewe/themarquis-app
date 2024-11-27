@@ -16,7 +16,6 @@ import 'package:marquis_v2/dialog/auth_dialog.dart';
 import 'package:marquis_v2/widgets/profile_item.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -222,7 +221,6 @@ class InviteFriendDialog extends StatefulWidget {
 }
 
 class _InviteFriendDialogState extends State<InviteFriendDialog> {
-  final ScreenshotController screenshotController = ScreenshotController();
 
   @override
   Widget build(BuildContext context) {
@@ -251,14 +249,11 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
               ],
             ),
             const SizedBox(height: 20),
-            Screenshot(
-              controller: screenshotController,
-              child: QrImageView(
-                data:
-                    "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
-                size: 150,
-                backgroundColor: Colors.white,
-              ),
+            QrImageView(
+              data:
+                  "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
+              size: 150,
+              backgroundColor: Colors.white,
             ),
             const SizedBox(height: 20),
             ReferralField(
@@ -369,21 +364,14 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                                   content: Text('Copied to clipboard')),
                             );
                           }),
-                          _buildActionButton(Icons.photo_outlined, 'Save image', () {
-                            screenshotController
-                                .capture(delay: const Duration(milliseconds: 10))
-                                .then((capturedImage) async {
-                              Uint8List? qrImageBytes = capturedImage;
-                              await Gal.putImageBytes(
-                                  qrImageBytes!);
-                              if(!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Saved to device')),
-                              );
-                            }).catchError((onError) {
-                              print(onError);
-                            });
+                          _buildActionButton(Icons.photo_outlined, 'Save image', () async {
+                            await Gal.putImageBytes(
+                                snapshot.data!);
+                            if(!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Saved to device')),
+                            );
                           }),
                           _buildActionButton(Icons.share, 'Share', () async {
                             final image = await rootBundle
