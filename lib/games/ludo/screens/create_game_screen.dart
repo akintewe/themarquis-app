@@ -11,7 +11,7 @@ import 'package:marquis_v2/games/ludo/widgets/stepper_option_card.dart';
 import 'package:marquis_v2/games/ludo/widgets/vertical_stepper.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
-import 'package:marquis_v2/widgets/user_app_bar.dart';
+import 'package:marquis_v2/widgets/user_points_widget.dart';
 
 enum NumberOfPlayers {
   two,
@@ -37,6 +37,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
   String? _selectedTokenAddress;
   double? _selectedTokenAmount;
   String? _playerColor;
+  bool _isLoading = false;
   final Map<String, String> _supportedTokens = {};
 
   void _selectNumberOfPlayers(NumberOfPlayers numberOfPlayers) {
@@ -82,10 +83,13 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
     final game = ModalRoute.of(context)!.settings.arguments as LudoGame;
     final color = _playerColor!.split("/").last.split(".").first.split("_").first;
     try {
+      setState(() {
+        _isLoading = true;
+      });
       await ref.read(ludoSessionProvider.notifier).createSession(
-            (_selectedTokenAmount ?? 0).toString(),
+            _gameMode == GameMode.free ? '0' : '$_selectedTokenAmount',
             color,
-            _selectedTokenAddress ?? "0x0000000000000000000000000000000000000000000000000000000000000000",
+            _selectedTokenAddress ?? "0",
           );
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -93,6 +97,10 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
     } catch (e) {
       if (!context.mounted) return;
       showErrorDialog(e.toString(), context);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -101,7 +109,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const UserAppbar(),
+        title: const UserPointsWidget(),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -386,6 +394,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                 min: 0,
                                                 divisions: 100,
                                                 activeColor: Colors.white,
+                                                label: '${_selectedTokenAmount! / 1e18}',
                                                 secondaryActiveColor: Colors.cyan,
                                                 allowedInteraction: SliderInteraction.slideThumb,
                                                 max: snapshot.data?.toDouble() ?? 0,
@@ -424,7 +433,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                           SizedBox(
                                                             width: 60,
                                                             child: Text(
-                                                              '${snapshot.data?.toDouble() ?? 0}',
+                                                              '${snapshot.data!.toDouble() / 1e18}',
                                                               style: const TextStyle(fontSize: 10, color: Color(0xFFFFFFFF), fontWeight: FontWeight.w400),
                                                               maxLines: 1,
                                                               overflow: TextOverflow.ellipsis,
@@ -529,6 +538,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                       height: scaledHeight(52),
                       alignment: Alignment.center,
                       child: Visibility(
+                        visible: !_isLoading,
                         replacement: const Center(child: CircularProgressIndicator()),
                         child: Text('CREATE GAME', style: TextStyle(color: _playerColor == null ? const Color(0xFF939393) : const Color(0xFF000000))),
                       ),

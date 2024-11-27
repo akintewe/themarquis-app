@@ -6,6 +6,7 @@ import 'package:marquis_v2/providers/user.dart';
 
 import 'user_points_widget.dart';
 
+@Deprecated("To be removed")
 class UserAppbar extends ConsumerStatefulWidget {
   const UserAppbar({super.key});
 

@@ -12,7 +12,7 @@ import 'package:marquis_v2/games/ludo/screens/create_game_screen.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
-import 'package:marquis_v2/widgets/user_app_bar.dart';
+import 'package:marquis_v2/widgets/user_points_widget.dart';
 
 class LudoWelcomeScreen extends ConsumerStatefulWidget {
   const LudoWelcomeScreen({super.key, required this.game});
@@ -62,8 +62,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
 
             return Column(
               children: [
-                //TODO replace with UserAppbar created in issue #5
-                const UserAppbar(),
+                const UserPointsWidget(),
                 SizedBox(height: scaledHeight(8)),
                 Flexible(
                   child: Container(
@@ -1211,7 +1210,7 @@ class FindGameChooseColorDialog extends ConsumerStatefulWidget {
 
 class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorDialog> {
   final String _selectedColor = "";
-  bool _isLoading = false;
+  bool isLoading = false;
   // BigInt? _tokenBalance;
   // final BigInt _sliderValue = BigInt.from(0);
   // List<Map<String, String>>? _supportedTokens;
@@ -1231,7 +1230,7 @@ class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorD
   Future<void> joinGame() async {
     try {
       setState(() {
-        _isLoading = true;
+        isLoading = true;
       });
       if (_selectedColor == "") {
         showErrorDialog("Please select a color", context);
@@ -1242,10 +1241,11 @@ class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorD
     } catch (e) {
       if (!mounted) return;
       showErrorDialog(e.toString(), context);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   @override

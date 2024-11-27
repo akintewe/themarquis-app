@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +13,6 @@ import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
