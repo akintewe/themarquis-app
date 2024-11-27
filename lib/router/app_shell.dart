@@ -62,7 +62,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                 // ),
                 BottomNavigationBarItem(
                   // key: ValueKey("AccountBottomNavigationBarItem"),
-                  icon: FaIcon(FontAwesomeIcons.circleUser),
+                  icon: FaIcon(FontAwesomeIcons.solidUser),
                   label: 'Profile',
                 ),
               ],
