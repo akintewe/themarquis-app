@@ -128,8 +128,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGame> {
         style: TextStyle(
           color: Colors.white,
            fontFamily: 'Orbitron',
-          fontSize: playerIndex == game.userIndex ? 20 : 20,
-          fontWeight: FontWeight.bold,
+          fontSize: playerIndex == game.userIndex ? 30 : 30,
+          fontWeight: FontWeight.w300,
         ),
       ),
     );

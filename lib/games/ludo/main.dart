@@ -67,33 +67,36 @@ Widget build(BuildContext context) {
       ),
       child: SafeArea(
         child: _game.playState == PlayState.playing
-            ? Center(
-                child: AspectRatio(
-                  aspectRatio: 9/16,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: SizedBox(
-                      width: gameWidth,
-                      height: gameHeight,
-                      child: RiverpodAwareGameWidget<LudoGame>(
-                        key: _gameWidgetKey,
-                        game: _game,
-                        overlayBuilderMap: {
-                          PlayState.welcome.name: (context, game) =>
-                              LudoWelcomeScreen(game: game),
-                          PlayState.waiting.name: (context, game) =>
-                              WaitingRoomScreen(game: game),
-                          PlayState.finished.name: (context, game) =>
-                              MatchResultsScreen(
-                                game: game,
-                                session: ref.read(ludoSessionProvider)!,
-                              ),
-                        },
+            ? Padding(
+              padding: const EdgeInsets.only(left:67.0, right: 67),
+              child: Container(
+                  child: AspectRatio(
+                    aspectRatio: 7/20,
+                    child: FittedBox(
+                      fit: BoxFit.fitHeight,
+                      child: SizedBox(
+                        width: gameWidth,
+                        height: gameHeight,
+                        child: RiverpodAwareGameWidget<LudoGame>(
+                          key: _gameWidgetKey,
+                          game: _game,
+                          overlayBuilderMap: {
+                            PlayState.welcome.name: (context, game) =>
+                                LudoWelcomeScreen(game: game),
+                            PlayState.waiting.name: (context, game) =>
+                                WaitingRoomScreen(game: game),
+                            PlayState.finished.name: (context, game) =>
+                                MatchResultsScreen(
+                                  game: game,
+                                  session: ref.read(ludoSessionProvider)!,
+                                ),
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
-              )
+            )
             : RiverpodAwareGameWidget<LudoGame>(
                 key: _gameWidgetKey,
                 game: _game,

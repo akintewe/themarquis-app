@@ -285,7 +285,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
     turnText = TextComponent(
       text: '',
-      position: Vector2(size.x / 2, size.y * 0.15),
+      position: Vector2(size.x / 2, size.y * 0.10),
       anchor: Anchor.center,
       textRenderer: TextPaint(
         style: TextStyle(
