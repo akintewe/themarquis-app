@@ -335,6 +335,36 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
     updateTurnText();
     isInit = true;
+    // Add message container with text
+    final messageContainer = CustomRectangleComponent(
+      position: Vector2(size.x / 2, size.y - 170),
+      size: Vector2(500, 50),
+      anchor: Anchor.center,
+      color: const Color(0xFF1A3B44),
+      borderRadius: 12,
+      children: [
+        SpriteComponent(
+          sprite: await Sprite.load('dice_icon.png'),
+          position: Vector2(100, 25), // Center horizontally and vertically
+          size: Vector2(24, 24),
+          anchor: Anchor.center,
+        ),
+        TextComponent(
+          text: 'No tokens available to move. Roll a 6 to start!',
+          position: Vector2(130, 25), // Position text next to centered icon
+          anchor: Anchor.centerLeft,
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+    
+    await add(messageContainer);
   }
 
   void updateTurnText() {
@@ -512,8 +542,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   Future<void> createAndSetCurrentPlayerDice() async {
     final newDice = Dice(
-      size: Vector2(140, 80),
-      position: Vector2(size.x / 2, size.y - 200),
+      size: Vector2(200, 80),
+      position: Vector2(size.x / 2, size.y - 120),
       playerIndex: _currentPlayer,
       isCenterRoll: true,
     );
@@ -523,8 +553,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       newDice.state = DiceState.inactive;
     }
     diceContainer = DiceContainer(
-      position: Vector2(size.x / 2, size.y - 150),
-      size: Vector2(120, 80),
+      position: Vector2(size.x / 2, size.y - 70),
+      size: Vector2(200, 80),
       dice: newDice,
     );
     await add(diceContainer);
@@ -569,5 +599,38 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       return WelcomeTopBar(game: this);
     }
     return GameTopBar(game: this);
+  }
+}
+
+// Custom Rectangle Component with rounded corners
+class CustomRectangleComponent extends PositionComponent {
+  final Color color;
+  final double borderRadius;
+
+  CustomRectangleComponent({
+    required Vector2 position,
+    required Vector2 size,
+    required this.color,
+    required this.borderRadius,
+    Anchor anchor = Anchor.topLeft,
+    List<Component>? children,
+  }) : super(
+          position: position,
+          size: size,
+          anchor: anchor,
+          children: children,
+        );
+
+  @override
+  void render(Canvas canvas) {
+    final rrect = RRect.fromRectAndRadius(
+      size.toRect(),
+      Radius.circular(borderRadius),
+    );
+    canvas.drawRRect(
+      rrect,
+      Paint()..color = color,
+    );
+    super.render(canvas);
   }
 }
