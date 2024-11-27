@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:marquis_v2/dialog/deposit_dialog.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/dialog/auth_dialog.dart';
+import 'package:marquis_v2/widgets/locked_game_widget.dart';
+import 'package:marquis_v2/widgets/ui_widgets.dart';
+
+import '../widgets/gradient_separator.dart';
+import '../widgets/user_points_widget.dart';
 
 class HomePath extends AppRoutePath {
   @override
@@ -23,6 +28,9 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+
+  bool showBalance = false;
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
@@ -32,123 +40,246 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Column(
               children: [
-                const SizedBox(
+                 const SizedBox(
                   height: 64,
                 ),
-                Image.asset(
-                  'assets/images/banner.png',
-                  fit: BoxFit.fitWidth,
+                FittedBox(
+                  child: Image.asset(
+                    'assets/images/banner.png',
+                    width: MediaQuery.of(context).size.width,
+                    fit: BoxFit.fill,
+                  ),
                 ),
               ],
             ),
             Column(
               children: [
                 AppBar(
-                  backgroundColor: Colors.transparent,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: user == null
-                            ? () {
-                                showDialog(
-                                    context: context,
-                                    builder: (c) => const AuthDialog());
-                              }
-                            : () {
-                                //go to profile page
-                              },
-                        child: Row(
-                          children: [
-                            user == null
-                                ? const Icon(
-                                    Icons.account_circle,
-                                    size: 25,
-                                  )
-                                : const CircleAvatar(
-                                    radius: 15,
-                                    backgroundImage: AssetImage(
-                                      'assets/images/avatar.png',
-                                    ), // Add your avatar image in assets folder
-                                    backgroundColor: Colors.transparent,
+                  backgroundColor: Colors.white.withOpacity(0.02),
+                  systemOverlayStyle: const SystemUiOverlayStyle(
+                      statusBarIconBrightness: Brightness.light,
+                      statusBarBrightness: Brightness.light
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const UserPointsWidget(),
+                        horizontalSpace(8.0),
+                        user == null
+                            ? Container()
+                            : Expanded(
+                              child: Container(
+                                 decoration: BoxDecoration(
+                                   color: Colors.white.withOpacity(0.04),
+                                   borderRadius: const BorderRadius.all(Radius.circular(8.0))
+                                 ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        InkWell(
+                                          onTap: (){
+                                            setState(() {
+                                              showBalance = !showBalance;
+                                            });
+                                          },
+                                            child: SvgPicture.asset(
+                                              showBalance ?
+                                                'assets/svg/eye_icon.svg' : 'assets/svg/hide_icon.svg',
+                                                width: 18, height: 20
+                                            )
+                                        ),
+                                        horizontalSpace(8.0),
+                                        const GradientSeparator(),
+                                        horizontalSpace(8.0),
+                                        SizedBox(
+                                          width: 75,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  SvgPicture.asset(
+                                                    "assets/svg/STRK_logo.svg",
+                                                    width: 19,
+                                                  ),
+                                                  horizontalSpace(4.0),
+                                                  const Text(
+                                                    'STRK',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              const SizedBox(width: 5),
+                                              FutureBuilder<BigInt>(
+                                                future: ref.read(userProvider.notifier).getTokenBalance(
+                                                    "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot.connectionState ==
+                                                      ConnectionState.waiting) {
+                                                    return Transform.scale(
+                                                      scale: 0.2,
+                                                        child: const CircularProgressIndicator());
+                                                  }
+                                                  if (snapshot.hasError) {
+                                                    return Container();
+                                                  }
+                                                  return Text(
+                                                    showBalance ?
+                                                    ((snapshot.data! / BigInt.from(1e18))
+                                                        .toStringAsFixed(8)
+                                                        .replaceAll(RegExp(r'0+$'), '')
+                                                        .replaceAll(RegExp(r'\.$'), '')) : '********',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        horizontalSpace(12.0),
+                                        const GradientSeparator(),
+                                        horizontalSpace(8.0),
+                                        SizedBox(
+                                          width: 75,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Image.asset(
+                                                    "assets/images/eth_icon.png",
+                                                    width: 19,
+                                                  ),
+                                                  horizontalSpace(4.0),
+                                                  const Text(
+                                                    'ETH',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              const SizedBox(width: 5),
+                                              FutureBuilder<BigInt>(
+                                                future: ref.read(userProvider.notifier).getTokenBalance(
+                                                    "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot.connectionState ==
+                                                      ConnectionState.waiting) {
+                                                    return Transform.scale(
+                                                        scale: 0.2,
+                                                        child: const CircularProgressIndicator());
+                                                  }
+                                                  if (snapshot.hasError) {
+                                                    return Container();
+                                                  }
+                                                  return Text(
+                                                    showBalance ?
+                                                    ((snapshot.data! / BigInt.from(1e18))
+                                                        .toStringAsFixed(8)
+                                                        .replaceAll(RegExp(r'0+$'), '')
+                                                        .replaceAll(RegExp(r'\.$'), '')) : '********',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        horizontalSpace(12.0),
+                                        const GradientSeparator(),
+                                        horizontalSpace(8.0),
+                                        SizedBox(
+                                          width: 75,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Image.asset(
+                                                    "assets/images/lords_icon.png",
+                                                    width: 19,
+                                                  ),
+                                                  horizontalSpace(4.0),
+                                                  const Text(
+                                                    'LORDS',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              const SizedBox(width: 5),
+                                              Text(
+                                                  showBalance ? '0' : '********',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 10,
+                                                  )
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    const SizedBox(width: 12),
+                                        const GradientSeparator(),
+                                        horizontalSpace(8.0),
+                                        SizedBox(
+                                          width: 75,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Image.asset(
+                                                    "assets/images/brother_logo.png",
+                                                    width: 19,
+                                                  ),
+                                                  horizontalSpace(4.0),
+                                                  const Text(
+                                                    'BROTHER',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 10,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              const SizedBox(width: 5),
+                                              Text(
+                                                  showBalance ? '0' : '********',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 10,
+                                                  )
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            Text(
-                              user == null
-                                  ? "LOGIN"
-                                  : user.email.split("@").first,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall!
-                                  .copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 18,
-                            child: Image.asset('assets/images/member.png'),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            user?.points.toString() ?? "0",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(width: 15),
-                          SvgPicture.asset(
-                            "assets/svg/STRK_logo.svg",
-                            width: 19,
-                          ),
-                          const SizedBox(width: 5),
-                          FutureBuilder<BigInt>(
-                            future: ref.read(userProvider.notifier).getTokenBalance(
-                                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              }
-                              if (snapshot.hasError) {
-                                return Container();
-                              }
-                              return Text(
-                                ((snapshot.data! / BigInt.from(1e18))
-                                    .toStringAsFixed(8)
-                                    .replaceAll(RegExp(r'0+$'), '')
-                                    .replaceAll(RegExp(r'\.$'), '')),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
                                 ),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 10),
-                          GestureDetector(
-                            onTap: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (c) {
-                                    return const DepositDialog();
-                                  });
-                            },
-                            child: const Icon(
-                              Icons.add,
-                              size: 24,
-                              color: Colors.white,
+                              ),
                             ),
-                          )
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(
@@ -238,124 +369,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                'assets/images/yahtzee.png',
-                                fit: BoxFit.fitWidth,
-                                width: 64,
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Yahtzee',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      'Dice Game',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                                side: const BorderSide(color: Colors.cyan),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0)),
-                            child: const Text(
-                              'Coming Soon',
-                              style: TextStyle(fontSize: 12),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                                color: const Color(0xff181B25)
+                            )
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            verticalSpace(8.0),
+                            const LockedGameWidget(
+                              title: 'Checkers',
+                              subTitle: 'Board Game',
+                              image: 'assets/images/checkers.png',
                             ),
-                          ),
-                        ],
+                            const LockedGameWidget(
+                              title: 'Yahtzee',
+                              subTitle: 'Dice Game',
+                              image: 'assets/images/yahtzee.png',
+                            ),
+                            const LockedGameWidget(
+                              title: '6 nimmt',
+                              subTitle: 'Card Game',
+                              image: 'assets/images/6nimmt.png',
+                            )
+                          ],
+                        ),
                       ),
-                    ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: SvgPicture.asset(
+                          'assets/svg/locked_badge.svg',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    child: Container(
-                      width: double.maxFinite,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                'assets/images/6nimmt.png',
-                                fit: BoxFit.fitWidth,
-                                width: 64,
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '6 nimmt',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      'Card Game',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                                side: const BorderSide(color: Colors.cyan),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0)),
-                            child: const Text(
-                              'Coming Soon',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+
               ],
             ),
           ],

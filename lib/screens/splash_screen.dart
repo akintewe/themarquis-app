@@ -39,7 +39,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.7,
                 height: MediaQuery.of(context).size.height * 0.7,
-                child: Image.asset('assets/images/marquis.png'),
+                child: Image.asset('assets/images/splash_logo.png'),
               ),
               if (snapshot.connectionState == ConnectionState.waiting)
                 const Padding(

@@ -45,7 +45,7 @@ class MyApp extends ConsumerWidget {
           surface: const Color(0xff0f1118),
           brightness: Brightness.dark,
         ),
-        textTheme: GoogleFonts.orbitronTextTheme(Theme.of(context).textTheme)
+        textTheme: GoogleFonts.montserratTextTheme(Theme.of(context).textTheme)
             .apply(bodyColor: Colors.white),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
