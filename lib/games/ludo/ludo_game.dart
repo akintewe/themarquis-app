@@ -59,7 +59,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             width: gameWidth,
             height: gameHeight,
           ),
-        );
+        ) {
+    camera.viewfinder.anchor = Anchor.center;
+  }
 
   double get width => size.x;
   double get height => size.y;
@@ -148,6 +150,15 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         _handleLudoSessionUpdate(next);
       });
     });
+
+    // Calculate the scale to fit the screen while maintaining aspect ratio
+    final screenHeight = size.y;
+    final screenWidth = size.x;
+    final scale = screenHeight / gameHeight;
+    
+    camera.viewfinder.zoom = scale;
+    // Center the camera
+    camera.viewfinder.position = Vector2(screenWidth / 2, screenHeight / 2);
   }
 
   Future<void> _handleLudoSessionUpdate(LudoSessionData? next) async {

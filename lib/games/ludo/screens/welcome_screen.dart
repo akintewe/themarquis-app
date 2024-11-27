@@ -24,195 +24,190 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final deviceSize = MediaQuery.of(context).size;
     final user = ref.read(userProvider);
-    // final ludoSession = ref.read(ludoSessionProvider.notifier);
     if (user == null) {
       return const Center(child: Text("Not Logged In"));
     }
     return Scaffold(
       backgroundColor: const Color(0xff0f1118),
-      body: Transform.scale(
-        scale: widget.game.height / deviceSize.height,
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: deviceSize.height * widget.game.width / widget.game.height,
-          height: deviceSize.height,
-          child: Column(
-            children: [
-              Container(
-                width: deviceSize.height * widget.game.width / widget.game.height,
-                height: deviceSize.height * 0.5,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: const AssetImage('assets/images/image 21.png'),
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.5),
-                      BlendMode.darken,
-                    ),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                padding: const EdgeInsets.all(16.0),
-                child: const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 128,
-                      ),
-                      Text(
-                        'LUDO',
-                        style: TextStyle(
-                          fontSize: 72,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 40.0,
-                              color: Colors.cyan,
-                              
-                              offset: Offset(0, 0),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        'MENU',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.white,
-                          letterSpacing: 8,
-                        ),
-                      ),
-                      SizedBox(height: 35),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
+      body: Container(
+        width: deviceSize.width,
+        height: deviceSize.height,
+        decoration: BoxDecoration(
+         
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: deviceSize.width,
+              height: deviceSize.height * 0.5,
+ decoration: BoxDecoration(
+  image: DecorationImage(
+            image: const AssetImage('assets/images/image 21.png'),
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.5),
+              BlendMode.darken,
+            ),
+            fit: BoxFit.cover,
+          ),
+ ),
+              padding: const EdgeInsets.all(16.0),
+              child: const Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (user.sessionId != null)
-                      _buildMenuButton(
-                        icon: Icons.gamepad_rounded,
-                        text: 'Resume Game',
-                        onTap: () async {
-                          try {
-                            ref
-                                .read(appStateProvider.notifier)
-                                .selectGameSessionId(
-                                    "ludo", user.sessionId);
-                            var session = ref.read(ludoSessionProvider);
-                            if (session == null) {
-                              await ref
-                                  .read(ludoSessionProvider.notifier)
-                                  .getLudoSession();
-                              session = ref.read(ludoSessionProvider);
-                            }
-                            if (session == null) return;
-                            if (session.sessionUserStatus
-                                    .where((e) => e.status == "ACTIVE")
-                                    .length ==
-                                4) {
-                              widget.game.playState = PlayState.playing;
-                            } else {
-                              widget.game.playState = PlayState.waiting;
-                            }
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            showErrorDialog(e.toString(), context);
-                          }
-                        },
+                    SizedBox(height: 128),
+                    Text(
+                      'LUDO',
+                      style: TextStyle(
+                        fontSize: 72,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 40.0,
+                            color: Colors.cyan,
+                            offset: Offset(0, 0),
+                          ),
+                        ],
                       ),
-                    if (user.sessionId != null)
-                      _buildMenuButton(
-                        icon: Icons.exit_to_app,
-                        text: 'Exit Game',
-                        onTap: () async {
-                          try {
-                            // Show confirmation dialog
-                            final bool confirmExit = await showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Exit Game'),
-                                  content: const Text(
-                                      'Are you sure you want to exit the current game?'),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: const Text('Cancel'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop(false);
-                                      },
-                                    ),
-                                    TextButton(
-                                      child: const Text('Exit'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop(true);
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-
-                            // If user doesn't confirm, return early
-                            if (!confirmExit) return;
-                            await ref
-                                .read(ludoSessionProvider.notifier)
-                                .exitSession();
-                            setState(() {});
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            showErrorDialog(e.toString(), context);
-                          }
-                        },
-                      ),
-                    if (user.sessionId == null)
-                      _buildMenuButton(
-                        icon: Icons.add,
-                        text: 'Create Room',
-                        onTap: () {
-                          createRoomDialog(
-                            ctx: context,
-                            game: widget.game,
-                          );
-                        },
-                      ),
-                    if (user.sessionId == null)
-                      _buildMenuButton(
-                        icon: Icons.group,
-                        text: 'Join Room',
-                        onTap: () {
-                          joinRoomDialog(
-                            ctx: context,
-                            game: widget.game,
-                          );
-                        },
-                      ),
-                    if (user.sessionId == null)
-                      _buildMenuButton(
-                        icon: Icons.casino,
-                        text: 'Open Sessions',
-                        onTap: () {
-                          openSessionDialog(
-                            ctx: context,
-                            game: widget.game,
-                          );
-                        },
-                      ),
-                    _buildMenuButton(
-                      icon: Icons.home,
-                      text: 'Back to Home',
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
                     ),
+                    Text(
+                      'MENU',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.white,
+                        letterSpacing: 8,
+                      ),
+                    ),
+                    SizedBox(height: 35),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (user.sessionId != null)
+                    _buildMenuButton(
+                      icon: Icons.gamepad_rounded,
+                      text: 'Resume Game',
+                      onTap: () async {
+                        try {
+                          ref
+                              .read(appStateProvider.notifier)
+                              .selectGameSessionId(
+                                  "ludo", user.sessionId);
+                          var session = ref.read(ludoSessionProvider);
+                          if (session == null) {
+                            await ref
+                                .read(ludoSessionProvider.notifier)
+                                .getLudoSession();
+                            session = ref.read(ludoSessionProvider);
+                          }
+                          if (session == null) return;
+                          if (session.sessionUserStatus
+                                  .where((e) => e.status == "ACTIVE")
+                                  .length ==
+                              4) {
+                            widget.game.playState = PlayState.playing;
+                          } else {
+                            widget.game.playState = PlayState.waiting;
+                          }
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          showErrorDialog(e.toString(), context);
+                        }
+                      },
+                    ),
+                  if (user.sessionId != null)
+                    _buildMenuButton(
+                      icon: Icons.exit_to_app,
+                      text: 'Exit Game',
+                      onTap: () async {
+                        try {
+                          // Show confirmation dialog
+                          final bool confirmExit = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Exit Game'),
+                                content: const Text(
+                                    'Are you sure you want to exit the current game?'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('Cancel'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: const Text('Exit'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          // If user doesn't confirm, return early
+                          if (!confirmExit) return;
+                          await ref
+                              .read(ludoSessionProvider.notifier)
+                              .exitSession();
+                          setState(() {});
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          showErrorDialog(e.toString(), context);
+                        }
+                      },
+                    ),
+                  if (user.sessionId == null)
+                    _buildMenuButton(
+                      icon: Icons.add,
+                      text: 'Create Room',
+                      onTap: () {
+                        createRoomDialog(
+                          ctx: context,
+                          game: widget.game,
+                        );
+                      },
+                    ),
+                  if (user.sessionId == null)
+                    _buildMenuButton(
+                      icon: Icons.group,
+                      text: 'Join Room',
+                      onTap: () {
+                        joinRoomDialog(
+                          ctx: context,
+                          game: widget.game,
+                        );
+                      },
+                    ),
+                  if (user.sessionId == null)
+                    _buildMenuButton(
+                      icon: Icons.casino,
+                      text: 'Open Sessions',
+                      onTap: () {
+                        openSessionDialog(
+                          ctx: context,
+                          game: widget.game,
+                        );
+                      },
+                    ),
+                  _buildMenuButton(
+                    icon: Icons.home,
+                    text: 'Back to Home',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

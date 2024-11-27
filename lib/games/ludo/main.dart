@@ -37,70 +37,52 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
   final LudoGame _game = LudoGame();
   final GlobalKey<RiverpodAwareGameWidgetState<LudoGame>> _gameWidgetKey =
       GlobalKey<RiverpodAwareGameWidgetState<LudoGame>>();
+@override
+Widget build(BuildContext context) {
+  ref.listen<PlayState>(
+    Provider((ref) => _game.playState), 
+    (previous, next) {
+      setState(() {});  
+    },
+  );
 
-  @override
-  Widget build(BuildContext context) {
-    ref.listen<PlayState>(
-      Provider((ref) => _game.playState), 
-      (previous, next) {
-        setState(() {});  
-      },
-    );
-
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: _game.buildTopBar(context),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        titleSpacing: 0,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xff0f1118),
-              Color(0xff1f2228),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: FittedBox(
-                      child: SizedBox(
-                        width: gameWidth,
-                        height: gameHeight,
-                        child: RiverpodAwareGameWidget<LudoGame>(
-                          key: _gameWidgetKey,
-                          game: _game,
-                          overlayBuilderMap: {
-                            PlayState.welcome.name: (context, game) =>
-                                LudoWelcomeScreen(game: game),
-                            PlayState.waiting.name: (context, game) =>
-                                WaitingRoomScreen(game: game),
-                            PlayState.finished.name: (context, game) =>
-                                MatchResultsScreen(
-                                  game: game,
-                                  session: ref.read(ludoSessionProvider)!,
-                                ),
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+  return Scaffold(
+    appBar: AppBar(
+      automaticallyImplyLeading: false,
+      title: _game.buildTopBar(context),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      titleSpacing: 0,
+    ),
+    body: Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xff0f1118),
+            Color(0xff1f2228),
+          ],
         ),
       ),
-    );
-  }
+      child: SafeArea(
+        child: RiverpodAwareGameWidget<LudoGame>(
+          key: _gameWidgetKey,
+          game: _game,
+          overlayBuilderMap: {
+            PlayState.welcome.name: (context, game) =>
+                LudoWelcomeScreen(game: game),
+            PlayState.waiting.name: (context, game) =>
+                WaitingRoomScreen(game: game),
+            PlayState.finished.name: (context, game) =>
+                MatchResultsScreen(
+                  game: game,
+                  session: ref.read(ludoSessionProvider)!,
+                ),
+          },
+        ),
+      ),
+    ),
+  );
+}
 }
