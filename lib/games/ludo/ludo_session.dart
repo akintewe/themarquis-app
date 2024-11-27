@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -303,6 +304,11 @@ class LudoSession extends _$LudoSession {
 
   Future<void> createSession(String amount, String color, String tokenAddress) async {
     final url = Uri.parse('$baseUrl/session/create');
+    log(jsonEncode({
+      'amount': amount,
+      'user_creator_color': color,
+      'token_address': tokenAddress,
+    }));
     final response = await http.post(
       url,
       body: jsonEncode({

@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
+import 'package:marquis_v2/games/ludo/screens/create_game_screen.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
@@ -97,75 +98,83 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                   padding: EdgeInsets.only(left: 69, right: 35, top: scaledHeight(25), bottom: scaledHeight(25)),
                   child: Column(
                     children: [
-                      if (user.sessionId != null)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: MenuButton(
-                              icon: Icons.play_arrow,
-                              label: 'Resume Game',
-                              onTap: () async {
-                                try {
-                                  ref.read(appStateProvider.notifier).selectGameSessionId("ludo", user.sessionId);
-                                  var session = ref.read(ludoSessionProvider);
-                                  if (session == null) {
-                                    await ref.read(ludoSessionProvider.notifier).getLudoSession();
-                                    session = ref.read(ludoSessionProvider);
+                      if (user.sessionId != null) ...[
+                        SizedBox(
+                          height: scaledHeight(64),
+                          child: FittedBox(
+                            child: MenuButton(
+                                icon: Icons.play_arrow,
+                                label: 'Resume Game',
+                                onTap: () async {
+                                  try {
+                                    ref.read(appStateProvider.notifier).selectGameSessionId("ludo", user.sessionId);
+                                    var session = ref.read(ludoSessionProvider);
+                                    if (session == null) {
+                                      await ref.read(ludoSessionProvider.notifier).getLudoSession();
+                                      session = ref.read(ludoSessionProvider);
+                                    }
+                                    if (session == null) return;
+                                    if (session.sessionUserStatus.where((e) => e.status == "ACTIVE").length == 4) {
+                                      widget.game.playState = PlayState.playing;
+                                    } else {
+                                      widget.game.playState = PlayState.waiting;
+                                    }
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+                                    showErrorDialog(e.toString(), context);
                                   }
-                                  if (session == null) return;
-                                  if (session.sessionUserStatus.where((e) => e.status == "ACTIVE").length == 4) {
-                                    widget.game.playState = PlayState.playing;
-                                  } else {
-                                    widget.game.playState = PlayState.waiting;
-                                  }
-                                } catch (e) {
-                                  if (!context.mounted) return;
-                                  showErrorDialog(e.toString(), context);
-                                }
-                              }),
+                                }),
+                          ),
                         ),
-                      if (user.sessionId != null)
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: MenuButton(
-                              icon: Icons.exit_to_app,
-                              label: 'Exit Game',
-                              onTap: () async {
-                                try {
-                                  // Show confirmation dialog
-                                  final bool confirmExit = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Exit Game'),
-                                        content: const Text('Are you sure you want to exit the current game?'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            child: const Text('Cancel'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop(false);
-                                            },
-                                          ),
-                                          TextButton(
-                                            child: const Text('Exit'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop(true);
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
+                        SizedBox(height: scaledHeight(20)),
+                      ],
+                      if (user.sessionId != null) ...[
+                        SizedBox(
+                          height: scaledHeight(64),
+                          child: FittedBox(
+                            child: MenuButton(
+                                icon: Icons.exit_to_app,
+                                label: 'Exit Game',
+                                onTap: () async {
+                                  try {
+                                    // Show confirmation dialog
+                                    final bool confirmExit = await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text('Exit Game'),
+                                          content: const Text('Are you sure you want to exit the current game?'),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              child: const Text('Cancel'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop(false);
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: const Text('Exit'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop(true);
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
 
-                                  // If user doesn't confirm, return early
-                                  if (!confirmExit) return;
-                                  await ref.read(ludoSessionProvider.notifier).exitSession();
-                                  setState(() {});
-                                } catch (e) {
-                                  if (!context.mounted) return;
-                                  showErrorDialog(e.toString(), context);
-                                }
-                              }),
+                                    // If user doesn't confirm, return early
+                                    if (!confirmExit) return;
+                                    await ref.read(ludoSessionProvider.notifier).exitSession();
+                                    setState(() {});
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+                                    showErrorDialog(e.toString(), context);
+                                  }
+                                }),
+                          ),
                         ),
+                        SizedBox(height: scaledHeight(20)),
+                      ],
                       if (user.sessionId == null) ...[
                         SizedBox(
                           height: scaledHeight(64),
@@ -253,16 +262,14 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
     );
   }
 
-  Future createRoomDialog({
-    required BuildContext ctx,
-    required LudoGame game,
-  }) {
-    return showDialog(
-      context: ctx,
-      builder: (BuildContext context) {
-        return CreateRoomDialog(game: game);
-      },
-    );
+  createRoomDialog({required BuildContext ctx, required LudoGame game}) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CreateGameScreen(), settings: RouteSettings(arguments: game)));
+    // return showDialog(
+    //   context: ctx,
+    //   builder: (BuildContext context) {
+    //     return CreateRoomDialog(game: game);
+    //   },
+    // );
   }
 }
 
@@ -820,9 +827,7 @@ class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
                           ),
                         ],
                       ),
-                      const SizedBox(
-                        height: 22,
-                      ),
+                      const SizedBox(height: 22),
                       const Text(
                         "Please Select Your Color",
                         style: TextStyle(
