@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
@@ -329,5 +330,88 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     canvas.restore();
   }
 
-  
+  @override
+  bool onTapUp(TapUpEvent event) {
+    // Only show invalid move message when it's not the player's turn
+    if (game.currentPlayer != game.userIndex) {
+      showInvalidMoveMessage();
+    }
+    return true;
+  }
+
+  void showInvalidMoveMessage() async {
+    // Remove existing messages
+    final existingMessages = game.children.whereType<CustomRectangleComponent>().toList();
+    for (final message in existingMessages) {
+      game.remove(message);
+    }
+
+    // Show invalid move message
+    final messageContainer = CustomRectangleComponent(
+      position: Vector2(game.size.x / 2, game.size.y - 170),
+      size: Vector2(500, 50),
+      anchor: Anchor.center,
+      color: const Color(0xFFFF4D4D),
+      borderRadius: 12,
+      children: [
+        SpriteComponent(
+          sprite: Sprite(game.images.fromCache('subway_error.png')),
+          position: Vector2(100, 25),
+          size: Vector2(24, 24),
+          anchor: Anchor.center,
+        ),
+        TextComponent(
+          text: 'Invalid move! You cannot place a pin here',
+          position: Vector2(130, 25),
+          anchor: Anchor.centerLeft,
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    game.add(messageContainer);
+
+    // After 2 seconds, remove invalid message and restore original
+    await Future.delayed(const Duration(seconds: 2));
+    game.remove(messageContainer);
+
+    // Only show original message if it's still not player's turn
+    if (game.currentPlayer != game.userIndex) {
+      final originalMessage = CustomRectangleComponent(
+        position: Vector2(game.size.x / 2, game.size.y - 170),
+        size: Vector2(500, 50),
+        anchor: Anchor.center,
+        color: const Color(0xFF1A3B44),
+        borderRadius: 12,
+        children: [
+          SpriteComponent(
+            sprite: Sprite(game.images.fromCache('dice_icon.png')),
+            position: Vector2(100, 25),
+            size: Vector2(24, 24),
+            anchor: Anchor.center,
+          ),
+          TextComponent(
+            text: 'No tokens available to move. Roll a 6 to start!',
+            position: Vector2(130, 25),
+            anchor: Anchor.centerLeft,
+            textRenderer: TextPaint(
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      );
+
+      game.add(originalMessage);
+    }
+  }
 }

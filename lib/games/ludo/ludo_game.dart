@@ -616,6 +616,55 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
     return GameTopBar(game: this);
   }
+
+  Future<void> showGameMessage({
+    required String message,
+    Color backgroundColor = const Color(0xFF1A3B44),
+    int durationSeconds = 3,
+  }) async {
+    // Remove existing message container
+    children.whereType<CustomRectangleComponent>().forEach((container) {
+      remove(container);
+    });
+
+    final messageContainer = CustomRectangleComponent(
+      position: Vector2(size.x / 2, size.y - 170),
+      size: Vector2(500, 50),
+      anchor: Anchor.center,
+      color: backgroundColor,
+      borderRadius: 12,
+      children: [
+        SpriteComponent(
+          sprite: await Sprite.load('dice_icon.png'),
+          position: Vector2(100, 25),
+          size: Vector2(24, 24),
+          anchor: Anchor.center,
+        ),
+        TextComponent(
+          text: message,
+          position: Vector2(130, 25),
+          anchor: Anchor.centerLeft,
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+    
+    await add(messageContainer);
+
+    if (durationSeconds > 0) {
+      Future.delayed(Duration(seconds: durationSeconds), () {
+        if (contains(messageContainer)) {
+          remove(messageContainer);
+        }
+      });
+    }
+  }
 }
 
 // Custom Rectangle Component with rounded corners
