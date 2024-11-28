@@ -231,7 +231,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                 offset: Offset(0, 6),
                 child: Container(
                   width: 280,
-                  height: 80,
+                  height: 75,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.centerLeft,
@@ -253,7 +253,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                         child: Text(
                           text,
                           style: const TextStyle(
-                            color: Color(0xFF00ECFF),
+                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),

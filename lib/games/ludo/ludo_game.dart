@@ -398,9 +398,25 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     print("rollDice called, playerCanMove: $playerCanMove");
     if (playerCanMove) return;
     
+    // Show animated dice dialog
+    if (buildContext != null && buildContext!.mounted) {
+      await showDialog(
+        context: buildContext!,
+        barrierDismissible: false,
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          child: SizedBox(
+            width: 120,
+            height: 120,
+            child: DiceAnimationWidget(),
+          ),
+        ),
+      );
+    }
+
     print("Rolling dice...");
     await diceContainer.currentDice.roll();
-    playState = PlayState.finished;
+    // playState = PlayState.finished;
     
     if (playState == PlayState.finished) {
       if (buildContext != null && buildContext!.mounted) {
@@ -632,5 +648,60 @@ class CustomRectangleComponent extends PositionComponent {
       Paint()..color = color,
     );
     super.render(canvas);
+  }
+}
+
+// Add this new widget class
+class DiceAnimationWidget extends StatefulWidget {
+  @override
+  _DiceAnimationWidgetState createState() => _DiceAnimationWidgetState();
+}
+
+class _DiceAnimationWidgetState extends State<DiceAnimationWidget> 
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late int currentDiceFace = 1;
+  final List<int> diceSequence = [1, 2, 3, 4, 5, 6];
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _controller.addListener(() {
+      // Change dice face every ~166ms (1000ms / 6 faces)
+      setState(() {
+        currentDiceFace = diceSequence[
+          (_controller.value * 6).floor() % 6
+        ];
+      });
+    });
+
+    // Start animation and close dialog when done
+    _controller.repeat();
+    Future.delayed(const Duration(seconds: 2), () {
+      _controller.stop();
+      Navigator.of(context).pop();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Image.asset(
+        'assets/images/dice_$currentDiceFace.png', // Adjust path based on your assets
+        width: 80,
+        height: 80,
+      ),
+    );
   }
 }
