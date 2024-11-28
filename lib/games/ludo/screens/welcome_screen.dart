@@ -12,9 +12,9 @@ import 'package:marquis_v2/games/ludo/screens/create_game_screen.dart';
 import 'package:marquis_v2/games/ludo/widgets/pin_color_option.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
+import 'package:marquis_v2/widgets/balance_appbar.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
-import 'package:marquis_v2/widgets/user_points_widget.dart';
 
 class LudoWelcomeScreen extends ConsumerStatefulWidget {
   const LudoWelcomeScreen({super.key, required this.game});
@@ -64,7 +64,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
 
             return Column(
               children: [
-                const UserPointsWidget(),
+                const BalanceAppBar(),
                 SizedBox(height: scaledHeight(8)),
                 Flexible(
                   child: Container(

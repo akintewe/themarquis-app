@@ -10,8 +10,8 @@ import 'package:marquis_v2/games/ludo/widgets/radio_option.dart';
 import 'package:marquis_v2/games/ludo/widgets/stepper_option_card.dart';
 import 'package:marquis_v2/games/ludo/widgets/vertical_stepper.dart';
 import 'package:marquis_v2/providers/user.dart';
+import 'package:marquis_v2/widgets/balance_appbar.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
-import 'package:marquis_v2/widgets/user_points_widget.dart';
 
 enum NumberOfPlayers {
   two,
@@ -109,7 +109,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const UserPointsWidget(),
+        title: const BalanceAppBar(),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

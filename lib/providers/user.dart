@@ -11,14 +11,16 @@ import 'package:http/http.dart' as http;
 
 part "user.g.dart";
 
-final baseUrl = environment['build'] == 'DEBUG'
-    ? environment['apiUrlDebug']
-    : environment['apiUrl'];
+final baseUrl = environment['build'] == 'DEBUG' ? environment['apiUrlDebug'] : environment['apiUrl'];
 
 @Riverpod(keepAlive: true)
 class User extends _$User {
   //Details Declaration
   Box<UserData>? _hiveBox;
+
+  bool _isBalanceVisible = false;
+
+  bool get isBalanceVisible => _isBalanceVisible;
 
   @override
   UserData? build() {
@@ -30,14 +32,10 @@ class User extends _$User {
     final url = Uri.parse('$baseUrl/user/info');
     final response = await http.get(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': ref.read(appStateProvider).bearerToken
-      },
+      headers: {'Content-Type': 'application/json', 'Authorization': ref.read(appStateProvider).bearerToken},
     );
     if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     final user = UserData(
@@ -50,10 +48,8 @@ class User extends _$User {
       referralId: decodedResponse['user']['referral_id'],
       walletId: decodedResponse['user']['wallet_id'],
       profileImageUrl: decodedResponse['user']['profile_image_url'],
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-          decodedResponse['user']['created_at'] * 1000),
-      updatedAt: DateTime.fromMicrosecondsSinceEpoch(
-          decodedResponse['user']['updated_at'] * 1000),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(decodedResponse['user']['created_at'] * 1000),
+      updatedAt: DateTime.fromMicrosecondsSinceEpoch(decodedResponse['user']['updated_at'] * 1000),
       referralCode: decodedResponse['referral_code'],
       accountAddress: decodedResponse['account_address'],
       sessionId: decodedResponse['session_id'],
@@ -101,18 +97,13 @@ class User extends _$User {
     final url = Uri.parse('$baseUrl/game/supported-tokens');
     final response = await http.get(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': ref.read(appStateProvider).bearerToken
-      },
+      headers: {'Content-Type': 'application/json', 'Authorization': ref.read(appStateProvider).bearerToken},
     );
     if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final List<Map<String, String>> results = [];
-    final decodedResponse =
-        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
     for (var e in decodedResponse) {
       results.add({
         'tokenAddress': e['address'],
@@ -124,20 +115,20 @@ class User extends _$User {
 
   Future<BigInt> getTokenBalance(String tokenAddress) async {
     if (state == null) return BigInt.from(0);
-    final url = Uri.parse(
-        '$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
+    final url = Uri.parse('$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
     final response = await http.get(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': ref.read(appStateProvider).bearerToken
-      },
+      headers: {'Content-Type': 'application/json', 'Authorization': ref.read(appStateProvider).bearerToken},
     );
     if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     return BigInt.parse(decodedResponse['balance']);
+  }
+
+  void toggleBalanceVisibility() {
+    _isBalanceVisible = !_isBalanceVisible;
+    ref.notifyListeners();
   }
 }
