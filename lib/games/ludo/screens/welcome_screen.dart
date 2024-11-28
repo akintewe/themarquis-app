@@ -9,9 +9,11 @@ import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/screens/create_game_screen.dart';
+import 'package:marquis_v2/games/ludo/widgets/pin_color_option.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
+import 'package:marquis_v2/widgets/ui_widgets.dart';
 import 'package:marquis_v2/widgets/user_points_widget.dart';
 
 class LudoWelcomeScreen extends ConsumerStatefulWidget {
@@ -572,7 +574,7 @@ class OpenSessionRoomCard extends StatelessWidget {
             : sessionData.playToken == "ETH"
                 ? const Color(0xFF7531F4)
                 : const Color(0xFF404040);
-    final roomStake = sessionData.playAmount == '0' ? "Free" : "${sessionData.playAmount} ${sessionData.playToken}";
+
     return Theme(
       data: Theme.of(context).copyWith(textTheme: GoogleFonts.orbitronTextTheme()),
       child: Container(
@@ -588,10 +590,27 @@ class OpenSessionRoomCard extends StatelessWidget {
                   children: [
                     Text("ROOM $roomName", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white)),
                     const SizedBox(width: 4),
-                    Container(
-                      decoration: BoxDecoration(border: Border.all(color: roomColor), borderRadius: BorderRadius.circular(30)),
-                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      child: Text(roomStake, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white)),
+                    Consumer(
+                      builder: (context, ref, child) {
+                        return FutureBuilder(
+                            future: ref.read(userProvider.notifier).getSupportedTokens(),
+                            builder: (context, snapshot) {
+                              final supportedTokens = <String, String>{};
+                              if (snapshot.hasData) {
+                                for (var item in snapshot.data!) {
+                                  supportedTokens.addAll({item["tokenAddress"]!: item["tokenName"]!});
+                                }
+                              }
+                              final roomStake = sessionData.playAmount == '0'
+                                  ? "Free"
+                                  : "${(double.parse(sessionData.playAmount) / 1e18).toStringAsFixed(5)} ${supportedTokens[sessionData.playToken]}";
+                              return Container(
+                                decoration: BoxDecoration(border: Border.all(color: roomColor), borderRadius: BorderRadius.circular(30)),
+                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                child: Text(roomStake, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white)),
+                              );
+                            });
+                      },
                     ),
                   ],
                 ),
@@ -1209,7 +1228,7 @@ class FindGameChooseColorDialog extends ConsumerStatefulWidget {
 }
 
 class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorDialog> {
-  final String _selectedColor = "";
+  String _selectedColor = "";
   bool isLoading = false;
   // BigInt? _tokenBalance;
   // final BigInt _sliderValue = BigInt.from(0);
@@ -1227,6 +1246,12 @@ class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorD
               : const Color(0xFF404040);
   late final roomStake = widget.selectedSession.playAmount == '0' ? "Free" : "${widget.selectedSession.playAmount} ${widget.selectedSession.playToken}";
 
+  void _selectColor(String color) {
+    setState(() {
+      _selectedColor = color;
+    });
+  }
+
   Future<void> joinGame() async {
     try {
       setState(() {
@@ -1236,7 +1261,8 @@ class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorD
         showErrorDialog("Please select a color", context);
         return;
       }
-      await ref.read(ludoSessionProvider.notifier).joinSession(widget.roomId, _selectedColor);
+      final color = _selectedColor.split("/").last.split(".").first.split("_").first;
+      await ref.read(ludoSessionProvider.notifier).joinSession(widget.roomId, color);
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
@@ -1295,7 +1321,70 @@ class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorD
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       for (int i = 0; i < noOfPlayers; i++) PlayerAvatarCard(index: i, size: 55, color: colors[i]),
-                      for (int i = 0; i < 4 - noOfPlayers; i++) const PlayerEmptyCard(size: 55),
+                      if (!widget.selectedSession.notAvailableColors.contains('green')) ...[
+                        SizedBox.square(
+                          dimension: 55,
+                          child: PinColorOption(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Color(0xFF005C30), Color(0x730C3823), Color(0xFF005C30)],
+                            ),
+                            svgPath: 'assets/svg/chess-and-bg/green_chess.svg',
+                            selectedPinColor: _selectedColor,
+                            onTap: _selectColor,
+                          ),
+                        ),
+                        horizontalSpace(8),
+                      ],
+                      if (!widget.selectedSession.notAvailableColors.contains('blue')) ...[
+                        SizedBox.square(
+                          dimension: 55,
+                          child: PinColorOption(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Color(0xC700CEDB), Color(0x73145559), Color(0x9E00CEDB)],
+                            ),
+                            svgPath: 'assets/svg/chess-and-bg/blue_chess.svg',
+                            selectedPinColor: _selectedColor,
+                            onTap: _selectColor,
+                          ),
+                        ),
+                        horizontalSpace(8),
+                      ],
+                      if (!widget.selectedSession.notAvailableColors.contains('red')) ...[
+                        SizedBox.square(
+                          dimension: 55,
+                          child: PinColorOption(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Color(0xC7DB0000), Color(0x73591414), Color(0x9EDB0000)],
+                            ),
+                            svgPath: 'assets/svg/chess-and-bg/red_chess.svg',
+                            selectedPinColor: _selectedColor,
+                            onTap: _selectColor,
+                          ),
+                        ),
+                        horizontalSpace(8),
+                      ],
+                      if (!widget.selectedSession.notAvailableColors.contains('yellow')) ...[
+                        SizedBox.square(
+                          dimension: 55,
+                          child: PinColorOption(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Color(0xC7DBD200), Color(0x73595214), Color(0x9EDBD200)],
+                            ),
+                            svgPath: 'assets/svg/chess-and-bg/yellow_chess.svg',
+                            selectedPinColor: _selectedColor,
+                            onTap: _selectColor,
+                          ),
+                        ),
+                        horizontalSpace(8),
+                      ],
                     ],
                   )
                 ],
@@ -1325,7 +1414,7 @@ class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorD
                         backgroundColor: const Color(0xFF00ECFF),
                         disabledBackgroundColor: const Color(0xFF00ECFF).withOpacity(0.5),
                       ),
-                      child: const Text("Join"),
+                      child: isLoading ? const CircularProgressIndicator() : const Text("Join"),
                     ),
                   ),
                 ],
