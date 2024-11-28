@@ -5,7 +5,6 @@ import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/screens/game_over_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/waiting_room/four_player_waiting_room_screen.dart';
-import 'package:marquis_v2/games/ludo/screens/waiting_room/three_player_waiting_room_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/waiting_room/two_player_waiting_room_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/welcome_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/waiting_room_screen.dart';
@@ -82,7 +81,7 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                             //   subtitle: 'Please join a session',
                             // ),
                             PlayState.waiting.name: (context, game) =>
-                                 FourPlayerWaitingRoomScreen(
+                                 TwoPlayerWaitingRoomScreen(
                                   game: game,
                                 ),
                             PlayState.finished.name: (context, game) =>

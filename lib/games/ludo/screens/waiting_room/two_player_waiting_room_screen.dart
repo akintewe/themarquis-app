@@ -146,7 +146,7 @@ class _TwoPlayerWaitingRoomScreenState
           ),
           const SizedBox(width: 20),
           if (session.sessionUserStatus.length > 1) _invitePlayer(session),
-          if (session.sessionUserStatus.length == 2)
+          if (session.sessionUserStatus.length == 1)
             playerAvatarCard(
               index: 3,
               size: 85,
@@ -260,7 +260,7 @@ class _TwoPlayerWaitingRoomScreenState
                     children: [
                       // SizedBox(width: 96),
                       ...List.generate(
-                        4,
+                        2,
                         (index) => Container(
                           width: 108,
                           margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -752,3 +752,5 @@ class _TwoPlayerWaitingRoomScreenState
             2;
   }
 }
+
+
