@@ -268,7 +268,7 @@ class _ThreePlayerWaitingRoomScreenState
                     children: [
                       // SizedBox(width: 96),
                       ...List.generate(
-                        4,
+                        3,
                         (index) => Container(
                           width: 108,
                           margin: const EdgeInsets.symmetric(horizontal: 10),
