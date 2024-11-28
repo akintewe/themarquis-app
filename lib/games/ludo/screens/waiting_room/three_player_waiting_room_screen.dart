@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -11,27 +9,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gal/gal.dart';
-import 'package:marquis_v2/games/ludo/components/string_validation.dart';
+import 'package:marquis_v2/games/ludo/components/cut_edge_container.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
-import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
-import 'package:marquis_v2/games/ludo/widgets/divider_shape.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class TwoPlayerWaitingRoomScreen extends ConsumerStatefulWidget {
-  const TwoPlayerWaitingRoomScreen({super.key, required this.game});
+class ThreePlayerWaitingRoomScreen extends ConsumerStatefulWidget {
+  const ThreePlayerWaitingRoomScreen({super.key, required this.game});
   final LudoGame game;
 
   @override
-  ConsumerState<TwoPlayerWaitingRoomScreen> createState() =>
-      _TwoPlayerWaitingRoomScreenState();
+  ConsumerState<ThreePlayerWaitingRoomScreen> createState() =>
+      _ThreePlayerWaitingRoomScreenState();
 }
 
-class _TwoPlayerWaitingRoomScreenState
-    extends ConsumerState<TwoPlayerWaitingRoomScreen> {
+class _ThreePlayerWaitingRoomScreenState
+    extends ConsumerState<ThreePlayerWaitingRoomScreen> {
   Timer? _countdownTimer;
   int _countdown = 15;
 
@@ -59,26 +55,36 @@ class _TwoPlayerWaitingRoomScreenState
   Widget build(BuildContext context) {
     final session = ref.watch(ludoSessionProvider);
     if (_isRoomFull(session) && _countdownTimer == null) _startCountdown();
+    final deviceSize = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.black,
       body: session == null
           ? const Center(child: Text('No Data'))
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _waitingRoomTopBar(),
-                const SizedBox(height: 76),
-                _roomID(session),
-                // const SizedBox(height: 20),
-                // _starkTonMenu(),
-                const SizedBox(height: 32),
-                _players(),
-                const SizedBox(height: 20),
-                _playesrDetailsList(session),
-                const Spacer(),
-                _bottom(session),
-                const SizedBox(height: 62),
-              ],
+          : Transform.scale(
+              scale: widget.game.height / deviceSize.height,
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width:
+                    deviceSize.height * widget.game.width / widget.game.height,
+                height: deviceSize.height,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _waitingRoomTopBar(),
+                    const SizedBox(height: 59),
+                    _roomID(session),
+                    // const SizedBox(height: 20),
+                    // _starkTonMenu(),
+                    const SizedBox(height: 32),
+                    _players(),
+                    const SizedBox(height: 20),
+                    _playesrDetailsList(session),
+                    const Spacer(),
+                    _bottom(session),
+                    const SizedBox(height: 62),
+                  ],
+                ),
+              ),
             ),
     );
   }
@@ -124,26 +130,37 @@ class _TwoPlayerWaitingRoomScreenState
 
   Widget _playesrDetailsList(LudoSessionData session) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 120),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           playerAvatarCard(
             index: 0,
-            size: 72,
+            size: 85,
             isSelf: false,
             player: session.sessionUserStatus[0],
             color: session.getListOfColors[0],
             showText: true,
           ),
-          if (session.sessionUserStatus.length > 1) _invitePlayer(session),
-          if (session.sessionUserStatus.length == session.sessionUserStatus[2])
+          for (int i = 1; i < session.sessionUserStatus.length && i < 2; i++)
+            playerAvatarCard(
+              index: i,
+              size: 85,
+              isSelf: false,
+              player: session.sessionUserStatus[i],
+              color: session.getListOfColors[i],
+              showText: true,
+            ),
+          if (session.sessionUserStatus.length > 1 ||
+              session.sessionUserStatus.length > 2)
+            _invitePlayer(session),
+          if (session.sessionUserStatus.length == 3)
             playerAvatarCard(
               index: 3,
-              size: 72,
+              size: 85,
               isSelf: false,
-              player: session.sessionUserStatus[2],
-              color: session.getListOfColors[2],
+              player: session.sessionUserStatus[3],
+              color: session.getListOfColors[3],
               showText: true,
             ),
         ],
@@ -199,7 +216,7 @@ class _TwoPlayerWaitingRoomScreenState
         ),
         if (showText) const SizedBox(height: 10),
         Text(
-          player.email.split("@").first.truncate(5),
+          player.email.split("@").first,
           style: const TextStyle(
             fontSize: 14,
             color: Colors.white,
@@ -369,150 +386,74 @@ class _TwoPlayerWaitingRoomScreenState
               children: [
                 Image.memory(imageBytes),
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.all(16.0),
                   child: Row(
-                    // mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 36,
-                            width: 36,
-                            child: IconButton.filled(
-                              color: Colors.white,
-                              iconSize: 20,
-                              onPressed: () async {
-                                final tweetText =
-                                    'Join my Ludo Session\nRoom Id: ${session.id}';
-                                final url =
-                                    'https://themarquis.xyz/ludo?roomid=${session.id}';
+                      IconButton.filled(
+                        onPressed: () async {
+                          final tweetText =
+                              'Join my Ludo Session\nRoom Id: ${session.id}';
+                          final url =
+                              'https://themarquis.xyz/ludo?roomid=${session.id}';
 
-                                // Use the Twitter app's URL scheme
-                                final tweetUrl = Uri.encodeFull(
-                                    'twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
+                          // Use the Twitter app's URL scheme
+                          final tweetUrl = Uri.encodeFull(
+                              'twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
 
-                                // Fallback to web URL if the app isn't installed
-                                final webTweetUrl = Uri.encodeFull(
-                                    'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz&image=data:image/png;base64,${base64Encode(imageBytes)}');
-                                if (await canLaunchUrl(Uri.parse(tweetUrl))) {
-                                  await launchUrl(Uri.parse(tweetUrl));
-                                } else {
-                                  await launchUrl(Uri.parse(webTweetUrl));
-                                }
-                              },
-                              icon: const Icon(FontAwesomeIcons.xTwitter),
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            "X",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                          // Fallback to web URL if the app isn't installed
+                          final webTweetUrl = Uri.encodeFull(
+                              'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz&image=data:image/png;base64,${base64Encode(imageBytes)}');
+                          if (await canLaunchUrl(Uri.parse(tweetUrl))) {
+                            await launchUrl(Uri.parse(tweetUrl));
+                          } else {
+                            await launchUrl(Uri.parse(webTweetUrl));
+                          }
+                        },
+                        icon: const Icon(FontAwesomeIcons.xTwitter),
                       ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 36,
-                            width: 36,
-                            child: IconButton.filled(
-                              iconSize: 20,
-                              color: Colors.white,
-                              onPressed: () async {
-                                Clipboard.setData(ClipboardData(
-                                    text:
-                                        "https://themarquis.xyz/ludo?roomid=${session.id}"));
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Link Copied to Clipboard'),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(FontAwesomeIcons.link),
+                      IconButton.filled(
+                        onPressed: () async {
+                          Clipboard.setData(ClipboardData(
+                              text:
+                                  "https://themarquis.xyz/ludo?roomid=${session.id}"));
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Link Copied to Clipboard'),
+                              duration: Duration(seconds: 2),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Copy Link",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                          );
+                        },
+                        icon: const Icon(FontAwesomeIcons.link),
                       ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 36,
-                            width: 36,
-                            child: IconButton.filled(
-                              iconSize: 20,
-                              color: Colors.white,
-                              onPressed: () async {
-                                await Gal.putImageBytes(qrImageBytes);
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Image successfully saved to gallery'),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.qr_code),
+                      IconButton.filled(
+                        onPressed: () async {
+                          await Gal.putImageBytes(qrImageBytes);
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Image successfully saved to gallery'),
+                              duration: Duration(seconds: 2),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Download QR",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                          );
+                        },
+                        icon: const Icon(Icons.qr_code),
                       ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 36,
-                            width: 36,
-                            child: IconButton.filled(
-                              iconSize: 20,
-                              color: Colors.white,
-                              onPressed: () {
-                                Share.shareXFiles(
-                                    [
-                                      XFile.fromData(imageBytes,
-                                          mimeType: 'image/png')
-                                    ],
-                                    subject: 'Ludo Invite',
-                                    text: 'I am playing Ludo, please join us!',
-                                    fileNameOverrides: ['share.png']);
-                              },
-                              icon: const Icon(Icons.share),
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Share",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                      IconButton.filled(
+                        onPressed: () {
+                          Share.shareXFiles(
+                              [
+                                XFile.fromData(imageBytes,
+                                    mimeType: 'image/png')
+                              ],
+                              subject: 'Ludo Invite',
+                              text: 'I am playing Ludo, please join us!',
+                              fileNameOverrides: ['share.png']);
+                        },
+                        icon: const Icon(Icons.share),
                       ),
                     ],
                   ),
@@ -525,8 +466,8 @@ class _TwoPlayerWaitingRoomScreenState
       child: Column(
         children: [
           Container(
-            height: 72,
-            width: 72,
+            height: 85,
+            width: 85,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
@@ -543,7 +484,7 @@ class _TwoPlayerWaitingRoomScreenState
           ),
           const SizedBox(height: 10),
           Container(
-            height: 24,
+            height: 25,
             width: 74,
             decoration: BoxDecoration(
                 color: const Color(0XFF00ECFF),
@@ -632,52 +573,35 @@ class _TwoPlayerWaitingRoomScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _gradientContainer(),
+          Container(
+            height: 38,
+            width: 130,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0XFF00ECFF).withOpacity(0.6),
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text(
+                'Players',
+                style: TextStyle(
+                  fontSize: 17,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
           const Divider(
             thickness: 2,
             color: Color(0XFF00ECFF),
             height: 2,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _gradientContainer() {
-    return Container(
-      height: 28,
-      width: 110,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: const Color(0xFF00ECFF),
-        ),
-        gradient: RadialGradient(
-            colors: [Colors.transparent, Color(0xFF00ECFF).withOpacity(0.9)],
-            radius: 1.7),
-      ),
-      clipBehavior: Clip.antiAlias,
-      alignment: Alignment.center,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        width: 130,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF00ECFF).withOpacity(0.6),
-              Colors.transparent,
-              Color(0xFF00ECFF).withOpacity(0.6),
-            ],
-            stops: [0.05, 0.4, 1],
-          ),
-        ),
-        alignment: Alignment.center,
-        child: const Text(
-          'Players',
-          style: TextStyle(
-              fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
-        ),
       ),
     );
   }
@@ -756,9 +680,9 @@ class _TwoPlayerWaitingRoomScreenState
       children: [
         Center(
           child: Text(
-            'Room ID',
+            session.id.toString(),
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 20,
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
@@ -766,14 +690,14 @@ class _TwoPlayerWaitingRoomScreenState
         ),
         const SizedBox(height: 10),
         Container(
-          height: 30,
-          width: 97,
+          height: 40,
+          width: 130,
           color: Colors.grey.withOpacity(0.3),
-          child: Center(
+          child: const Center(
             child: Text(
-              session.id.toString(),
+              "A028",
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 20,
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
@@ -788,46 +712,44 @@ class _TwoPlayerWaitingRoomScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 30),
+        const SizedBox(height: 90),
         Padding(
-          padding: const EdgeInsets.only(right: 10, bottom: 5),
+          padding: const EdgeInsets.only(left: 27, right: 7),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              GestureDetector(
-                onTap: Navigator.of(context).pop,
-                child: Container(
-                  decoration: ShapeDecoration(
-                      color: Colors.white, shape: ChevronBorder()),
-                  padding: const EdgeInsets.only(
-                      top: 2, left: 8, bottom: 1, right: 31),
-                  child:
-                      const Text('MENU', style: TextStyle(color: Colors.black)),
+              const Text(
+                "WAITING ROOM",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
                 ),
+              ),
+              Stack(
+                children: [
+                  SvgPicture.asset(
+                    'assets/svg/card.svg',
+                    width: 100,
+                    height: 25,
+                  ),
+                  const Positioned(
+                    left: 8,
+                    child: Text(
+                      "MENU",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        Container(
-          height: 10,
-          decoration: const ShapeDecoration(
-            color: Color(0xFF00ECFF),
-            shape: DividerShape(
-              Color(0xFF00ECFF),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 24),
-          child: const Text(
-            "wAITING ROOM",
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.white,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ),
+        const CutEdgesContainer(),
       ],
     );
   }
@@ -835,6 +757,6 @@ class _TwoPlayerWaitingRoomScreenState
   bool _isRoomFull(LudoSessionData? session) {
     return session != null &&
         session.sessionUserStatus.where((e) => e.status == "ACTIVE").length ==
-            2;
+            3;
   }
 }

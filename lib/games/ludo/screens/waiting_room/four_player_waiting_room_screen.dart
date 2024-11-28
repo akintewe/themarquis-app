@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -9,7 +11,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gal/gal.dart';
-import 'package:marquis_v2/games/ludo/components/cut_edge_container.dart';
 import 'package:marquis_v2/games/ludo/components/string_validation.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
@@ -58,7 +59,6 @@ class _FourPlayerWaitingRoomScreenState
   Widget build(BuildContext context) {
     final session = ref.watch(ludoSessionProvider);
     if (_isRoomFull(session) && _countdownTimer == null) _startCountdown();
-    final deviceSize = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.black,
       body: session == null
@@ -390,7 +390,7 @@ class _FourPlayerWaitingRoomScreenState
                     children: [
                       Column(
                         children: [
-                          Container(
+                          SizedBox(
                             height: 36,
                             width: 36,
                             child: IconButton.filled(
