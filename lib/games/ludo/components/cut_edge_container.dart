@@ -5,33 +5,32 @@ class CutEdgesContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Stack(
-        alignment: Alignment.topLeft,
-        children: [
-          SizedBox(
-            height: 15,
-            width: MediaQuery.of(context).size.width,
+    return Stack(
+      alignment: Alignment.topLeft,
+      children: [
+        SizedBox(
+          height: 20,
+          width: MediaQuery.of(context).size.width,
+        ),
+        ClipPath(
+          clipper: BottomHalfClipper(),
+          child: Container(
+            height: 20,
+            width: 270,
+            color: const Color(0XFF00ECFF),
           ),
-          ClipPath(
-            clipper: BottomHalfClipper(),
-            child: Container(
-              height: 15,
-              width: 217,
-              color: const Color(0XFF00ECFF),
-            ),
+        ),
+        Positioned(
+          top: 10,
+          left: 260,
+          child: 
+          Container(
+            height: 1,
+            width: MediaQuery.of(context).size.width - 260,
+            color: const Color(0XFF00ECFF),
           ),
-          Positioned(
-            top: 7.5,
-            left: 213,
-            child: Container(
-              height: 1,
-              width: MediaQuery.of(context).size.width - 217,
-              color: const Color(0XFF00ECFF),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
