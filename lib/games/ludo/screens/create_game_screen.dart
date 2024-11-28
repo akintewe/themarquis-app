@@ -382,7 +382,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                       ),
                                       const SizedBox(height: 8),
                                       FutureBuilder(
-                                        future: _selectedTokenAddress == null || (_selectedTokenAmount ?? 0) > 0
+                                        future: _selectedTokenAddress == null || ((_selectedTokenAmount ?? 0)) > 0
                                             ? null
                                             : ref.read(userProvider.notifier).getTokenBalance(_selectedTokenAddress!),
                                         builder: (context, snapshot) {
@@ -394,7 +394,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                 min: 0,
                                                 divisions: 100,
                                                 activeColor: Colors.white,
-                                                label: '${_selectedTokenAmount! / 1e18}',
+                                                label: ((_selectedTokenAmount ?? 0) / 1e18).toStringAsFixed(7),
                                                 secondaryActiveColor: Colors.cyan,
                                                 allowedInteraction: SliderInteraction.slideThumb,
                                                 max: snapshot.data?.toDouble() ?? 0,
@@ -411,7 +411,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                       SizedBox(
                                                         width: 60,
                                                         child: Text(
-                                                          '$_selectedTokenAmount',
+                                                          ((_selectedTokenAmount ?? 0) / 1e18).toStringAsFixed(7),
                                                           style: const TextStyle(fontSize: 10, color: Color(0xFFFFFFFF), fontWeight: FontWeight.w400),
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
@@ -433,7 +433,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                           SizedBox(
                                                             width: 60,
                                                             child: Text(
-                                                              '${snapshot.data!.toDouble() / 1e18}',
+                                                              ((snapshot.data?.toDouble() ?? 0) / 1e18).toStringAsFixed(7),
                                                               style: const TextStyle(fontSize: 10, color: Color(0xFFFFFFFF), fontWeight: FontWeight.w400),
                                                               maxLines: 1,
                                                               overflow: TextOverflow.ellipsis,
@@ -456,7 +456,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                             ),
                           ),
                           StepperOptionCard(
-                            isEnabled: _gameMode == GameMode.free || ((_selectedTokenAddress?.isNotEmpty ?? false) && ((_selectedTokenAmount ?? 0) > 0)),
+                            isEnabled: _gameMode == GameMode.free || ((_selectedTokenAddress?.isNotEmpty ?? false) && (((_selectedTokenAmount ?? 0)) > 0)),
                             cardIndex: 3,
                             activeCardIndex: _activeTab,
                             child: Padding(
