@@ -251,7 +251,7 @@ class _TwoPlayerWaitingRoomScreenState
                     children: [
                       // SizedBox(width: 96),
                       ...List.generate(
-                        4,
+                        2,
                         (index) => Container(
                           width: 108,
                           margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -838,3 +838,5 @@ class _TwoPlayerWaitingRoomScreenState
             2;
   }
 }
+
+
