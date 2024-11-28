@@ -18,10 +18,6 @@ class User extends _$User {
   //Details Declaration
   Box<UserData>? _hiveBox;
 
-  bool _isBalanceVisible = false;
-
-  bool get isBalanceVisible => _isBalanceVisible;
-
   @override
   UserData? build() {
     _hiveBox ??= Hive.box<UserData>("user");
@@ -125,10 +121,5 @@ class User extends _$User {
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     return BigInt.parse(decodedResponse['balance']);
-  }
-
-  void toggleBalanceVisibility() {
-    _isBalanceVisible = !_isBalanceVisible;
-    ref.notifyListeners();
   }
 }
