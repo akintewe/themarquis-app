@@ -34,7 +34,7 @@ class RadioOption<T> extends StatelessWidget {
 
   bool get _isActive => _globalValue == _value && _value != null;
 
-  Color get _backgroundColor => _isActive ? _selectedBackgroundColor : _unSelectedBackgroundColor;
+  // Color get _backgroundColor => _isActive ? _selectedBackgroundColor : _unSelectedBackgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class RadioOption<T> extends StatelessWidget {
         width: _width,
         padding: _padding,
         decoration: BoxDecoration(
-          color: _backgroundColor,
+          // color: _backgroundColor,
           border: _isActive ? null : Border.all(color: _borderColor),
           boxShadow: [if (_isActive && _activeShadow != null) _activeShadow],
           borderRadius: BorderRadius.circular(8),

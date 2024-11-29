@@ -87,15 +87,9 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
   }
 
   void _switchToPreviousTab() {
-    if (_playerColor == null) {
-      setState(() {
-        _activeTab -= 1;
-      });
-    } else {
-      setState(() {
-        _playerColor = null;
-      });
-    }
+    setState(() {
+      _activeTab -= 1;
+    });
   }
 
   bool get _isNextEnabled {
@@ -171,14 +165,13 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                 height: scaledHeight(10),
                 decoration: const ShapeDecoration(color: Color(0xFF00ECFF), shape: DividerShape(Color(0xFF00ECFF))),
               ),
-              SizedBox(height: _activeTab == _numberOfTabs - 1 ? 31 : 21),
+              SizedBox(height: _activeTab == _numberOfTabs ? 31 : 21),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if ((_activeTab != _numberOfTabs - 1 && _playerColor == null) ||
-                        ((((_activeTab == 2 && _gameMode == GameMode.free) || _activeTab == 3) && _playerColor == null))) ...[
+                    if (_activeTab != _numberOfTabs) ...[
                       SizedBox(
                         width: 32,
                         child: VerticalStepper(activeTab: _activeTab, numberOfSteps: _numberOfTabs),
@@ -210,8 +203,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                           selectedBackgroundColor: const Color(0x1200ECFF),
                                           unSelectedBackgroundColor: Colors.transparent,
                                           borderColor: const Color(0xFF00ECFF),
-                                          activeShadow:
-                                              const BoxShadow(blurStyle: BlurStyle.inner, blurRadius: 21.5, spreadRadius: 1, color: Color(0xFF00ECFF)),
+                                          activeShadow: const BoxShadow(blurStyle: BlurStyle.inner, blurRadius: 30, spreadRadius: 1, color: Color(0xFF00ECFF)),
                                           child: const Text('Free', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xFF00ECFF))),
                                         ),
                                         const SizedBox(width: 8),
@@ -224,8 +216,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                           selectedBackgroundColor: const Color(0x1200ECFF),
                                           unSelectedBackgroundColor: Colors.transparent,
                                           borderColor: const Color(0xFF00ECFF),
-                                          activeShadow:
-                                              const BoxShadow(blurStyle: BlurStyle.inner, blurRadius: 21.5, spreadRadius: 1, color: Color(0xFF00ECFF)),
+                                          activeShadow: const BoxShadow(blurStyle: BlurStyle.inner, blurRadius: 30, spreadRadius: 1, color: Color(0xFF00ECFF)),
                                           child: const Text('Token', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xFF00ECFF))),
                                         ),
                                       ],
@@ -250,8 +241,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                           selectedBackgroundColor: const Color(0x1200ECFF),
                                           unSelectedBackgroundColor: Colors.transparent,
                                           borderColor: const Color(0xFF00ECFF),
-                                          activeShadow:
-                                              const BoxShadow(blurStyle: BlurStyle.inner, blurRadius: 21.5, spreadRadius: 1, color: Color(0xFF00ECFF)),
+                                          activeShadow: const BoxShadow(blurStyle: BlurStyle.inner, blurRadius: 30, spreadRadius: 1, color: Color(0xFF00ECFF)),
                                           child: const Text('2 Players', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xFF00ECFF))),
                                         ),
                                         const SizedBox(width: 8),
@@ -264,8 +254,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                           selectedBackgroundColor: const Color(0x1200ECFF),
                                           unSelectedBackgroundColor: Colors.transparent,
                                           borderColor: const Color(0xFF00ECFF),
-                                          activeShadow:
-                                              const BoxShadow(blurStyle: BlurStyle.inner, blurRadius: 21.5, spreadRadius: 1, color: Color(0xFF00ECFF)),
+                                          activeShadow: const BoxShadow(blurStyle: BlurStyle.inner, blurRadius: 30, spreadRadius: 1, color: Color(0xFF00ECFF)),
                                           child: const Text('4 Players', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xFF00ECFF))),
                                         ),
                                       ],
@@ -301,14 +290,13 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                 globalValue: _selectedTokenAddress,
                                                 onTap: _selectTokenAddress,
                                                 activeShadow:
-                                                    const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 21),
+                                                    const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 30),
                                                 selectedBackgroundColor: const Color(0x1200ECFF),
                                                 unSelectedBackgroundColor: Colors.transparent,
                                                 borderColor: const Color(0xFF00ECFF),
                                                 width: 130,
                                                 padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
                                                 child: Row(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Image.asset('assets/images/STRK_logo.png'),
                                                     const SizedBox(width: 4),
@@ -328,14 +316,13 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                 globalValue: _selectedTokenAddress,
                                                 onTap: _selectTokenAddress,
                                                 activeShadow:
-                                                    const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 21),
+                                                    const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 30),
                                                 selectedBackgroundColor: const Color(0x1200ECFF),
                                                 unSelectedBackgroundColor: Colors.transparent,
                                                 borderColor: const Color(0xFF00ECFF),
                                                 width: 130,
                                                 padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
                                                 child: Row(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Image.asset('assets/images/eth_icon.png'),
                                                     const SizedBox(width: 4),
@@ -360,14 +347,13 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                 globalValue: _selectedTokenAddress,
                                                 onTap: _selectTokenAddress,
                                                 activeShadow:
-                                                    const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 21),
+                                                    const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 30),
                                                 selectedBackgroundColor: const Color(0x1200ECFF),
                                                 unSelectedBackgroundColor: Colors.transparent,
                                                 borderColor: const Color(0xFF00ECFF),
                                                 width: 130,
                                                 padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
                                                 child: Row(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Image.asset('assets/images/lords_icon.png'),
                                                     const SizedBox(width: 4),
@@ -387,14 +373,13 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                 globalValue: _selectedTokenAddress,
                                                 onTap: _selectTokenAddress,
                                                 activeShadow:
-                                                    const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 21),
+                                                    const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 30),
                                                 selectedBackgroundColor: const Color(0x1200ECFF),
                                                 unSelectedBackgroundColor: Colors.transparent,
                                                 borderColor: const Color(0xFF00ECFF),
                                                 width: 130,
                                                 padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
                                                 child: Row(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Image.asset('assets/images/brother_icon.png'),
                                                     const SizedBox(width: 4),
@@ -506,7 +491,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                     },
                                   ),
                                 ),
-                              if (((_activeTab == 2 && _gameMode == GameMode.free) || _activeTab == 3) && _playerColor == null)
+                              if (((_activeTab == 2 && _gameMode == GameMode.free) || _activeTab == 3))
                                 Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -567,7 +552,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                         ),
                       ),
                     ],
-                    if (_activeTab == _numberOfTabs - 1 && _playerColor != null)
+                    if (_activeTab == _numberOfTabs && _playerColor != null)
                       SizedBox(
                         width: constraints.maxWidth - 24,
                         height: scaledHeight(462),
@@ -576,8 +561,6 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                             Expanded(
                               child: Container(
                                 decoration: BoxDecoration(color: const Color(0xFF21262B), borderRadius: BorderRadius.circular(8)),
-                                // height: double.infinity,
-                                // width: 500,
                                 alignment: Alignment.center,
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
@@ -588,13 +571,13 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                       value: _gameMode,
                                       globalValue: _gameMode,
                                       onTap: (_) {},
-                                      activeShadow: const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 21),
+                                      activeShadow: const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 30),
                                       selectedBackgroundColor: const Color(0x1200ECFF),
                                       unSelectedBackgroundColor: Colors.transparent,
                                       borderColor: const Color(0xFF00ECFF),
                                       width: 130,
-                                      padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
-                                      child: Text(_gameMode == GameMode.free ? 'Free' : 'Token'),
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Text(_gameMode == GameMode.free ? 'Free' : 'Token', style: TextStyle(color: Color(0xFF00ECFF))),
                                     ),
                                   ],
                                 ),
@@ -614,13 +597,16 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                       value: _numberOfPlayers,
                                       globalValue: _numberOfPlayers,
                                       onTap: (_) {},
-                                      activeShadow: const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 21),
+                                      activeShadow: const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 30),
                                       selectedBackgroundColor: const Color(0x1200ECFF),
                                       unSelectedBackgroundColor: Colors.transparent,
                                       borderColor: const Color(0xFF00ECFF),
                                       width: 130,
-                                      padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
-                                      child: Text(_numberOfPlayers == NumberOfPlayers.two ? '2 Players' : '4 Players'),
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Text(
+                                        _numberOfPlayers == NumberOfPlayers.two ? '2 Players' : '4 Players',
+                                        style: TextStyle(color: Color(0xFF00ECFF)),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -641,12 +627,12 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                         value: _selectedTokenAddress,
                                         globalValue: _selectedTokenAddress,
                                         onTap: (_) {},
-                                        activeShadow: const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 21),
+                                        activeShadow: const BoxShadow(color: Color(0xFF00ECFF), blurStyle: BlurStyle.inner, spreadRadius: 1, blurRadius: 30),
                                         selectedBackgroundColor: const Color(0x1200ECFF),
                                         unSelectedBackgroundColor: Colors.transparent,
                                         borderColor: const Color(0xFF00ECFF),
                                         width: 130,
-                                        padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
+                                        padding: const EdgeInsets.symmetric(vertical: 4),
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
@@ -750,41 +736,18 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                           foregroundColor: const Color(0xFF000000),
                           textStyle: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
-                        onPressed: _activeTab == _numberOfTabs - 1
+                        onPressed: _activeTab == _numberOfTabs
                             ? _createGame
                             : _isNextEnabled
                                 ? _switchToNextTab
                                 : null,
-                        child: _isLoading
-                            ? const CircularProgressIndicator()
-                            : Text(_activeTab == _numberOfTabs - 1 && _playerColor != null ? 'Create Game' : 'Next'),
+                        child:
+                            _isLoading ? const CircularProgressIndicator() : Text(_activeTab == _numberOfTabs && _playerColor != null ? 'Create Game' : 'Next'),
                       ),
                     ),
                   ],
                 ),
               ),
-              // Expanded(
-              //   child: Center(
-              //     child: GestureDetector(
-              //       onTap: _createGame,
-              //       child: Container(
-              //         margin: const EdgeInsets.symmetric(horizontal: 29),
-              //         decoration: ShapeDecoration(
-              //           color: _playerColor == null ? const Color(0xFF32363A) : const Color(0xFF00ECFF),
-              //           shape: AngledSubmitShape(_playerColor == null ? const Color(0xFF939393) : const Color(0xFF000000)),
-              //         ),
-              //         //width: double.infinity,
-              //         height: scaledHeight(52),
-              //         alignment: Alignment.center,
-              //         child: Visibility(
-              //           visible: !_isLoading,
-              //           replacement: const Center(child: CircularProgressIndicator()),
-              //           child: Text('CREATE GAME', style: TextStyle(color: _playerColor == null ? const Color(0xFF939393) : const Color(0xFF000000))),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
             ],
           );
         },

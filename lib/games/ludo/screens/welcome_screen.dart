@@ -296,13 +296,13 @@ class _MenuButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(_label, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                Text(_label, style: const TextStyle(color: Colors.white, fontSize: 12)),
                 Container(color: const Color(0xFF00ECFF), height: 2, width: 28),
               ],
             ),
           ),
           Positioned(
-            left: -34,
+            left: -38,
             child: Container(
               width: 64,
               height: 64,
@@ -311,7 +311,7 @@ class _MenuButton extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: const Color(0xFF0E272F),
               ),
-              child: Icon(_icon, color: Colors.white, size: 20),
+              child: Icon(_icon, color: Colors.white, size: 24),
             ),
           ),
         ],
