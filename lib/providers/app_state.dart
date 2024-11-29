@@ -6,6 +6,7 @@ import 'package:marquis_v2/env.dart';
 import 'package:marquis_v2/models/app_state.dart';
 import 'package:hive/hive.dart';
 import 'package:marquis_v2/providers/user.dart';
+import 'package:marquis_v2/router/router_delegate.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 
@@ -23,8 +24,7 @@ class AppState extends _$AppState {
   @override
   AppStateData build() {
     _hiveBox ??= Hive.box<AppStateData>("appState");
-    final result = _hiveBox!.get("appState", defaultValue: AppStateData())!;
-    return result.copyWith(autoLoginResult: null);
+    return _hiveBox!.get("appState", defaultValue: AppStateData())!;
   }
 
   void changeNavigatorIndex(int newIndex) {
@@ -42,6 +42,9 @@ class AppState extends _$AppState {
       selectedGame: id,
     );
     _hiveBox!.put("appState", state);
+    
+    // Force rebuild of router
+    ref.read(routerDelegateProvider).forceRebuild();
   }
 
   void selectGameSessionId(String? game, String? id) {

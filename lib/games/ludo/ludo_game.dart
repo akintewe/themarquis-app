@@ -416,7 +416,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
     print("Rolling dice...");
     await diceContainer.currentDice.roll();
-    // playState = PlayState.finished;
+    playState = PlayState.finished;
     
     if (playState == PlayState.finished) {
       if (buildContext != null && buildContext!.mounted) {

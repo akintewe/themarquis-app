@@ -68,7 +68,7 @@ Widget build(BuildContext context) {
       child: SafeArea(
         child: _game.playState == PlayState.playing
             ? Padding(
-              padding: const EdgeInsets.only(left:67.0, right: 67),
+              padding: const EdgeInsets.only(left:80.0, right: 80),
               child: Container(
                   child: AspectRatio(
                     aspectRatio: 7/20,
@@ -76,9 +76,9 @@ Widget build(BuildContext context) {
                       fit: BoxFit.fitHeight,
                       child: SizedBox(
                         width: gameWidth,
-                        height: gameHeight,
+                        height: gameHeight,  
                         child: RiverpodAwareGameWidget<LudoGame>(
-                          key: _gameWidgetKey,
+                          key: _gameWidgetKey, 
                           game: _game,
                           overlayBuilderMap: {
                             PlayState.welcome.name: (context, game) =>

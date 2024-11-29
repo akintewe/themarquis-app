@@ -23,9 +23,7 @@ final innerRouterDelegateProvider =
 
 class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
-  @override
   final GlobalKey<NavigatorState> navigatorKey;
-
   bool? _showPageNotFound;
   bool _isSignUp = false;
   final ProviderRef ref;
@@ -33,11 +31,17 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
 
   AppRouterDelegate(this.ref) : navigatorKey = GlobalKey<NavigatorState>() {
     _appState = ref.read(appStateProvider);
-
-    ref.listen(appStateProvider, (previous, next) {
+    
+    // Listen to state changes and force rebuild
+    ref.listen<AppStateData>(appStateProvider, (previous, next) {
       _appState = next;
-      notifyListeners();
+      notifyListeners(); // Ensure navigation state is updated
     });
+  }
+
+  // Add method to force rebuild
+  void forceRebuild() {
+    notifyListeners();
   }
 
   @override
