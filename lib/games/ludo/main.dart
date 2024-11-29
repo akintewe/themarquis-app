@@ -41,12 +41,22 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: _game.buildTopBar(context),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        titleSpacing: 0,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: ValueListenableBuilder<PlayState>(
+          valueListenable: _game.playStateNotifier,
+          builder: (context, playState, child) {
+            return AppBar(
+              automaticallyImplyLeading: false,
+              title: playState == PlayState.welcome 
+                  ? WelcomeTopBar(game: _game)
+                  : GameTopBar(game: _game),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              titleSpacing: 0,
+            );
+          },
+        ),
       ),
       body: Container(
         decoration: const BoxDecoration(

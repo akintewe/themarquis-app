@@ -627,10 +627,14 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   }
 
   Widget? buildTopBar(BuildContext context) {
-    if (playState == PlayState.welcome) {
-      return WelcomeTopBar(game: this);
+    switch (playState) {
+      case PlayState.welcome:
+        return WelcomeTopBar(game: this);
+      case PlayState.waiting:
+      case PlayState.playing:
+      case PlayState.finished:
+        return GameTopBar(game: this);
     }
-    return GameTopBar(game: this);
   }
 
   Future<void> showGameMessage({

@@ -15,7 +15,9 @@ class GameTopBar extends StatelessWidget {
       height: kToolbarHeight,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Color.fromRGBO(48, 239, 253, 0.25),
+        color: game.playState == PlayState.finished 
+            ? Colors.black.withOpacity(0.3)
+            : Color.fromRGBO(48, 239, 253, 0.25),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(16),
           bottomRight: Radius.circular(16),
@@ -24,23 +26,40 @@ class GameTopBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-
           Transform.translate(
             offset: Offset(-5, 4),
             child: GestureDetector(
               onTap: () {
-                if (game.playState == PlayState.welcome || 
-                    game.playState == PlayState.waiting) {
+                if (game.playState == PlayState.waiting) {
                   Navigator.of(context).pushReplacementNamed('/');
-                } else {
+                } else if (game.playState == PlayState.finished) {
                   game.playState = PlayState.welcome;
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Leave Game?'),
+                      content: Text('Are you sure you want to leave the game?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            game.playState = PlayState.welcome;
+                          },
+                          child: Text('Leave'),
+                        ),
+                      ],
+                    ),
+                  );
                 }
               },
-              child: SvgPicture.asset('assets/images/Group 1171276336.svg')),
+              child: SvgPicture.asset('assets/images/Group 1171276336.svg'),
+            ),
           ),
-          // Back Button
-         
-          // STRK Balance
           Consumer(
             builder: (context, ref, _) {
               return Row(
