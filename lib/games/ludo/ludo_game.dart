@@ -10,6 +10,7 @@ import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:marquis_v2/games/ludo/components/board.dart';
 import 'package:marquis_v2/games/ludo/components/destination.dart';
@@ -51,7 +52,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   dart_async.Timer? _messageTimer;
   Completer<void>? ludoSessionLoadingCompleter;
 
-  PlayState _playState = PlayState.welcome;
+  final ValueNotifier<PlayState> playStateNotifier = ValueNotifier(PlayState.welcome);
 
   LudoGame()
       : super(
@@ -113,33 +114,48 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
   }
 
-  PlayState get playState => _playState;
-  set playState(PlayState playState) {
-    _playState = playState;
-    switch (playState) {
-      case PlayState.welcome:
-        overlays.clear();
-        overlays.add(playState.name);
-        break;
-      case PlayState.waiting:
-      case PlayState.finished:
-        overlays.clear();
-        overlays.add(playState.name);
-        break;
-      case PlayState.playing:
-        overlays.clear();
-        if (_sessionData != null) {
-          initGame();
-        }
-        break;
+  PlayState get playState => playStateNotifier.value;
+  set playState(PlayState value) {
+    if (playStateNotifier.value != value) {
+      playStateNotifier.value = value;
+      
+      switch (value) {
+        case PlayState.welcome:
+        case PlayState.waiting:
+          overlays.clear();
+          overlays.add(value.name);
+          break;
+        case PlayState.playing:
+          overlays.clear();
+          if (_sessionData != null) {
+            Future.microtask(() async {
+              await initGame();
+            });
+          }
+          break;
+        case PlayState.finished:
+          overlays.clear();
+          overlays.add(value.name);
+          Future.microtask(() {
+            if (buildContext != null && buildContext!.mounted) {
+              // Force rebuild of game over screen
+              (buildContext! as Element).markNeedsBuild();
+            }
+          });
+          break;
+      }
     }
   }
 
   @override
   Future<void> onLoad() async {
-    super.onLoad();
-    playState = PlayState.welcome;
+    await super.onLoad();
     _sessionData = ref.read(ludoSessionProvider);
+    
+    overlays.clear();
+    overlays.add(PlayState.welcome.name);
+    playStateNotifier.value = PlayState.welcome;
+
     addToGameWidgetBuild(() {
       ref.listen(ludoSessionProvider, (prev, next) async {
         if (ludoSessionLoadingCompleter != null) {
@@ -166,11 +182,11 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           return;
         }
       }
-      if (_playState == PlayState.welcome) {
+      if (playState == PlayState.welcome) {
         playState = PlayState.waiting;
       }
       // Update pin locations
-      if (_playState == PlayState.playing && isInit) {
+      if (playState == PlayState.playing && isInit) {
         try {
           final prevPlayer = _currentPlayer;
           _currentPlayer = _sessionData!.nextPlayerIndex;

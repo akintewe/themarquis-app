@@ -27,65 +27,72 @@ class MatchResultsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final results = session.sessionUserStatus.map((element) {
-      final numWinningTokens = element.playerWinningTokens
-          .map((e) => e ? 1 : 0)
-          .reduce((a, b) => a + b);
-      return {
-        'index': session.sessionUserStatus.indexOf(element),
-        'score': numWinningTokens == 4 ? 400 : -100,
-        'numWinningTokens': numWinningTokens,
-        'exp': 400,
-      };
-    }).toList();
-    results.sort(
-        (a, b) => b['numWinningTokens']!.compareTo(a['numWinningTokens']!));
-    for (int i = 0; i < results.length; i++) {
-      results[i]['rank'] = i + 1;
-    }
-    final deviceSize = MediaQuery.of(context).size;
-    print("Device width: ${deviceSize.width}, game width: ${game.width}");
-    return Scaffold(
-       
-        body: Transform.scale(
-          scale: game.height / deviceSize.height,
-          alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: deviceSize.height * game.width / game.height,
-            height: deviceSize.height,
-            child: FutureBuilder<List<Map<String, dynamic>>>(future: () async {
-              final supportedTokens =
-                  await ref.read(userProvider.notifier).getSupportedTokens();
-              supportedTokens.add({
-                "tokenAddress":
-                    "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "tokenName": "No Token",
-              });
-              return supportedTokens;
-            }(), builder: (context, snapshot) {
-              return snapshot.connectionState == ConnectionState.waiting
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                       
-                        _buildHeader(),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        _buildTransactionsButton(context),
-                        Expanded(
-                            child: _buildResultsList(results, snapshot.data!)),
-                        _buildShareButton(context, results, snapshot.data!),
-                        _buildBackToMenuButton(ref),
-                        const SizedBox(
-                          height: 48,
-                        )
-                      ],
-                    );
-            }),
-          ),
-        ));
+    return ValueListenableBuilder<PlayState>(
+      valueListenable: game.playStateNotifier,
+      builder: (context, playState, child) {
+        if (playState != PlayState.finished) return const SizedBox.shrink();
+        
+        final results = session.sessionUserStatus.map((element) {
+          final numWinningTokens = element.playerWinningTokens
+              .map((e) => e ? 1 : 0)
+              .reduce((a, b) => a + b);
+          return {
+            'index': session.sessionUserStatus.indexOf(element),
+            'score': numWinningTokens == 4 ? 400 : -100,
+            'numWinningTokens': numWinningTokens,
+            'exp': 400,
+          };
+        }).toList();
+        results.sort(
+            (a, b) => b['numWinningTokens']!.compareTo(a['numWinningTokens']!));
+        for (int i = 0; i < results.length; i++) {
+          results[i]['rank'] = i + 1;
+        }
+        final deviceSize = MediaQuery.of(context).size;
+        print("Device width: ${deviceSize.width}, game width: ${game.width}");
+        return Scaffold(
+           
+            body: Transform.scale(
+              scale: game.height / deviceSize.height,
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: deviceSize.height * game.width / game.height,
+                height: deviceSize.height,
+                child: FutureBuilder<List<Map<String, dynamic>>>(future: () async {
+                  final supportedTokens =
+                      await ref.read(userProvider.notifier).getSupportedTokens();
+                  supportedTokens.add({
+                    "tokenAddress":
+                        "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "tokenName": "No Token",
+                  });
+                  return supportedTokens;
+                }(), builder: (context, snapshot) {
+                  return snapshot.connectionState == ConnectionState.waiting
+                      ? const Center(child: CircularProgressIndicator())
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                           
+                            _buildHeader(),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            _buildTransactionsButton(context),
+                            Expanded(
+                                child: _buildResultsList(results, snapshot.data!)),
+                            _buildShareButton(context, results, snapshot.data!),
+                            _buildBackToMenuButton(ref),
+                            const SizedBox(
+                              height: 48,
+                            )
+                          ],
+                        );
+                }),
+              ),
+            ));
+      }
+    );
   }
 
   Widget _buildHeader() {
@@ -103,27 +110,9 @@ class MatchResultsScreen extends ConsumerWidget {
             ),
           ),
         ),
-        Row(
-          children: [
-            const SizedBox(width: 16), // Align with the text padding
-            Expanded(
-              child: Container(
-                height: 2,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      Color(0xFF00ECFF),
-                    ],
-                    stops: [0.0, 0.1], // Adjust these values to control the fade
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+       SizedBox(
+        width: 500,
+        child: Image.asset('assets/images/divider (1).png', fit: BoxFit.cover,)),
       ],
     );
   }
@@ -233,11 +222,7 @@ class MatchResultsScreen extends ConsumerWidget {
               ),
             );
           },
-          icon: const Icon(
-            FontAwesomeIcons.rightLeft,
-            color: Colors.black,
-            size: 12,
-          ),
+       
           label: const Text('Transactions',
               style: TextStyle(color: Colors.black, fontSize: 12.0)),
           style: ElevatedButton.styleFrom(
@@ -291,14 +276,14 @@ class MatchResultsScreen extends ConsumerWidget {
                 children: [
                   // Player rank/name section
                   Expanded(
-                    flex: 2,
+                    flex: 1,
                     child: Row(
                       children: [
                         Text(
                           result['rank'] == 1 ? 'Winner' : 'Player ${result['rank']}',
                           style: TextStyle(
                             color: result['rank'] == 1 ? Colors.white : Colors.grey[400],
-                            fontSize: 14,
+                            fontSize: 12,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -307,8 +292,8 @@ class MatchResultsScreen extends ConsumerWidget {
                               .split('@')[0]
                               .toUpperCase(),
                           style: TextStyle(
-                            color: result['rank'] == 1 ? const Color(0xFF00ECFF) : Colors.white,
-                            fontSize: 16,
+                            color: result['rank'] == 1 ? Colors.white : Colors.white,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -320,45 +305,43 @@ class MatchResultsScreen extends ConsumerWidget {
                     flex: 1,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (session.playToken !=
-                            "0x0000000000000000000000000000000000000000000000000000000000000000")
-                          Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/coin_icon.png', // Make sure to add this asset
-                                width: 16,
-                                height: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                result['rank'] == 1 ? '400' : '100',
-                                style: TextStyle(
-                                  color: result['rank'] == 1 ? Colors.yellow : Colors.red,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        const SizedBox(width: 12),
                         Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             SvgPicture.asset(
-                              'assets/images/会员.svg', 
-                              width: 30,
-                              height: 30,
+                              'assets/images/starknet-token-strk-logo (4) 7.svg',
+                              width: 20,
+                              height: 20,
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '${result['exp']} EXP',
-                              style: const TextStyle(
-                                color: Color(0xFF00ECFF),
+                              result['rank'] == 1 ? '400' : '100',
+                              style: TextStyle(
+                                color: result['rank'] == 1
+                                    ? Colors.yellow
+                                    : Colors.red,
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                            const SizedBox(width: 12),
                           ],
+                        ),
+                        SvgPicture.asset(
+                          'assets/images/会员.svg',
+                          width: 20,
+                          height: 20,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${result['exp']} EXP',
+                          style: const TextStyle(
+                            color: Color(0xFF00ECFF),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -644,7 +627,7 @@ class MatchResultsScreen extends ConsumerWidget {
             ),
             // Cyan line
            Center(child: SizedBox(
-            width: 800,
+            width: 400,
             child: Image.asset('assets/images/divider.png', fit: BoxFit.cover,))),
             const SizedBox(height: 16),
             // Results List
@@ -694,29 +677,27 @@ class MatchResultsScreen extends ConsumerWidget {
                         // Scores
                         Row(
                           children: [
-                            if (session.playToken !=
-                                "0x0000000000000000000000000000000000000000000000000000000000000000")
-                              Row(
-                                children: [
-                                  SvgPicture.asset(
-                                    'assets/images/starknet-token-strk-logo (4) 7.svg',
-                                    width: 20,
-                                    height: 20,
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/images/starknet-token-strk-logo (4) 7.svg',
+                                  width: 20,
+                                  height: 20,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  result['rank'] == 1 ? '400' : '100',
+                                  style: TextStyle(
+                                    color: result['rank'] == 1
+                                        ? Colors.yellow
+                                        : Colors.red,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    result['rank'] == 1 ? '400' : '100',
-                                    style: TextStyle(
-                                      color: result['rank'] == 1
-                                          ? Colors.yellow
-                                          : Colors.red,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(width: 12),
+                              ],
+                            ),
                             SvgPicture.asset(
                               'assets/images/会员.svg',
                               width: 20,
