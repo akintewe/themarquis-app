@@ -47,9 +47,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    // final deviceSize = MediaQuery.of(context).size;
     final user = ref.read(userProvider);
-    // final ludoSession = ref.read(ludoSessionProvider.notifier);
     if (user == null) {
       return const Center(child: Text("Not Logged In"));
     }
@@ -103,7 +101,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                         SizedBox(
                           height: scaledHeight(64),
                           child: FittedBox(
-                            child: MenuButton(
+                            child: _MenuButton(
                                 icon: Icons.play_arrow,
                                 label: 'Resume Game',
                                 onTap: () async {
@@ -133,7 +131,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                         SizedBox(
                           height: scaledHeight(64),
                           child: FittedBox(
-                            child: MenuButton(
+                            child: _MenuButton(
                                 icon: Icons.exit_to_app,
                                 label: 'Exit Game',
                                 onTap: () async {
@@ -180,7 +178,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                         SizedBox(
                           height: scaledHeight(64),
                           child: FittedBox(
-                            child: MenuButton(icon: Icons.add, label: 'Create Game', onTap: () => createRoomDialog(ctx: context, game: widget.game)),
+                            child: _MenuButton(icon: Icons.add, label: 'Create Game', onTap: () => _createRoomDialog(ctx: context, game: widget.game)),
                           ),
                         ),
                         SizedBox(height: scaledHeight(20)),
@@ -189,7 +187,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                         SizedBox(
                           height: scaledHeight(64),
                           child: FittedBox(
-                            child: MenuButton(icon: Icons.group, label: 'Find Game', onTap: () => findRoomDialog(ctx: context, game: widget.game)),
+                            child: _MenuButton(icon: Icons.group, label: 'Find Game', onTap: () => _findRoomDialog(ctx: context, game: widget.game)),
                           ),
                         ),
                         SizedBox(height: scaledHeight(20)),
@@ -198,14 +196,14 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                         SizedBox(
                           height: scaledHeight(64),
                           child: FittedBox(
-                            child: MenuButton(icon: Icons.casino, label: 'Join Game', onTap: () => joinGameDialog(ctx: context, game: widget.game)),
+                            child: _MenuButton(icon: Icons.casino, label: 'Join Game', onTap: () => _joinGameDialog(ctx: context, game: widget.game)),
                           ),
                         ),
                         SizedBox(height: scaledHeight(20)),
                       ],
                       SizedBox(
                         height: scaledHeight(64),
-                        child: FittedBox(child: MenuButton(icon: Icons.home, label: 'Back to Home', onTap: Navigator.of(context).pop)),
+                        child: FittedBox(child: _MenuButton(icon: Icons.home, label: 'Back to Home', onTap: Navigator.of(context).pop)),
                       ),
                     ],
                   ),
@@ -245,40 +243,34 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
     );
   }
 
-  Future joinGameDialog({required BuildContext ctx, required LudoGame game}) {
+  Future<void> _joinGameDialog({required BuildContext ctx, required LudoGame game}) {
     return showDialog(
       context: ctx,
       builder: (BuildContext context) {
-        return JoinGameDialog(game: widget.game, errorHandler: _showError);
+        return _JoinGameDialog(game: widget.game, errorHandler: _showError);
       },
     );
   }
 
-  Future findRoomDialog({required BuildContext ctx, required LudoGame game}) {
+  Future<void> _findRoomDialog({required BuildContext ctx, required LudoGame game}) {
     return showDialog(
       context: ctx,
       builder: (BuildContext context) {
-        return FindRoomDialog(game: game, errorHandler: _showError);
+        return _FindRoomDialog(game: game, errorHandler: _showError);
       },
     );
   }
 
-  createRoomDialog({required BuildContext ctx, required LudoGame game}) {
+  void _createRoomDialog({required BuildContext ctx, required LudoGame game}) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => const CreateGameScreen(), settings: RouteSettings(arguments: game)));
-    // return showDialog(
-    //   context: ctx,
-    //   builder: (BuildContext context) {
-    //     return CreateRoomDialog(game: game);
-    //   },
-    // );
   }
 }
 
-class MenuButton extends StatelessWidget {
+class _MenuButton extends StatelessWidget {
   final String _label;
   final VoidCallback _onTap;
   final IconData _icon;
-  const MenuButton({required String label, required IconData icon, required VoidCallback onTap, super.key})
+  const _MenuButton({required String label, required IconData icon, required VoidCallback onTap, super.key})
       : _label = label,
         _onTap = onTap,
         _icon = icon;
@@ -310,7 +302,7 @@ class MenuButton extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: -34, // Adjust this value to control how much it extends out
+            left: -34,
             child: Container(
               width: 64,
               height: 64,
@@ -328,18 +320,18 @@ class MenuButton extends StatelessWidget {
   }
 }
 
-class FindRoomDialog extends ConsumerStatefulWidget {
-  const FindRoomDialog({super.key, required this.game, this.roomId, required this.errorHandler});
+class _FindRoomDialog extends ConsumerStatefulWidget {
+  const _FindRoomDialog({super.key, required this.game, this.roomId, required this.errorHandler});
 
   final LudoGame game;
   final String? roomId;
   final void Function(String) errorHandler;
 
   @override
-  ConsumerState<FindRoomDialog> createState() => _FindRoomDialogState();
+  ConsumerState<_FindRoomDialog> createState() => _FindRoomDialogState();
 }
 
-class _FindRoomDialogState extends ConsumerState<FindRoomDialog> {
+class _FindRoomDialogState extends ConsumerState<_FindRoomDialog> {
   final _roomIdController = TextEditingController();
   bool _isLoading = false;
 
@@ -365,7 +357,7 @@ class _FindRoomDialogState extends ConsumerState<FindRoomDialog> {
       final res = await showDialog(
           context: context,
           builder: (c) {
-            return FindGameChooseColorDialog(roomId: _roomIdController.text, selectedSession: ludoSession, game: widget.game);
+            return _FindGameChooseColorDialog(roomId: _roomIdController.text, selectedSession: ludoSession, game: widget.game);
           });
       if (res == true) {
         if (!mounted) return;
@@ -478,17 +470,17 @@ class _FindRoomDialogState extends ConsumerState<FindRoomDialog> {
   }
 }
 
-class JoinGameDialog extends ConsumerStatefulWidget {
-  const JoinGameDialog({super.key, required this.game, required this.errorHandler});
+class _JoinGameDialog extends ConsumerStatefulWidget {
+  const _JoinGameDialog({super.key, required this.game, required this.errorHandler});
 
   final LudoGame game;
   final void Function(String) errorHandler;
 
   @override
-  ConsumerState<JoinGameDialog> createState() => _JoinGameDialogState();
+  ConsumerState<_JoinGameDialog> createState() => _JoinGameDialogState();
 }
 
-class _JoinGameDialogState extends ConsumerState<JoinGameDialog> {
+class _JoinGameDialogState extends ConsumerState<_JoinGameDialog> {
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -538,7 +530,7 @@ class _JoinGameDialogState extends ConsumerState<JoinGameDialog> {
                         children: [
                           ...snapshot.data!.map(
                             (sessionData) =>
-                                OpenSessionRoomCard(game: widget.game, sessionData: sessionData, context: context, errorHandler: widget.errorHandler),
+                                _OpenSessionRoomCard(game: widget.game, sessionData: sessionData, context: context, errorHandler: widget.errorHandler),
                           ),
                         ],
                       ),
@@ -554,8 +546,8 @@ class _JoinGameDialogState extends ConsumerState<JoinGameDialog> {
   }
 }
 
-class OpenSessionRoomCard extends StatelessWidget {
-  const OpenSessionRoomCard({super.key, required this.game, required this.sessionData, required this.context, required this.errorHandler});
+class _OpenSessionRoomCard extends StatelessWidget {
+  const _OpenSessionRoomCard({super.key, required this.game, required this.sessionData, required this.context, required this.errorHandler});
 
   final LudoGame game;
   final LudoSessionData sessionData;
@@ -625,8 +617,8 @@ class OpenSessionRoomCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    for (int i = 0; i < noOfPlayers; i++) PlayerAvatarCard(index: i, size: 37, color: colors[i]),
-                    for (int i = 0; i < 4 - noOfPlayers; i++) const PlayerEmptyCard(size: 37),
+                    for (int i = 0; i < noOfPlayers; i++) _PlayerAvatarCard(index: i, size: 37, color: colors[i]),
+                    for (int i = 0; i < 4 - noOfPlayers; i++) const _PlayerEmptyCard(size: 37),
                   ],
                 ),
                 //join button
@@ -639,7 +631,7 @@ class OpenSessionRoomCard extends StatelessWidget {
                           final res = await showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return FindRoomDialog(game: game, roomId: roomName, errorHandler: errorHandler);
+                              return _FindRoomDialog(game: game, roomId: roomName, errorHandler: errorHandler);
                             },
                           );
                           if (res == true) {
@@ -677,11 +669,8 @@ class OpenSessionRoomCard extends StatelessWidget {
   }
 }
 
-class PlayerEmptyCard extends StatelessWidget {
-  const PlayerEmptyCard({
-    super.key,
-    required this.size,
-  });
+class _PlayerEmptyCard extends StatelessWidget {
+  const _PlayerEmptyCard({super.key, required this.size});
 
   final double size;
 
@@ -705,8 +694,8 @@ class PlayerEmptyCard extends StatelessWidget {
   }
 }
 
-class PlayerAvatarCard extends StatelessWidget {
-  const PlayerAvatarCard({super.key, required this.index, required this.size, required this.color});
+class _PlayerAvatarCard extends StatelessWidget {
+  const _PlayerAvatarCard({super.key, required this.index, required this.size, required this.color});
 
   final int index;
   final double size;
@@ -752,343 +741,16 @@ class PlayerAvatarCard extends StatelessWidget {
   }
 }
 
-class CreateRoomDialog extends ConsumerStatefulWidget {
-  const CreateRoomDialog({super.key, required this.game});
-
-  final LudoGame game;
-
-  @override
-  ConsumerState<CreateRoomDialog> createState() => _CreateRoomDialogState();
-}
-
-class _CreateRoomDialogState extends ConsumerState<CreateRoomDialog> {
-  BigInt _sliderValue = BigInt.from(0);
-  BigInt? _tokenBalance;
-  String _selectedTokenAddress = '';
-  final _tokenAmountController = TextEditingController();
-  List<Map<String, String>>? _supportedTokens;
-  String? _selectedColor; // To keep track of the selected color
-  bool _isLoading = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: FutureBuilder(
-          future: _supportedTokens == null
-              ? () async {
-                  _supportedTokens = await ref.read(userProvider.notifier).getSupportedTokens();
-                }()
-              : null,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(
-                width: 100,
-                height: 100,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            if (snapshot.hasError) {
-              return Text(snapshot.error.toString());
-            }
-            return Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color.fromARGB(255, 0, 236, 255), // Cyan border color
-                  width: 1, // Border thickness
-                ),
-                borderRadius: BorderRadius.circular(12), // Ensure the border follows the shape of the dialog
-              ),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.80,
-                height: MediaQuery.of(context).size.height * 0.50 < 450 ? 450 : MediaQuery.of(context).size.height * 0.50,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Expanded(
-                            flex: 1,
-                            child: SizedBox(),
-                          ),
-                          const Expanded(
-                            flex: 3,
-                            child: Center(
-                              child: Text(
-                                'CREATE ROOM',
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 0, 236, 255), // Cyan border color
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: IconButton(
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.all(0),
-                                onPressed: Navigator.of(context).pop,
-                                icon: const Icon(Icons.cancel_outlined, color: Colors.white, size: 22),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 22),
-                      const Text(
-                        "Please Select Your Color",
-                        style: TextStyle(
-                          color: Color.fromARGB(
-                            255,
-                            0,
-                            236,
-                            255,
-                          ), // Cyan border color
-                          fontSize: 12, fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 14,
-                      ),
-                      StatefulBuilder(
-                        builder: (ctx, stste) {
-                          return Column(
-                            children: [
-                              ColorChoosingCard(
-                                onColorPicked: (color) {
-                                  setState(() {
-                                    _selectedColor = color;
-                                  });
-                                },
-                              ),
-                              const SizedBox(
-                                height: 14,
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: DropdownButtonFormField<String>(
-                                      isExpanded: true,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Token',
-                                      ),
-                                      items: [
-                                        ...?_supportedTokens,
-                                        {
-                                          "tokenAddress": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                                          "tokenName": "No Token",
-                                        },
-                                      ].map((Map<String, String> value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value['tokenAddress']!,
-                                          child: Text(value['tokenName']!),
-                                        );
-                                      }).toList(),
-                                      onChanged: (String? newValue) {
-                                        stste(() {
-                                          _selectedTokenAddress = newValue!;
-                                          _tokenBalance = null;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                  if (_selectedTokenAddress != "0x0000000000000000000000000000000000000000000000000000000000000000") const SizedBox(width: 16),
-                                  if (_selectedTokenAddress != "0x0000000000000000000000000000000000000000000000000000000000000000")
-                                    Expanded(
-                                      flex: 3,
-                                      child: TextField(
-                                        decoration: const InputDecoration(
-                                          labelText: 'Token Amount',
-                                        ),
-                                        controller: _tokenAmountController,
-                                        keyboardType: TextInputType.number,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
-                                          TextInputFormatter.withFunction((oldValue, newValue) {
-                                            if (newValue.text.isEmpty) {
-                                              return newValue;
-                                            }
-                                            double? value = double.tryParse(newValue.text);
-                                            if (value != null && _tokenBalance != null && value <= _tokenBalance!.toDouble() / 1e18) {
-                                              return newValue;
-                                            }
-                                            return oldValue;
-                                          }),
-                                        ],
-                                        onChanged: (value) {
-                                          if (value.isNotEmpty) {
-                                            stste(() {
-                                              _sliderValue = BigInt.from(double.parse(value) * 1e18);
-                                            });
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              if (_selectedTokenAddress != "0x0000000000000000000000000000000000000000000000000000000000000000" && _selectedTokenAddress != "")
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: FutureBuilder(
-                                    future: _tokenBalance != null
-                                        ? null
-                                        : () async {
-                                            if (_selectedTokenAddress == "0x0000000000000000000000000000000000000000000000000000000000000000") {
-                                              _sliderValue = BigInt.from(0);
-                                              _tokenBalance = BigInt.from(0);
-                                              return;
-                                            }
-                                            final res = await ref.read(userProvider.notifier).getTokenBalance(_selectedTokenAddress);
-                                            _sliderValue = BigInt.from(0);
-                                            _tokenBalance = res;
-                                          }(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState == ConnectionState.waiting) {
-                                        return const CircularProgressIndicator();
-                                      }
-                                      if (snapshot.hasError) {
-                                        return Text(snapshot.error.toString());
-                                      }
-                                      return Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Select amount:',
-                                            style: TextStyle(color: Colors.white),
-                                          ),
-                                          Slider(
-                                            min: 0.0,
-                                            max: _tokenBalance!.toDouble(), // Convert int to double
-                                            divisions: 100,
-                                            label: (_sliderValue.toDouble() / 1e18)
-                                                .toStringAsFixed(8)
-                                                .replaceAll(RegExp(r'0+$'), '')
-                                                .replaceAll(RegExp(r'\.$'), ''),
-                                            value: _sliderValue.toDouble(),
-                                            onChanged: (double value) {
-                                              stste(() {
-                                                _sliderValue = BigInt.from(value);
-                                                _tokenAmountController.text = (_sliderValue.toDouble() / 1e18)
-                                                    .toStringAsFixed(8)
-                                                    .replaceAll(RegExp(r'0+$'), '')
-                                                    .replaceAll(RegExp(r'\.$'), '');
-                                              });
-                                            },
-                                          ),
-                                          Text(
-                                            'Max: ${(_tokenBalance!.toDouble() / 1e18).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      _isLoading
-                          ? const CircularProgressIndicator()
-                          : Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: TextButton(
-                                onPressed: () async {
-                                  print(
-                                      "${(_sliderValue.toDouble() / 1e18).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}   ${_tokenAmountController.text}   $_selectedTokenAddress");
-                                  try {
-                                    if (_selectedColor == null) {
-                                      showErrorDialog("Please select a color", context);
-                                      return;
-                                    }
-                                    if (_selectedTokenAddress == "") {
-                                      showErrorDialog("Please select a token", context);
-                                      return;
-                                    }
-                                    setState(() {
-                                      _isLoading = true;
-                                    });
-                                    await ref.read(ludoSessionProvider.notifier).createSession(
-                                          _sliderValue.toString(),
-                                          _selectedColor!,
-                                          _selectedTokenAddress,
-                                        );
-                                  } catch (e) {
-                                    if (!context.mounted) return;
-                                    showErrorDialog(e.toString(), context);
-                                  }
-                                  setState(() {
-                                    _isLoading = false;
-                                  });
-
-                                  if (!context.mounted) return;
-                                  Navigator.of(context).pop();
-
-                                  widget.game.playState = PlayState.waiting;
-                                },
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: const Color.fromARGB(255, 0, 236, 255),
-                                      width: 1.2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0,
-                                    horizontal: 42.0,
-                                  ),
-                                  child: const Text(
-                                    "Create",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }),
-    );
-  }
-}
-
-class ColorChoosingCard extends StatefulWidget {
-  const ColorChoosingCard({super.key, required this.onColorPicked, this.takenColors = const []});
+class _ColorChoosingCard extends StatefulWidget {
+  const _ColorChoosingCard({super.key, required this.onColorPicked, this.takenColors = const []});
   final Function(String) onColorPicked;
   final List<String> takenColors;
 
   @override
-  State<ColorChoosingCard> createState() => _ColorChoosingCardState();
+  State<_ColorChoosingCard> createState() => _ColorChoosingCardState();
 }
 
-class _ColorChoosingCardState extends State<ColorChoosingCard> {
+class _ColorChoosingCardState extends State<_ColorChoosingCard> {
   final colors = ["red", "blue", "green", "yellow"];
   late final List<String> _takenColors;
   int _pickedColorIndex = 0;
@@ -1217,17 +879,17 @@ class _ColorChoosingCardState extends State<ColorChoosingCard> {
   }
 }
 
-class FindGameChooseColorDialog extends ConsumerStatefulWidget {
-  const FindGameChooseColorDialog({super.key, required this.roomId, required this.selectedSession, required this.game});
+class _FindGameChooseColorDialog extends ConsumerStatefulWidget {
+  const _FindGameChooseColorDialog({super.key, required this.roomId, required this.selectedSession, required this.game});
   final String roomId;
   final LudoSessionData selectedSession;
   final LudoGame game;
 
   @override
-  ConsumerState<FindGameChooseColorDialog> createState() => _FindGameChooseColorDialogState();
+  ConsumerState<_FindGameChooseColorDialog> createState() => _FindGameChooseColorDialogState();
 }
 
-class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorDialog> {
+class _FindGameChooseColorDialogState extends ConsumerState<_FindGameChooseColorDialog> {
   String _selectedColor = "";
   bool isLoading = false;
   // BigInt? _tokenBalance;
@@ -1320,7 +982,7 @@ class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorD
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      for (int i = 0; i < noOfPlayers; i++) PlayerAvatarCard(index: i, size: 55, color: colors[i]),
+                      for (int i = 0; i < noOfPlayers; i++) _PlayerAvatarCard(index: i, size: 55, color: colors[i]),
                       if (!widget.selectedSession.notAvailableColors.contains('green')) ...[
                         SizedBox.square(
                           dimension: 55,
@@ -1420,176 +1082,6 @@ class _FindGameChooseColorDialogState extends ConsumerState<FindGameChooseColorD
                 ],
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: ColorChoosingCard(
-            //     onColorPicked: (color) {
-            //       setState(() {
-            //         _selectedColor = color;
-            //       });
-            //     },
-            //     takenColors: widget.selectedSession.notAvailableColors,
-            //   ),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: FutureBuilder(
-            //       future: _supportedTokens == null
-            //           ? () async {
-            //               _supportedTokens = await ref.read(userProvider.notifier).getSupportedTokens();
-            //               _supportedTokens!.add({
-            //                 "tokenAddress": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            //                 "tokenName": "No Token",
-            //               });
-            //             }()
-            //           : null,
-            //       builder: (context, snapshot) {
-            //         if (snapshot.connectionState == ConnectionState.waiting) {
-            //           return const CircularProgressIndicator();
-            //         }
-            //         return Container(
-            //           decoration: BoxDecoration(
-            //             border: Border.all(color: Colors.grey, width: 1.2),
-            //             borderRadius: BorderRadius.circular(6),
-            //           ),
-            //           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            //           child: Row(
-            //             mainAxisAlignment: MainAxisAlignment.center,
-            //             children: [
-            //               Padding(
-            //                 padding: const EdgeInsets.all(8.0),
-            //                 child: Text(
-            //                   _supportedTokens?.firstWhere((e) => e["tokenAddress"] == widget.selectedSession.playToken)["tokenName"] ?? "",
-            //                   style: const TextStyle(
-            //                     color: Colors.white,
-            //                     fontSize: 16,
-            //                     fontWeight: FontWeight.w500,
-            //                   ),
-            //                 ),
-            //               ),
-            //               if (widget.selectedSession.playToken != "0x0000000000000000000000000000000000000000000000000000000000000000")
-            //                 Padding(
-            //                   padding: const EdgeInsets.all(8.0),
-            //                   child: Text(
-            //                     (double.parse(widget.selectedSession.playAmount) / 1e18)
-            //                         .toStringAsFixed(8)
-            //                         .replaceAll(RegExp(r'0+$'), '')
-            //                         .replaceAll(RegExp(r'\.$'), ''),
-            //                     style: const TextStyle(
-            //                       color: Colors.white,
-            //                       fontSize: 18,
-            //                       fontWeight: FontWeight.bold,
-            //                     ),
-            //                   ),
-            //                 ),
-            //             ],
-            //           ),
-            //         );
-            //       }),
-            // ),
-            // if (widget.selectedSession.playToken != "0x0000000000000000000000000000000000000000000000000000000000000000")
-            //   Padding(
-            //     padding: const EdgeInsets.all(8.0),
-            //     child: FutureBuilder(
-            //       future: _tokenBalance != null
-            //           ? null
-            //           : () async {
-            //               final res = await ref.read(userProvider.notifier).getTokenBalance(widget.selectedSession.playToken);
-            //               _sliderValue = BigInt.parse(widget.selectedSession.playAmount);
-            //               _tokenBalance = res;
-            //             }(),
-            //       builder: (context, snapshot) {
-            //         if (snapshot.connectionState == ConnectionState.waiting) {
-            //           return const CircularProgressIndicator();
-            //         }
-            //         if (snapshot.hasError) {
-            //           return Text(snapshot.error.toString());
-            //         }
-            //         return Column(
-            //           crossAxisAlignment: CrossAxisAlignment.start,
-            //           children: [
-            //             Slider(
-            //               min: 0.0,
-            //               max: _tokenBalance!.toDouble(), // Convert int to double
-            //               divisions: 100,
-            //               label: (_sliderValue.toDouble() / 1e18).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), ''),
-            //               value: _sliderValue.toDouble(),
-            //               onChanged: (_) {},
-            //             ),
-            //             Text(
-            //               'Max: ${(_tokenBalance!.toDouble() / 1e18).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')}',
-            //               style: const TextStyle(
-            //                 color: Colors.white,
-            //                 fontSize: 12,
-            //               ),
-            //             ),
-            //           ],
-            //         );
-            //       },
-            //     ),
-            //   ),
-            // _isLoading
-            //     ? const CircularProgressIndicator()
-            //     : Padding(
-            //         padding: const EdgeInsets.all(8.0),
-            //         child: TextButton(
-            //           onPressed: () async {
-            //             try {
-            //               setState(() {
-            //                 _isLoading = true;
-            //               });
-            //               if (_selectedColor == "") {
-            //                 showErrorDialog("Please select a color", context);
-            //                 return;
-            //               }
-            //               await ref.read(ludoSessionProvider.notifier).joinSession(
-            //                     widget.roomId,
-            //                     _selectedColor,
-            //                   );
-            //               if (!context.mounted) return;
-            //               Navigator.of(context).pop(true);
-            //             } catch (e) {
-            //               if (!context.mounted) return;
-            //               showErrorDialog(e.toString(), context);
-            //             }
-            //             setState(() {
-            //               _isLoading = false;
-            //             });
-            //           },
-            //           style: TextButton.styleFrom(
-            //             padding: EdgeInsets.zero,
-            //             // Remove the default splash effect
-            //             splashFactory: NoSplash.splashFactory,
-            //           ),
-            //           child: Container(
-            //             decoration: BoxDecoration(
-            //               border: Border.all(
-            //                 color: const Color.fromARGB(255, 0, 236, 255),
-            //                 width: 1.2,
-            //               ),
-            //               borderRadius: BorderRadius.circular(6),
-            //               // boxShadow: [
-            //               //   BoxShadow(
-            //               //     color: Colors.pink,
-            //               //     spreadRadius: -4,
-            //               //     blurRadius: 10,
-            //               //   ),
-            //               // ],
-            //             ),
-            //             padding: const EdgeInsets.symmetric(
-            //               vertical: 8.0,
-            //               horizontal: 42.0,
-            //             ),
-            //             child: const Text(
-            //               "Join Session",
-            //               style: TextStyle(
-            //                 fontSize: 14,
-            //                 color: Colors.white,
-            //               ),
-            //             ),
-            //           ),
-            //         ),
-            //       ),
           ],
         ),
       ),
