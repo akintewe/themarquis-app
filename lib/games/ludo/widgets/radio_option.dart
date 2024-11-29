@@ -45,7 +45,7 @@ class RadioOption<T> extends StatelessWidget {
         padding: _padding,
         decoration: BoxDecoration(
           color: _backgroundColor,
-          border: Border.all(color: _borderColor),
+          border: _isActive ? null : Border.all(color: _borderColor),
           boxShadow: [if (_isActive && _activeShadow != null) _activeShadow],
           borderRadius: BorderRadius.circular(8),
         ),
