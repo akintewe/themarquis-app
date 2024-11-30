@@ -146,7 +146,7 @@ class _TwoPlayerWaitingRoomScreenState
           ),
           const SizedBox(width: 20),
           if (session.sessionUserStatus.length > 1) _invitePlayer(session),
-          if (session.sessionUserStatus.length == 1)
+          if (session.sessionUserStatus.length == 2)
             playerAvatarCard(
               index: 3,
               size: 85,
