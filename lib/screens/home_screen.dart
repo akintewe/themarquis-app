@@ -35,16 +35,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Column(
               children: [
-                const SizedBox(
-                  height: 64,
-                ),
-                FittedBox(
-                  child: Image.asset(
-                    'assets/images/banner.png',
-                    width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.fill,
-                  ),
-                ),
+                const SizedBox(height: 64),
+                Image.asset('assets/images/banner.png', width: MediaQuery.of(context).size.width, fit: BoxFit.fill),
               ],
             ),
             Column(
@@ -54,80 +46,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   systemOverlayStyle: const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light, statusBarBrightness: Brightness.light),
                   title: const BalanceAppBar(),
                 ),
-                const SizedBox(
-                  height: 24.0,
-                ),
+                const SizedBox(height: 24.0),
                 const ListTile(
-                  title: Text(
-                    'Top picks',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Lets explore our games',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                  title: Text('Top picks', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                  subtitle: Text('Lets explore our games', style: TextStyle(fontSize: 12)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Card(
                     child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Stack(
-                          children: [
-                            Image.asset('assets/images/ludo.png', fit: BoxFit.fitWidth, color: Colors.black.withAlpha(100), colorBlendMode: BlendMode.darken),
-                            const Positioned(
-                              bottom: 0,
-                              left: 0,
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Dice Game',
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                    Text(
-                                      'Ludo',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                    )
-                                  ],
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                      child: Stack(
+                        children: [
+                          Image.asset('assets/images/ludo.png', fit: BoxFit.fitWidth, color: Colors.black.withAlpha(100), colorBlendMode: BlendMode.darken),
+                          const Positioned(
+                            bottom: 0,
+                            left: 0,
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Dice Game', style: TextStyle(fontSize: 12)),
+                                  Text('Ludo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: IconButton(
+                                onPressed: () {
+                                  if (!ref.read(appStateProvider).isAuth) {
+                                    showDialog(context: context, builder: (ctx) => const AuthDialog());
+                                    return;
+                                  }
+                                  ref.read(appStateProvider.notifier).selectGame("ludo");
+                                },
+                                icon: const Icon(Icons.arrow_forward, size: 32),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: Colors.white.withAlpha(100),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 ),
                               ),
                             ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: IconButton(
-                                  onPressed: () {
-                                    if (!ref.read(appStateProvider).isAuth) {
-                                      showDialog(context: context, builder: (ctx) => const AuthDialog());
-                                      return;
-                                    }
-                                    ref.read(appStateProvider.notifier).selectGame("ludo");
-                                  },
-                                  icon: const Icon(
-                                    Icons.arrow_forward,
-                                    size: 32,
-                                  ),
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: Colors.white.withAlpha(100),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        )),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 Padding(
