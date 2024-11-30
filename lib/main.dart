@@ -1,16 +1,16 @@
 // import 'package:magic_sdk/magic_sdk.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:marquis_v2/models/app_state.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
+import 'package:marquis_v2/models/app_state.dart';
 import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_information_parser.dart';
 import 'package:marquis_v2/router/router_delegate.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -45,8 +45,7 @@ class MyApp extends ConsumerWidget {
           surface: const Color(0xff0f1118),
           brightness: Brightness.dark,
         ),
-        textTheme: GoogleFonts.orbitronTextTheme(Theme.of(context).textTheme)
-            .apply(bodyColor: Colors.white),
+        textTheme: GoogleFonts.orbitronTextTheme(Theme.of(context).textTheme).apply(bodyColor: Colors.white),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       routeInformationParser: AppRouteInformationParser(),

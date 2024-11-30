@@ -2,25 +2,28 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 import 'package:marquis_v2/env.dart';
 import 'package:marquis_v2/models/app_state.dart';
-import 'package:hive/hive.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/router_delegate.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:http/http.dart' as http;
 
 part "app_state.g.dart";
 
-final baseUrl = environment['build'] == 'DEBUG'
-    ? environment['apiUrlDebug']
-    : environment['apiUrl'];
+final baseUrl = environment['build'] == 'DEBUG' ? environment['apiUrlDebug'] : environment['apiUrl'];
 
 @Riverpod(keepAlive: true)
 class AppState extends _$AppState {
   Box<AppStateData>? _hiveBox;
   Timer? _refreshTokenTimer;
   Timer? _logoutTimer;
+
+  // bool _isBalanceVisible = false;
+
+  // bool get isBalanceVisible => state.isBalanceVisible;
+
   @override
   AppStateData build() {
     _hiveBox ??= Hive.box<AppStateData>("appState");
@@ -52,6 +55,11 @@ class AppState extends _$AppState {
     _hiveBox!.put("appState", state);
   }
 
+  void toggleBalanceVisibility() {
+    state = state.copyWith(isBalanceVisible: !state.isBalanceVisible);
+    _hiveBox!.put("isBalanceVisible", state);
+  }
+
   Future<void> login(String email) async {
     final url = Uri.parse('$baseUrl/auth/signin');
     final response = await http.post(
@@ -60,8 +68,7 @@ class AppState extends _$AppState {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
   }
 
@@ -73,8 +80,7 @@ class AppState extends _$AppState {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
@@ -111,8 +117,7 @@ class AppState extends _$AppState {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
   }
 
@@ -126,8 +131,7 @@ class AppState extends _$AppState {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
@@ -166,8 +170,7 @@ class AppState extends _$AppState {
       },
     );
     if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
@@ -265,8 +268,7 @@ class AppState extends _$AppState {
       },
     );
     if (response.statusCode != 200) {
-      throw HttpException(
-          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token

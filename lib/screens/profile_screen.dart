@@ -5,15 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gal/gal.dart';
 import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/dialog/auth_dialog.dart';
+import 'package:marquis_v2/widgets/profile_item.dart';
+import 'package:marquis_v2/widgets/ui_widgets.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../widgets/referral_field.dart';
 
 class ProfilePath extends AppRoutePath {
   @override
@@ -59,85 +65,106 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
               )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      elevation: 8.0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(36),
+            : SingleChildScrollView(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    Text(
+                      'Edit profile',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge!
+                          .copyWith(fontWeight: FontWeight.w900),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Card(
+                          elevation: 8.0,
+                          color: const Color(0xff212329),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(36),
+                            ),
+                            child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage: AssetImage(
+                                          'assets/images/avatar.png'), // Add your avatar image in assets folder
+                                      backgroundColor: Colors.transparent,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(
+                                        user.email,
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge!
+                                            .copyWith(fontWeight: FontWeight.w900),
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                          ),
                         ),
-                        child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const CircleAvatar(
-                                  radius: 50,
-                                  backgroundImage: AssetImage(
-                                      'assets/images/avatar.png'), // Add your avatar image in assets folder
-                                  backgroundColor: Colors.transparent,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Text(
-                                    user.email.split("@").first,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge!
-                                        .copyWith(fontWeight: FontWeight.w900),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: SelectableText(
-                                    user.accountAddress,
-                                    style: const TextStyle(fontSize: 8),
-                                  ),
-                                ),
-                              ],
-                            )),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: InkWell(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => InviteFriendDialog(user: user),
-                        );
-                      },
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
                       child: Card(
                           elevation: 8.0,
+                          color: const Color(0xff212329),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(24),
                             ),
                             padding: const EdgeInsets.all(16.0),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.max,
+                            child:  Column(
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Icon(Icons.share),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: SvgPicture.asset('assets/svg/wallet_icon.svg'),
+                                    ),
+                                    const Text('Wallet Address'),
+                                  ],
                                 ),
-                                Text('Show Referral Code'),
+                                ReferralField(
+                                  label: '',
+                                  value:  user.accountAddress,
+                                )
                               ],
                             ),
                           )),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: InkWell(
+                    ProfileItem(
+                        icon: SvgPicture.asset('assets/svg/invite_friend.svg'),
+                        title: 'Invite Friend',
+                        onTap: (){
+                          showDialog(
+                            context: context,
+                            builder: (context) => InviteFriendDialog(user: user),
+                          );
+                        }
+                    ),
+                    verticalSpace(8.0),
+                    ProfileItem(
+                      icon: const Icon(
+                        Icons.help_outline_rounded
+                      ),
+                      title: 'Help and Support',
                       onTap: () {
                         showDialog(
                           context: context,
@@ -152,60 +179,29 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         );
                       },
-                      child: Card(
-                          elevation: 8.0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            padding: const EdgeInsets.all(16.0),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Icon(Icons.help),
-                                ),
-                                Text('Help and Support'),
-                              ],
-                            ),
-                          )),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: InkWell(
+                    verticalSpace(8.0),
+                    ProfileItem(
+                      icon: Icon(
+                        Icons.logout,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      title: 'Log Out',
+                      textColor: Theme.of(context).colorScheme.primary,
                       onTap: () {
                         ref.read(appStateProvider.notifier).logout();
                       },
-                      child: Card(
-                          elevation: 8.0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            padding: const EdgeInsets.all(16.0),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Icon(
-                                    Icons.logout,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                Text(
-                                  'Logout',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          )),
                     ),
-                  ),
-                ],
-              ),
+                    verticalSpace(8.0),
+                    ProfileItem(
+                      icon: SvgPicture.asset('assets/svg/trash_icon.svg'),
+                      title: 'Delete Account',
+                      textColor: Colors.red,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+            ),
       ),
     );
   }
@@ -219,11 +215,13 @@ class InviteFriendDialog extends StatefulWidget {
 
   final UserData user;
 
+
   @override
   State<InviteFriendDialog> createState() => _InviteFriendDialogState();
 }
 
 class _InviteFriendDialogState extends State<InviteFriendDialog> {
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -258,10 +256,13 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
               backgroundColor: Colors.white,
             ),
             const SizedBox(height: 20),
-            _buildReferralField('Referral Code', widget.user.referralCode),
+            ReferralField(
+              label: 'Referral Code',
+              value:  widget.user.referralCode,
+            ),
             const SizedBox(height: 10),
-            _buildReferralField('Referral Link',
-                'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'),
+            ReferralField(label: 'Referral Link',
+               value:  'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'),
             const SizedBox(height: 18),
             FutureBuilder<Uint8List>(future: () async {
               final image = await createImageFromWidget(
@@ -363,6 +364,15 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                                   content: Text('Copied to clipboard')),
                             );
                           }),
+                          _buildActionButton(Icons.photo_outlined, 'Save image', () async {
+                            await Gal.putImageBytes(
+                                snapshot.data!);
+                            if(!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Saved to device')),
+                            );
+                          }),
                           _buildActionButton(Icons.share, 'Share', () async {
                             final image = await rootBundle
                                 .load('assets/images/share_banner.png');
@@ -385,39 +395,6 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
             }),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildReferralField(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '$label    $value',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: value));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Copied to clipboard')),
-              );
-            },
-            icon: const Icon(Icons.copy, color: Colors.white),
-          ),
-        ],
       ),
     );
   }

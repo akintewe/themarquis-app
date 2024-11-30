@@ -36,6 +36,8 @@ mixin _$AppStateData {
   DateTime? get refreshTokenExpiry => throw _privateConstructorUsedError;
   @HiveField(9)
   String? get selectedGameSessionId => throw _privateConstructorUsedError;
+  @HiveField(10)
+  bool get isBalanceVisible => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $AppStateDataCopyWith<AppStateData> get copyWith =>
@@ -58,7 +60,8 @@ abstract class $AppStateDataCopyWith<$Res> {
       @HiveField(6) String? refreshToken,
       @HiveField(7) DateTime? accessTokenExpiry,
       @HiveField(8) DateTime? refreshTokenExpiry,
-      @HiveField(9) String? selectedGameSessionId});
+      @HiveField(9) String? selectedGameSessionId,
+      @HiveField(10) bool isBalanceVisible});
 }
 
 /// @nodoc
@@ -84,6 +87,7 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
     Object? accessTokenExpiry = freezed,
     Object? refreshTokenExpiry = freezed,
     Object? selectedGameSessionId = freezed,
+    Object? isBalanceVisible = null,
   }) {
     return _then(_value.copyWith(
       navigatorIndex: null == navigatorIndex
@@ -126,6 +130,10 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
           ? _value.selectedGameSessionId
           : selectedGameSessionId // ignore: cast_nullable_to_non_nullable
               as String?,
+      isBalanceVisible: null == isBalanceVisible
+          ? _value.isBalanceVisible
+          : isBalanceVisible // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -148,7 +156,8 @@ abstract class _$$AppStateDataImplCopyWith<$Res>
       @HiveField(6) String? refreshToken,
       @HiveField(7) DateTime? accessTokenExpiry,
       @HiveField(8) DateTime? refreshTokenExpiry,
-      @HiveField(9) String? selectedGameSessionId});
+      @HiveField(9) String? selectedGameSessionId,
+      @HiveField(10) bool isBalanceVisible});
 }
 
 /// @nodoc
@@ -172,6 +181,7 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
     Object? accessTokenExpiry = freezed,
     Object? refreshTokenExpiry = freezed,
     Object? selectedGameSessionId = freezed,
+    Object? isBalanceVisible = null,
   }) {
     return _then(_$AppStateDataImpl(
       navigatorIndex: null == navigatorIndex
@@ -214,6 +224,10 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
           ? _value.selectedGameSessionId
           : selectedGameSessionId // ignore: cast_nullable_to_non_nullable
               as String?,
+      isBalanceVisible: null == isBalanceVisible
+          ? _value.isBalanceVisible
+          : isBalanceVisible // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -232,7 +246,8 @@ class _$AppStateDataImpl extends _AppStateData {
       @HiveField(6) this.refreshToken,
       @HiveField(7) this.accessTokenExpiry,
       @HiveField(8) this.refreshTokenExpiry,
-      @HiveField(9) this.selectedGameSessionId})
+      @HiveField(9) this.selectedGameSessionId,
+      @HiveField(10) this.isBalanceVisible = false})
       : super._();
 
   @override
@@ -268,10 +283,14 @@ class _$AppStateDataImpl extends _AppStateData {
   @override
   @HiveField(9)
   final String? selectedGameSessionId;
+  @override
+  @JsonKey()
+  @HiveField(10)
+  final bool isBalanceVisible;
 
   @override
   String toString() {
-    return 'AppStateData(navigatorIndex: $navigatorIndex, accessToken: $accessToken, theme: $theme, autoLoginResult: $autoLoginResult, isConnectedInternet: $isConnectedInternet, selectedGame: $selectedGame, refreshToken: $refreshToken, accessTokenExpiry: $accessTokenExpiry, refreshTokenExpiry: $refreshTokenExpiry, selectedGameSessionId: $selectedGameSessionId)';
+    return 'AppStateData(navigatorIndex: $navigatorIndex, accessToken: $accessToken, theme: $theme, autoLoginResult: $autoLoginResult, isConnectedInternet: $isConnectedInternet, selectedGame: $selectedGame, refreshToken: $refreshToken, accessTokenExpiry: $accessTokenExpiry, refreshTokenExpiry: $refreshTokenExpiry, selectedGameSessionId: $selectedGameSessionId, isBalanceVisible: $isBalanceVisible)';
   }
 
   @override
@@ -297,7 +316,9 @@ class _$AppStateDataImpl extends _AppStateData {
             (identical(other.refreshTokenExpiry, refreshTokenExpiry) ||
                 other.refreshTokenExpiry == refreshTokenExpiry) &&
             (identical(other.selectedGameSessionId, selectedGameSessionId) ||
-                other.selectedGameSessionId == selectedGameSessionId));
+                other.selectedGameSessionId == selectedGameSessionId) &&
+            (identical(other.isBalanceVisible, isBalanceVisible) ||
+                other.isBalanceVisible == isBalanceVisible));
   }
 
   @override
@@ -312,7 +333,8 @@ class _$AppStateDataImpl extends _AppStateData {
       refreshToken,
       accessTokenExpiry,
       refreshTokenExpiry,
-      selectedGameSessionId);
+      selectedGameSessionId,
+      isBalanceVisible);
 
   @JsonKey(ignore: true)
   @override
@@ -332,7 +354,8 @@ abstract class _AppStateData extends AppStateData {
       @HiveField(6) final String? refreshToken,
       @HiveField(7) final DateTime? accessTokenExpiry,
       @HiveField(8) final DateTime? refreshTokenExpiry,
-      @HiveField(9) final String? selectedGameSessionId}) = _$AppStateDataImpl;
+      @HiveField(9) final String? selectedGameSessionId,
+      @HiveField(10) final bool isBalanceVisible}) = _$AppStateDataImpl;
   _AppStateData._() : super._();
 
   @override
@@ -365,6 +388,9 @@ abstract class _AppStateData extends AppStateData {
   @override
   @HiveField(9)
   String? get selectedGameSessionId;
+  @override
+  @HiveField(10)
+  bool get isBalanceVisible;
   @override
   @JsonKey(ignore: true)
   _$$AppStateDataImplCopyWith<_$AppStateDataImpl> get copyWith =>

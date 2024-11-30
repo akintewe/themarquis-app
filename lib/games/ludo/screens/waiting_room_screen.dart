@@ -1,7 +1,6 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'dart:async';
+import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -124,12 +123,8 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: playerAvatarCard(
-                                  index: 0,
-                                  size: 80,
-                                  isSelf: true,
-                                  player: session.sessionUserStatus[0],
-                                  color: session.getListOfColors[0]),
+                              child:
+                                  playerAvatarCard(index: 0, size: 80, isSelf: true, player: session.sessionUserStatus[0], color: session.getListOfColors[0]),
                             ),
                             const Padding(
                               padding: EdgeInsets.all(8.0),
@@ -146,18 +141,11 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 children: [
-                                  for (int i = 1;
-                                      i < session.sessionUserStatus.length;
-                                      i++)
+                                  for (int i = 1; i < session.sessionUserStatus.length; i++)
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
                                       child: playerAvatarCard(
-                                          index: i,
-                                          size: 80,
-                                          isSelf: false,
-                                          player: session.sessionUserStatus[i],
-                                          color: session.getListOfColors[i]),
+                                          index: i, size: 80, isSelf: false, player: session.sessionUserStatus[i], color: session.getListOfColors[i]),
                                     ),
                                 ],
                               ),
@@ -187,63 +175,48 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                                     padding: const EdgeInsets.all(16.0),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
                                         IconButton.filled(
                                           onPressed: () async {
-                                            final tweetText =
-                                                'Join my Ludo Session\nRoom Id: ${session.id}';
-                                            final url =
-                                                'https://themarquis.xyz/ludo?roomid=${session.id}';
+                                            final tweetText = 'Join my Ludo Session\nRoom Id: ${session.id}';
+                                            final url = 'https://themarquis.xyz/ludo?roomid=${session.id}';
 
                                             // Use the Twitter app's URL scheme
-                                            final tweetUrl = Uri.encodeFull(
-                                                'twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
+                                            final tweetUrl =
+                                                Uri.encodeFull('twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
 
                                             // Fallback to web URL if the app isn't installed
                                             final webTweetUrl = Uri.encodeFull(
                                                 'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz&image=data:image/png;base64,${base64Encode(imageBytes)}');
-                                            if (await canLaunchUrl(
-                                                Uri.parse(tweetUrl))) {
-                                              await launchUrl(
-                                                  Uri.parse(tweetUrl));
+                                            if (await canLaunchUrl(Uri.parse(tweetUrl))) {
+                                              await launchUrl(Uri.parse(tweetUrl));
                                             } else {
-                                              await launchUrl(
-                                                  Uri.parse(webTweetUrl));
+                                              await launchUrl(Uri.parse(webTweetUrl));
                                             }
                                           },
-                                          icon: const Icon(
-                                              FontAwesomeIcons.xTwitter),
+                                          icon: const Icon(FontAwesomeIcons.xTwitter),
                                         ),
                                         IconButton.filled(
                                           onPressed: () async {
-                                            Clipboard.setData(ClipboardData(
-                                                text:
-                                                    "https://themarquis.xyz/ludo?roomid=${session.id}"));
+                                            Clipboard.setData(ClipboardData(text: "https://themarquis.xyz/ludo?roomid=${session.id}"));
                                             if (!context.mounted) return;
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(
-                                                content: Text(
-                                                    'Link Copied to Clipboard'),
+                                                content: Text('Link Copied to Clipboard'),
                                                 duration: Duration(seconds: 2),
                                               ),
                                             );
                                           },
-                                          icon:
-                                              const Icon(FontAwesomeIcons.link),
+                                          icon: const Icon(FontAwesomeIcons.link),
                                         ),
                                         IconButton.filled(
                                           onPressed: () async {
-                                            await Gal.putImageBytes(
-                                                qrImageBytes);
+                                            await Gal.putImageBytes(qrImageBytes);
                                             if (!context.mounted) return;
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(
-                                                content: Text(
-                                                    'Image successfully saved to gallery'),
+                                                content: Text('Image successfully saved to gallery'),
                                                 duration: Duration(seconds: 2),
                                               ),
                                             );
@@ -252,17 +225,8 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                                         ),
                                         IconButton.filled(
                                           onPressed: () {
-                                            Share.shareXFiles(
-                                                [
-                                                  XFile.fromData(imageBytes,
-                                                      mimeType: 'image/png')
-                                                ],
-                                                subject: 'Ludo Invite',
-                                                text:
-                                                    'I am playing Ludo, please join us!',
-                                                fileNameOverrides: [
-                                                  'share.png'
-                                                ]);
+                                            Share.shareXFiles([XFile.fromData(imageBytes, mimeType: 'image/png')],
+                                                subject: 'Ludo Invite', text: 'I am playing Ludo, please join us!', fileNameOverrides: ['share.png']);
                                           },
                                           icon: const Icon(Icons.share),
                                         ),
@@ -281,8 +245,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                           ),
                         ),
                         child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 30.0, vertical: 10),
+                          padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10),
                           child: Text(
                             'Invite',
                             style: TextStyle(
@@ -307,8 +270,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                           alignment: AlignmentDirectional.center,
                           children: [
                             Center(
-                              child: SvgPicture.asset(
-                                  "assets/svg/ludo_elevated_button.svg"),
+                              child: SvgPicture.asset("assets/svg/ludo_elevated_button.svg"),
                             ),
                             Center(
                               child: Text(
@@ -356,20 +318,14 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                       padding: EdgeInsets.all(6.0),
                       child: Text(
                         "Game: Ludo",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: Text(
                         "Room ID: ${session.id}",
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
+                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                     QrImageView(
@@ -405,11 +361,10 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
         height: 418,
         child: Stack(
           children: [
-            Image.asset('assets/images/share_waiting_room_bg.png',
-                fit: BoxFit.cover),
+            Image.asset('assets/images/share_waiting_room_bg.png', fit: BoxFit.cover),
             Column(
               children: [
-                SizedBox(height: 80),
+                const SizedBox(height: 80),
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
@@ -453,17 +408,11 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
                                 showText: false,
                               ),
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 38.0),
+                                padding: const EdgeInsets.symmetric(vertical: 38.0),
                                 child: Text(
-                                  session.sessionUserStatus[index].email
-                                              .split("@")
-                                              .first ==
-                                          ""
+                                  session.sessionUserStatus[index].email.split("@").first == ""
                                       ? "No Player"
-                                      : session.sessionUserStatus[index].email
-                                          .split("@")
-                                          .first,
+                                      : session.sessionUserStatus[index].email.split("@").first,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -485,23 +434,19 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
         ),
       ),
     );
-    return await createImageFromWidget(shareWidget,
-        logicalSize: const Size(800, 418));
+    return await createImageFromWidget(shareWidget, logicalSize: const Size(800, 418));
   }
 
-  Future<Uint8List> createImageFromWidget(Widget widget,
-      {Duration? wait, Size? logicalSize}) async {
+  Future<Uint8List> createImageFromWidget(Widget widget, {Duration? wait, Size? logicalSize}) async {
     final RenderRepaintBoundary repaintBoundary = RenderRepaintBoundary();
     final view = PlatformDispatcher.instance.views.first;
     logicalSize ??= view.physicalSize / view.devicePixelRatio;
 
     final RenderView renderView = RenderView(
       view: view,
-      child: RenderPositionedBox(
-          alignment: Alignment.center, child: repaintBoundary),
+      child: RenderPositionedBox(alignment: Alignment.center, child: repaintBoundary),
       configuration: ViewConfiguration(
-        logicalConstraints: BoxConstraints(
-            maxWidth: logicalSize.width, maxHeight: logicalSize.height),
+        logicalConstraints: BoxConstraints(maxWidth: logicalSize.width, maxHeight: logicalSize.height),
         devicePixelRatio: 1.0,
       ),
     );
@@ -512,8 +457,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
     pipelineOwner.rootNode = renderView;
     renderView.prepareInitialFrame();
 
-    final RenderObjectToWidgetElement<RenderBox> rootElement =
-        RenderObjectToWidgetAdapter<RenderBox>(
+    final RenderObjectToWidgetElement<RenderBox> rootElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: repaintBoundary,
       child: widget,
     ).attachToRenderTree(buildOwner);
@@ -532,8 +476,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
     pipelineOwner.flushPaint();
 
     final ui.Image image = await repaintBoundary.toImage();
-    final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
     return Uint8List.view(byteData!.buffer);
   }
@@ -554,8 +497,7 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
           decoration: BoxDecoration(
             
             color: color, // Background color
-            borderRadius: BorderRadius.circular(
-                size / 8), // Rounded corners with radius 24
+            borderRadius: BorderRadius.circular(size / 8), // Rounded corners with radius 24
           ),
           child: FittedBox(
             fit: BoxFit.fill,
@@ -602,8 +544,6 @@ class _WaitingRoomScreenState extends ConsumerState<WaitingRoomScreen> {
   //           4;
   // }
   bool _isRoomFull(LudoSessionData? session) {
-    return session != null &&
-        session.sessionUserStatus.where((e) => e.status == "ACTIVE").length ==
-            4;
+    return session != null && session.sessionUserStatus.where((e) => e.status == "ACTIVE").length == 4;
   }
 }
