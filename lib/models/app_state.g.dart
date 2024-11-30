@@ -27,13 +27,14 @@ class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
       accessTokenExpiry: fields[7] as DateTime?,
       refreshTokenExpiry: fields[8] as DateTime?,
       selectedGameSessionId: fields[9] as String?,
+      isBalanceVisible: (fields[10] as bool?) ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$AppStateDataImpl obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.navigatorIndex)
       ..writeByte(1)
@@ -53,16 +54,14 @@ class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
       ..writeByte(8)
       ..write(obj.refreshTokenExpiry)
       ..writeByte(9)
-      ..write(obj.selectedGameSessionId);
+      ..write(obj.selectedGameSessionId)
+      ..writeByte(10)
+      ..write(obj.isBalanceVisible);
   }
 
   @override
   int get hashCode => typeId.hashCode;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AppStateDataImplAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+  bool operator ==(Object other) => identical(this, other) || other is AppStateDataImplAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-// import 'package:magic_sdk/magic_sdk.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
 import 'package:marquis_v2/widgets/primary_button.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
+
 import '../widgets/outline_button.dart';
 import '../widgets/text_form_field.dart';
 
@@ -36,7 +35,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
 
   void _validateEmail() {
     setState(() {
-       if (!_isValidEmail(_emailController.text) && _emailController.text.isNotEmpty) {
+      if (!_isValidEmail(_emailController.text) && _emailController.text.isNotEmpty) {
         _emailError = 'Invalid email';
         _emailHasError = true;
       } else {
@@ -46,16 +45,13 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return AlertDialog(
       contentPadding: const EdgeInsets.all(8.0),
       content: Container(
-        width: deviceSize.aspectRatio > 1
-            ? deviceSize.width * 0.5
-            : deviceSize.width * 0.85,
+        width: deviceSize.aspectRatio > 1 ? deviceSize.width * 0.5 : deviceSize.width * 0.85,
         margin: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
         child: Column(
@@ -65,19 +61,14 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 GestureDetector(
-                  onTap: (){
-                    Navigator.pop(context);
-                  },
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
                     child: SvgPicture.asset("assets/svg/cancel_icon.svg"))
               ],
             ),
             verticalSpace(4.0),
-            const Text("Welcome to The Marquis",
-                style: TextStyle(
-                    fontSize: 20,
-                  fontWeight: FontWeight.bold
-                )
-            ),
+            const Text("Welcome to The Marquis", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             verticalSpace(24.0),
             CustomTextFormField(
               label: 'Email',
@@ -85,7 +76,7 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
               controller: _emailController,
               hasError: _emailHasError,
               errorMessage: _emailError,
-              onTextChanged: (value)=> _validateEmail(),
+              onTextChanged: (value) => _validateEmail(),
             ),
             verticalSpace(16.0),
             AnimatedSize(
@@ -95,17 +86,17 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
               alignment: Alignment.centerRight,
               child: _isSignUp
                   ? CustomTextFormField(
-                    label: 'Referral Code',
-                    hintText: 'Input your code',
-                    controller: _refCodeController,
-                    hasError: false,
-                    errorMessage: _refCodeError,
-                    onTextChanged: (value){},
-                  )
+                      label: 'Referral Code',
+                      hintText: 'Input your code',
+                      controller: _refCodeController,
+                      hasError: false,
+                      errorMessage: _refCodeError,
+                      onTextChanged: (value) {},
+                    )
                   : const SizedBox(),
             ),
             Padding(
-              padding: const EdgeInsets.only(top:24.0),
+              padding: const EdgeInsets.only(top: 24.0),
               child: _isLoading
                   ? const CircularProgressIndicator()
                   : Column(
@@ -117,27 +108,22 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                                 _isLoading = true;
                               });
                               if (_isSignUp) {
-                                if (_emailController.text != "" &&
-                                    _refCodeController.text != "") {
+                                if (_emailController.text != "" && _refCodeController.text != "") {
                                   try {
-                                    if (!_emailController.text
-                                        .endsWith('@test.com')) {
-                                      await ref
-                                          .read(appStateProvider.notifier)
-                                          .signup(
-                                        _emailController.text.trim(),
-                                        _refCodeController.text.trim(),
-                                      );
+                                    if (!_emailController.text.endsWith('@test.com')) {
+                                      await ref.read(appStateProvider.notifier).signup(
+                                            _emailController.text.trim(),
+                                            _refCodeController.text.trim(),
+                                          );
                                     }
                                     if (!context.mounted) return;
                                     await showDialog<String>(
                                       context: context,
                                       barrierDismissible: false,
-                                      builder: (BuildContext context) =>
-                                          OTPDialog(
-                                            email: _emailController.text,
-                                            isSignUp: true,
-                                          ),
+                                      builder: (BuildContext context) => OTPDialog(
+                                        email: _emailController.text,
+                                        isSignUp: true,
+                                      ),
                                     );
                                     if (!context.mounted) return;
                                     Navigator.of(context).pop();
@@ -150,21 +136,17 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                                 //login
                                 if (_emailController.text != "") {
                                   try {
-                                    if (!_emailController.text
-                                        .endsWith('@test.com')) {
-                                      await ref
-                                          .read(appStateProvider.notifier)
-                                          .login(_emailController.text.trim());
+                                    if (!_emailController.text.endsWith('@test.com')) {
+                                      await ref.read(appStateProvider.notifier).login(_emailController.text.trim());
                                     }
                                     if (!context.mounted) return;
                                     await showDialog<String>(
                                       context: context,
                                       barrierDismissible: false,
-                                      builder: (BuildContext context) =>
-                                          OTPDialog(
-                                            email: _emailController.text,
-                                            isSignUp: false,
-                                          ),
+                                      builder: (BuildContext context) => OTPDialog(
+                                        email: _emailController.text,
+                                        isSignUp: false,
+                                      ),
                                     );
                                     if (!context.mounted) return;
                                     Navigator.of(context).pop();
@@ -177,31 +159,22 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
                                 _isLoading = false;
                               });
                             },
-                            buttonTitle: _isSignUp ? 'Sign Up' : 'Login'
-                        ),
+                            buttonTitle: _isSignUp ? 'Sign Up' : 'Login'),
                         verticalSpace(12.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(_isSignUp ? "Already have an account? " : "Don’t have an account? " ,
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xffCACACA)
-                                )
-                            ),
+                            Text(_isSignUp ? "Already have an account? " : "Don’t have an account? ",
+                                style: const TextStyle(fontSize: 14, color: Color(0xffCACACA))),
                             GestureDetector(
-                              onTap: (){
+                              onTap: () {
                                 setState(() {
                                   _isSignUp = !_isSignUp;
                                 });
                               },
                               child: Text(
                                 _isSignUp ? "Login" : "Sign up",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary
-                                ),
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
                               ),
                             ),
                           ],
@@ -226,7 +199,6 @@ class OTPDialog extends ConsumerStatefulWidget {
 }
 
 class _OTPDialogState extends ConsumerState<OTPDialog> {
-
   final _otpPinFieldController = GlobalKey<OtpPinFieldState>();
   bool _isLoading = false;
 
@@ -239,7 +211,6 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
   void dispose() {
     super.dispose();
   }
-
 
   void _submitOTP() {
     _verifyOTP();
@@ -288,9 +259,7 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
     return AlertDialog(
       contentPadding: const EdgeInsets.all(8.0),
       content: Container(
-        width: deviceSize.aspectRatio > 1
-            ? deviceSize.width * 0.5
-            : deviceSize.width * 0.85,
+        width: deviceSize.aspectRatio > 1 ? deviceSize.width * 0.5 : deviceSize.width * 0.85,
         margin: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
         child: Column(
@@ -300,7 +269,7 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.pop(context);
                     },
                     child: SvgPicture.asset("assets/svg/cancel_icon.svg"))
@@ -310,25 +279,19 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
             const Text(
               "Verification",
               style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
             verticalSpace(4.0),
             const Text(
               "Verification code has been sent to",
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xff8E8E8E)
-              ),
+              style: TextStyle(fontSize: 12, color: Color(0xff8E8E8E)),
             ),
             verticalSpace(4.0),
-             Text(
+            Text(
               widget.email,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xffF3F3F3)
-              ),
+              style: const TextStyle(fontSize: 12, color: Color(0xffF3F3F3)),
             ),
             verticalSpace(16.0),
             OtpPinField(
@@ -338,15 +301,13 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
               autoFillEnable: false,
               textInputAction: TextInputAction.done,
               onSubmit: (text) {
-                if(text.length == 4){
+                if (text.length == 4) {
                   _submitOTP();
                 }
               },
               onChange: (text) {},
               otpPinFieldStyle: OtpPinFieldStyle(
-                textStyle: const TextStyle(
-                  color: Colors.white
-                ),
+                textStyle: const TextStyle(color: Colors.white),
                 activeFieldBorderColor: Theme.of(context).colorScheme.primary,
                 defaultFieldBorderColor: const Color(0xff32363A),
                 fieldBorderWidth: 1,
@@ -356,8 +317,7 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
               cursorColor: Colors.white,
               cursorWidth: 2,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              otpPinFieldDecoration:
-              OtpPinFieldDecoration.defaultPinBoxDecoration,
+              otpPinFieldDecoration: OtpPinFieldDecoration.defaultPinBoxDecoration,
             ),
             verticalSpace(16.0),
             Row(
@@ -376,12 +336,12 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : Expanded(
-                    flex: 1,
-                      child: PrimaryButton(
-                        onTaps: _submitOTP,
-                        buttonTitle: 'Submit',
+                        flex: 1,
+                        child: PrimaryButton(
+                          onTaps: _submitOTP,
+                          buttonTitle: 'Submit',
+                        ),
                       ),
-                ),
               ],
             )
           ],

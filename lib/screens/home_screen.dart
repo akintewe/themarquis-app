@@ -3,15 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:marquis_v2/providers/app_state.dart';
-import 'package:marquis_v2/providers/user.dart';
-import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/dialog/auth_dialog.dart';
+import 'package:marquis_v2/providers/app_state.dart';
+import 'package:marquis_v2/router/route_path.dart';
+import 'package:marquis_v2/widgets/balance_appbar.dart';
 import 'package:marquis_v2/widgets/locked_game_widget.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
-
-import '../widgets/gradient_separator.dart';
-import '../widgets/user_points_widget.dart';
 
 class HomePath extends AppRoutePath {
   @override
@@ -28,344 +25,78 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-
   bool showBalance = false;
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
     return Scaffold(
       body: SingleChildScrollView(
         child: Stack(
           children: [
             Column(
               children: [
-                 const SizedBox(
-                  height: 64,
-                ),
-                FittedBox(
-                  child: Image.asset(
-                    'assets/images/banner.png',
-                    width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.fill,
-                  ),
-                ),
+                const SizedBox(height: 64),
+                Image.asset('assets/images/banner.png', width: MediaQuery.of(context).size.width, fit: BoxFit.fill),
               ],
             ),
             Column(
               children: [
                 AppBar(
                   backgroundColor: Colors.white.withOpacity(0.02),
-                  systemOverlayStyle: const SystemUiOverlayStyle(
-                      statusBarIconBrightness: Brightness.light,
-                      statusBarBrightness: Brightness.light
-                  ),
-                  title: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const UserPointsWidget(),
-                        horizontalSpace(8.0),
-                        user == null
-                            ? Container()
-                            : Expanded(
-                              child: Container(
-                                 decoration: BoxDecoration(
-                                   color: Colors.white.withOpacity(0.04),
-                                   borderRadius: const BorderRadius.all(Radius.circular(8.0))
-                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        InkWell(
-                                          onTap: (){
-                                            setState(() {
-                                              showBalance = !showBalance;
-                                            });
-                                          },
-                                            child: SvgPicture.asset(
-                                              showBalance ?
-                                                'assets/svg/eye_icon.svg' : 'assets/svg/hide_icon.svg',
-                                                width: 18, height: 20
-                                            )
-                                        ),
-                                        horizontalSpace(8.0),
-                                        const GradientSeparator(),
-                                        horizontalSpace(8.0),
-                                        SizedBox(
-                                          width: 75,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  SvgPicture.asset(
-                                                    "assets/svg/STRK_logo.svg",
-                                                    width: 19,
-                                                  ),
-                                                  horizontalSpace(4.0),
-                                                  const Text(
-                                                    'STRK',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                              const SizedBox(width: 5),
-                                              FutureBuilder<BigInt>(
-                                                future: ref.read(userProvider.notifier).getTokenBalance(
-                                                    "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot.connectionState ==
-                                                      ConnectionState.waiting) {
-                                                    return Transform.scale(
-                                                      scale: 0.2,
-                                                        child: const CircularProgressIndicator());
-                                                  }
-                                                  if (snapshot.hasError) {
-                                                    return Container();
-                                                  }
-                                                  return Text(
-                                                    showBalance ?
-                                                    ((snapshot.data! / BigInt.from(1e18))
-                                                        .toStringAsFixed(8)
-                                                        .replaceAll(RegExp(r'0+$'), '')
-                                                        .replaceAll(RegExp(r'\.$'), '')) : '********',
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        horizontalSpace(12.0),
-                                        const GradientSeparator(),
-                                        horizontalSpace(8.0),
-                                        SizedBox(
-                                          width: 75,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Image.asset(
-                                                    "assets/images/eth_icon.png",
-                                                    width: 19,
-                                                  ),
-                                                  horizontalSpace(4.0),
-                                                  const Text(
-                                                    'ETH',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                              const SizedBox(width: 5),
-                                              FutureBuilder<BigInt>(
-                                                future: ref.read(userProvider.notifier).getTokenBalance(
-                                                    "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot.connectionState ==
-                                                      ConnectionState.waiting) {
-                                                    return Transform.scale(
-                                                        scale: 0.2,
-                                                        child: const CircularProgressIndicator());
-                                                  }
-                                                  if (snapshot.hasError) {
-                                                    return Container();
-                                                  }
-                                                  return Text(
-                                                    showBalance ?
-                                                    ((snapshot.data! / BigInt.from(1e18))
-                                                        .toStringAsFixed(8)
-                                                        .replaceAll(RegExp(r'0+$'), '')
-                                                        .replaceAll(RegExp(r'\.$'), '')) : '********',
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        horizontalSpace(12.0),
-                                        const GradientSeparator(),
-                                        horizontalSpace(8.0),
-                                        SizedBox(
-                                          width: 75,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Image.asset(
-                                                    "assets/images/lords_icon.png",
-                                                    width: 19,
-                                                  ),
-                                                  horizontalSpace(4.0),
-                                                  const Text(
-                                                    'LORDS',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                  showBalance ? '0' : '********',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                  )
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                    const SizedBox(width: 12),
-                                        const GradientSeparator(),
-                                        horizontalSpace(8.0),
-                                        SizedBox(
-                                          width: 75,
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Image.asset(
-                                                    "assets/images/brother_logo.png",
-                                                    width: 19,
-                                                  ),
-                                                  horizontalSpace(4.0),
-                                                  const Text(
-                                                    'BROTHER',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                  showBalance ? '0' : '********',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                  )
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                      ],
-                    ),
-                  ),
+                  systemOverlayStyle: const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light, statusBarBrightness: Brightness.light),
+                  title: const BalanceAppBar(),
                 ),
-                const SizedBox(
-                  height: 24.0,
-                ),
+                const SizedBox(height: 24.0),
                 const ListTile(
-                  title: Text(
-                    'Top picks',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Lets explore our games',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                  title: Text('Top picks', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                  subtitle: Text('Lets explore our games', style: TextStyle(fontSize: 12)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Card(
                     child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Stack(
-                          children: [
-                            Image.asset('assets/images/ludo.png',
-                                fit: BoxFit.fitWidth,
-                                color: Colors.black.withAlpha(100),
-                                colorBlendMode: BlendMode.darken),
-                            const Positioned(
-                              bottom: 0,
-                              left: 0,
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Dice Game',
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                    Text(
-                                      'Ludo',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  ],
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                      child: Stack(
+                        children: [
+                          Image.asset('assets/images/ludo.png', fit: BoxFit.fitWidth, color: Colors.black.withAlpha(100), colorBlendMode: BlendMode.darken),
+                          const Positioned(
+                            bottom: 0,
+                            left: 0,
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Dice Game', style: TextStyle(fontSize: 12)),
+                                  Text('Ludo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: IconButton(
+                                onPressed: () {
+                                  if (!ref.read(appStateProvider).isAuth) {
+                                    showDialog(context: context, builder: (ctx) => const AuthDialog());
+                                    return;
+                                  }
+                                  ref.read(appStateProvider.notifier).selectGame("ludo");
+                                },
+                                icon: const Icon(Icons.arrow_forward, size: 32),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: Colors.white.withAlpha(100),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 ),
                               ),
                             ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: IconButton(
-                                  onPressed: () {
-                                    if (!ref.read(appStateProvider).isAuth) {
-                                      showDialog(
-                                          context: context,
-                                          builder: (ctx) => const AuthDialog());
-                                      return;
-                                    }
-                                    ref
-                                        .read(appStateProvider.notifier)
-                                        .selectGame("ludo");
-                                  },
-                                  icon: const Icon(
-                                    Icons.arrow_forward,
-                                    size: 32,
-                                  ),
-                                  style: IconButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.white.withAlpha(100),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        )),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 Padding(
@@ -374,12 +105,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       Container(
                         width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(
-                                color: const Color(0xff181B25)
-                            )
-                        ),
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.0), border: Border.all(color: const Color(0xff181B25))),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -412,7 +138,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                 ),
-
               ],
             ),
           ],
@@ -500,10 +225,7 @@ class GameCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(fontWeight: FontWeight.w800),
+                            style: Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
                         if (isActive)
@@ -574,8 +296,7 @@ class MyChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration:
-          BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: Row(
         children: [
@@ -583,18 +304,14 @@ class MyChip extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(0, 0, iconPadding, 0),
             child: Icon(
               icon,
-              color: isLightColor
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).colorScheme.onSurface,
+              color: isLightColor ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
               size: 15,
             ),
           ),
           Text(
             title,
             style: TextStyle(
-              color: isLightColor
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).colorScheme.onSurface,
+              color: isLightColor ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
