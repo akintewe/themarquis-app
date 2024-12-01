@@ -10,9 +10,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gal/gal.dart';
 import 'package:marquis_v2/games/ludo/components/cut_edge_container.dart';
+import 'package:marquis_v2/games/ludo/components/string_validation.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
+import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
+import 'package:marquis_v2/games/ludo/widgets/divider_shape.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -60,31 +63,22 @@ class _FourPlayerWaitingRoomScreenState
       backgroundColor: Colors.black,
       body: session == null
           ? const Center(child: Text('No Data'))
-          : Transform.scale(
-              scale: widget.game.height / deviceSize.height,
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width:
-                    deviceSize.height * widget.game.width / widget.game.height,
-                height: deviceSize.height,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _waitingRoomTopBar(),
-                    const SizedBox(height: 59),
-                    _roomID(session),
-                    // const SizedBox(height: 20),
-                    // _starkTonMenu(),
-                    const SizedBox(height: 32),
-                    _players(),
-                    const SizedBox(height: 20),
-                    _playesrDetailsList(session),
-                    const Spacer(),
-                    _bottom(session),
-                    const SizedBox(height: 62),
-                  ],
-                ),
-              ),
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _waitingRoomTopBar(),
+                const SizedBox(height: 76),
+                _roomID(session),
+                // const SizedBox(height: 20),
+                // _starkTonMenu(),
+                const SizedBox(height: 32),
+                _players(),
+                const SizedBox(height: 20),
+                _playesrDetailsList(session),
+                const Spacer(),
+                _bottom(session),
+                const SizedBox(height: 62),
+              ],
             ),
     );
   }
@@ -136,7 +130,7 @@ class _FourPlayerWaitingRoomScreenState
         children: [
           playerAvatarCard(
             index: 0,
-            size: 85,
+            size: 72,
             isSelf: false,
             player: session.sessionUserStatus[0],
             color: session.getListOfColors[0],
@@ -145,7 +139,7 @@ class _FourPlayerWaitingRoomScreenState
           for (int i = 1; i < session.sessionUserStatus.length && i < 3; i++)
             playerAvatarCard(
               index: i,
-              size: 85,
+              size: 72,
               isSelf: false,
               player: session.sessionUserStatus[i],
               color: session.getListOfColors[i],
@@ -153,12 +147,12 @@ class _FourPlayerWaitingRoomScreenState
             ),
           if (session.sessionUserStatus.length > 1 ||
               session.sessionUserStatus.length > 2 ||
-              session.sessionUserStatus.length > 3)
+              session.sessionUserStatus.length == 3)
             _invitePlayer(session),
-          if (session.sessionUserStatus.length > 4)
+          if (session.sessionUserStatus.length == session.sessionUserStatus[3])
             playerAvatarCard(
               index: 3,
-              size: 85,
+              size: 72,
               isSelf: false,
               player: session.sessionUserStatus[3],
               color: session.getListOfColors[3],
@@ -168,6 +162,8 @@ class _FourPlayerWaitingRoomScreenState
       ),
     );
   }
+
+
 
   Widget playerAvatarCard({
     required int index,
@@ -217,7 +213,7 @@ class _FourPlayerWaitingRoomScreenState
         ),
         if (showText) const SizedBox(height: 10),
         Text(
-          player.email.split("@").first,
+          player.email.split("@").first.truncate(5),
           style: const TextStyle(
             fontSize: 14,
             color: Colors.white,
@@ -387,74 +383,150 @@ class _FourPlayerWaitingRoomScreenState
               children: [
                 Image.memory(imageBytes),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(top: 8),
                   child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    // mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton.filled(
-                        onPressed: () async {
-                          final tweetText =
-                              'Join my Ludo Session\nRoom Id: ${session.id}';
-                          final url =
-                              'https://themarquis.xyz/ludo?roomid=${session.id}';
+                      Column(
+                        children: [
+                          Container(
+                            height: 36,
+                            width: 36,
+                            child: IconButton.filled(
+                              color: Colors.white,
+                              iconSize: 20,
+                              onPressed: () async {
+                                final tweetText =
+                                    'Join my Ludo Session\nRoom Id: ${session.id}';
+                                final url =
+                                    'https://themarquis.xyz/ludo?roomid=${session.id}';
 
-                          // Use the Twitter app's URL scheme
-                          final tweetUrl = Uri.encodeFull(
-                              'twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
+                                // Use the Twitter app's URL scheme
+                                final tweetUrl = Uri.encodeFull(
+                                    'twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
 
-                          // Fallback to web URL if the app isn't installed
-                          final webTweetUrl = Uri.encodeFull(
-                              'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz&image=data:image/png;base64,${base64Encode(imageBytes)}');
-                          if (await canLaunchUrl(Uri.parse(tweetUrl))) {
-                            await launchUrl(Uri.parse(tweetUrl));
-                          } else {
-                            await launchUrl(Uri.parse(webTweetUrl));
-                          }
-                        },
-                        icon: const Icon(FontAwesomeIcons.xTwitter),
-                      ),
-                      IconButton.filled(
-                        onPressed: () async {
-                          Clipboard.setData(ClipboardData(
-                              text:
-                                  "https://themarquis.xyz/ludo?roomid=${session.id}"));
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Link Copied to Clipboard'),
-                              duration: Duration(seconds: 2),
+                                // Fallback to web URL if the app isn't installed
+                                final webTweetUrl = Uri.encodeFull(
+                                    'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz&image=data:image/png;base64,${base64Encode(imageBytes)}');
+                                if (await canLaunchUrl(Uri.parse(tweetUrl))) {
+                                  await launchUrl(Uri.parse(tweetUrl));
+                                } else {
+                                  await launchUrl(Uri.parse(webTweetUrl));
+                                }
+                              },
+                              icon: const Icon(FontAwesomeIcons.xTwitter),
                             ),
-                          );
-                        },
-                        icon: const Icon(FontAwesomeIcons.link),
-                      ),
-                      IconButton.filled(
-                        onPressed: () async {
-                          await Gal.putImageBytes(qrImageBytes);
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Image successfully saved to gallery'),
-                              duration: Duration(seconds: 2),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "X",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.qr_code),
+                          ),
+                        ],
                       ),
-                      IconButton.filled(
-                        onPressed: () {
-                          Share.shareXFiles(
-                              [
-                                XFile.fromData(imageBytes,
-                                    mimeType: 'image/png')
-                              ],
-                              subject: 'Ludo Invite',
-                              text: 'I am playing Ludo, please join us!',
-                              fileNameOverrides: ['share.png']);
-                        },
-                        icon: const Icon(Icons.share),
+                      Column(
+                        children: [
+                          SizedBox(
+                            height: 36,
+                            width: 36,
+                            child: IconButton.filled(
+                              iconSize: 20,
+                              color: Colors.white,
+                              onPressed: () async {
+                                Clipboard.setData(ClipboardData(
+                                    text:
+                                        "https://themarquis.xyz/ludo?roomid=${session.id}"));
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Link Copied to Clipboard'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(FontAwesomeIcons.link),
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Copy Link",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          SizedBox(
+                            height: 36,
+                            width: 36,
+                            child: IconButton.filled(
+                              iconSize: 20,
+                              color: Colors.white,
+                              onPressed: () async {
+                                await Gal.putImageBytes(qrImageBytes);
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Image successfully saved to gallery'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.qr_code),
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Download QR",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          SizedBox(
+                            height: 36,
+                            width: 36,
+                            child: IconButton.filled(
+                              iconSize: 20,
+                              color: Colors.white,
+                              onPressed: () {
+                                Share.shareXFiles(
+                                    [
+                                      XFile.fromData(imageBytes,
+                                          mimeType: 'image/png')
+                                    ],
+                                    subject: 'Ludo Invite',
+                                    text: 'I am playing Ludo, please join us!',
+                                    fileNameOverrides: ['share.png']);
+                              },
+                              icon: const Icon(Icons.share),
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Share",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -467,8 +539,8 @@ class _FourPlayerWaitingRoomScreenState
       child: Column(
         children: [
           Container(
-            height: 85,
-            width: 85,
+            height: 72,
+            width: 72,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
@@ -485,7 +557,7 @@ class _FourPlayerWaitingRoomScreenState
           ),
           const SizedBox(height: 10),
           Container(
-            height: 25,
+            height: 24,
             width: 74,
             decoration: BoxDecoration(
                 color: const Color(0XFF00ECFF),
@@ -574,35 +646,52 @@ class _FourPlayerWaitingRoomScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 38,
-            width: 130,
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0XFF00ECFF).withOpacity(0.6),
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Text(
-                'Players',
-                style: TextStyle(
-                  fontSize: 17,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
+          _gradientContainer(),
           const Divider(
             thickness: 2,
             color: Color(0XFF00ECFF),
             height: 2,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _gradientContainer() {
+    return Container(
+      height: 28,
+      width: 110,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color(0xFF00ECFF),
+        ),
+        gradient: RadialGradient(
+            colors: [Colors.transparent, Color(0xFF00ECFF).withOpacity(0.9)],
+            radius: 1.7),
+      ),
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.center,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        width: 130,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF00ECFF).withOpacity(0.6),
+              Colors.transparent,
+              Color(0xFF00ECFF).withOpacity(0.6),
+            ],
+            stops: [0.05, 0.4, 1],
+          ),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Players',
+          style: TextStyle(
+              fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
+        ),
       ),
     );
   }
@@ -681,9 +770,9 @@ class _FourPlayerWaitingRoomScreenState
       children: [
         Center(
           child: Text(
-            session.id.toString(),
+            'Room ID',
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 14,
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
@@ -691,14 +780,14 @@ class _FourPlayerWaitingRoomScreenState
         ),
         const SizedBox(height: 10),
         Container(
-          height: 40,
-          width: 130,
+          height: 30,
+          width: 97,
           color: Colors.grey.withOpacity(0.3),
-          child: const Center(
+          child: Center(
             child: Text(
-              "A028",
+              session.id.toString(),
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 14,
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
@@ -713,44 +802,46 @@ class _FourPlayerWaitingRoomScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 90),
+        const SizedBox(height: 30),
         Padding(
-          padding: const EdgeInsets.only(left: 27, right: 7),
+          padding: const EdgeInsets.only(right: 10, bottom: 5),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text(
-                "WAITING ROOM",
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w400,
+              GestureDetector(
+                onTap: Navigator.of(context).pop,
+                child: Container(
+                  decoration: ShapeDecoration(
+                      color: Colors.white, shape: ChevronBorder()),
+                  padding: const EdgeInsets.only(
+                      top: 2, left: 8, bottom: 1, right: 31),
+                  child:
+                      const Text('MENU', style: TextStyle(color: Colors.black)),
                 ),
-              ),
-              Stack(
-                children: [
-                  SvgPicture.asset(
-                    'assets/svg/card.svg',
-                    width: 100,
-                    height: 25,
-                  ),
-                  const Positioned(
-                    left: 8,
-                    child: Text(
-                      "MENU",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
         ),
-        const CutEdgesContainer(),
+        Container(
+          height: 10,
+          decoration: const ShapeDecoration(
+            color: Color(0xFF00ECFF),
+            shape: DividerShape(
+              Color(0xFF00ECFF),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 24),
+          child: const Text(
+            "wAITING ROOM",
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.white,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
       ],
     );
   }
