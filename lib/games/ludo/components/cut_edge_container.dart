@@ -16,17 +16,17 @@ class CutEdgesContainer extends StatelessWidget {
           clipper: BottomHalfClipper(),
           child: Container(
             height: 20,
-            width: 270,
+            width: 218,
             color: const Color(0XFF00ECFF),
           ),
         ),
         Positioned(
           top: 10,
-          left: 260,
+          left: 215,
           child: 
           Container(
             height: 1,
-            width: MediaQuery.of(context).size.width - 260,
+            width: MediaQuery.of(context).size.width - 218,
             color: const Color(0XFF00ECFF),
           ),
         ),
