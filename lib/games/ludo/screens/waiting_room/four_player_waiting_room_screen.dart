@@ -15,6 +15,7 @@ import 'package:marquis_v2/games/ludo/components/string_validation.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
+import 'package:marquis_v2/games/ludo/screens/welcome_screen.dart';
 import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
 import 'package:marquis_v2/games/ludo/widgets/divider_shape.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -163,8 +164,6 @@ class _FourPlayerWaitingRoomScreenState
     );
   }
 
-
-
   Widget playerAvatarCard({
     required int index,
     required double size,
@@ -213,7 +212,7 @@ class _FourPlayerWaitingRoomScreenState
         ),
         if (showText) const SizedBox(height: 10),
         Text(
-          player.email.split("@").first.truncate(5),
+          player.email.split("@").first.truncate(6),
           style: const TextStyle(
             fontSize: 14,
             color: Colors.white,
@@ -290,7 +289,8 @@ class _FourPlayerWaitingRoomScreenState
                                       ? "No Player"
                                       : session.sessionUserStatus[index].email
                                           .split("@")
-                                          .first.truncate(6),
+                                          .first
+                                          .truncate(6),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -798,6 +798,8 @@ class _FourPlayerWaitingRoomScreenState
     );
   }
 
+  
+
   Widget _waitingRoomTopBar() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -809,7 +811,9 @@ class _FourPlayerWaitingRoomScreenState
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               GestureDetector(
-                onTap: Navigator.of(context).pop,
+                onTap: () {
+
+                },
                 child: Container(
                   decoration: ShapeDecoration(
                       color: Colors.white, shape: ChevronBorder()),
