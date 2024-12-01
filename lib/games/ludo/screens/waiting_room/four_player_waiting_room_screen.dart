@@ -290,7 +290,7 @@ class _FourPlayerWaitingRoomScreenState
                                       ? "No Player"
                                       : session.sessionUserStatus[index].email
                                           .split("@")
-                                          .first,
+                                          .first.truncate(6),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
