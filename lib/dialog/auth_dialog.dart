@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+// import 'package:magic_sdk/magic_sdk.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
-import 'package:marquis_v2/widgets/primary_button.dart';
-import 'package:marquis_v2/widgets/ui_widgets.dart';
-import 'package:otp_pin_field/otp_pin_field.dart';
-
-import '../widgets/outline_button.dart';
-import '../widgets/text_form_field.dart';
 
 class AuthDialog extends ConsumerStatefulWidget {
   const AuthDialog({super.key});
@@ -24,160 +19,151 @@ class _AuthDialogState extends ConsumerState<AuthDialog> {
   String? _refCodeError;
   bool _isLoading = false;
   bool _isSignUp = false;
-  bool _emailHasError = false;
-
-  bool _isValidEmail(String email) {
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-    );
-    return emailRegex.hasMatch(email);
-  }
-
-  void _validateEmail() {
-    setState(() {
-      if (!_isValidEmail(_emailController.text) && _emailController.text.isNotEmpty) {
-        _emailError = 'Invalid email';
-        _emailHasError = true;
-      } else {
-        _emailError = '';
-        _emailHasError = false;
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return AlertDialog(
-      contentPadding: const EdgeInsets.all(8.0),
       content: Container(
-        width: deviceSize.aspectRatio > 1 ? deviceSize.width * 0.5 : deviceSize.width * 0.85,
-        margin: const EdgeInsets.all(8.0),
+        width: deviceSize.aspectRatio > 1
+            ? deviceSize.width * 0.5
+            : deviceSize.width * 0.85,
+        margin: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: SvgPicture.asset("assets/svg/cancel_icon.svg"))
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  label: const Text("Email"),
+                  errorText: _emailError,
+                ),
+                controller: _emailController,
+              ),
             ),
-            verticalSpace(4.0),
-            const Text("Welcome to The Marquis", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            verticalSpace(24.0),
-            CustomTextFormField(
-              label: 'Email',
-              hintText: 'Input your email',
-              controller: _emailController,
-              hasError: _emailHasError,
-              errorMessage: _emailError,
-              onTextChanged: (value) => _validateEmail(),
-            ),
-            verticalSpace(16.0),
             AnimatedSize(
               duration: const Duration(
                 milliseconds: 100,
               ),
               alignment: Alignment.centerRight,
               child: _isSignUp
-                  ? CustomTextFormField(
-                      label: 'Referral Code',
-                      hintText: 'Input your code',
-                      controller: _refCodeController,
-                      hasError: false,
-                      errorMessage: _refCodeError,
-                      onTextChanged: (value) {},
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          label: const Text("Referral Code"),
+                          errorText: _refCodeError,
+                        ),
+                        controller: _refCodeController,
+                      ),
                     )
                   : const SizedBox(),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 24.0),
+              padding: const EdgeInsets.all(16.0),
               child: _isLoading
                   ? const CircularProgressIndicator()
                   : Column(
                       children: [
-                        PrimaryButton(
-                            isEnabled: _emailController.text.isNotEmpty && !_emailHasError,
-                            onTaps: () async {
-                              setState(() {
-                                _isLoading = true;
-                              });
-                              if (_isSignUp) {
-                                if (_emailController.text != "" && _refCodeController.text != "") {
-                                  try {
-                                    if (!_emailController.text.endsWith('@test.com')) {
-                                      await ref.read(appStateProvider.notifier).signup(
-                                            _emailController.text.trim(),
-                                            _refCodeController.text.trim(),
-                                          );
-                                    }
-                                    if (!context.mounted) return;
-                                    await showDialog<String>(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (BuildContext context) => OTPDialog(
-                                        email: _emailController.text,
-                                        isSignUp: true,
-                                      ),
-                                    );
-                                    if (!context.mounted) return;
-                                    Navigator.of(context).pop();
-                                  } catch (e) {
-                                    showErrorDialog(e.toString(), context);
+                        OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              width: 1.8,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7.5),
+                            ),
+                          ),
+                          onPressed: () async {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            if (_isSignUp) {
+                              if (_emailController.text != "" &&
+                                  _refCodeController.text != "") {
+                                try {
+                                  if (!_emailController.text
+                                      .endsWith('@test.com')) {
+                                    await ref
+                                        .read(appStateProvider.notifier)
+                                        .signup(
+                                          _emailController.text.trim(),
+                                          _refCodeController.text.trim(),
+                                        );
                                   }
-                                }
-                                //sign up
-                              } else {
-                                //login
-                                if (_emailController.text != "") {
-                                  try {
-                                    if (!_emailController.text.endsWith('@test.com')) {
-                                      await ref.read(appStateProvider.notifier).login(_emailController.text.trim());
-                                    }
-                                    if (!context.mounted) return;
-                                    await showDialog<String>(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (BuildContext context) => OTPDialog(
-                                        email: _emailController.text,
-                                        isSignUp: false,
-                                      ),
-                                    );
-                                    if (!context.mounted) return;
-                                    Navigator.of(context).pop();
-                                  } catch (e) {
-                                    showErrorDialog(e.toString(), context);
-                                  }
+                                  if (!context.mounted) return;
+                                  await showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) =>
+                                        OTPDialog(
+                                      email: _emailController.text,
+                                      isSignUp: true,
+                                    ),
+                                  );
+                                  if (!context.mounted) return;
+                                  Navigator.of(context).pop();
+                                } catch (e) {
+                                  showErrorDialog(e.toString(), context);
                                 }
                               }
-                              setState(() {
-                                _isLoading = false;
-                              });
-                            },
-                            buttonTitle: _isSignUp ? 'Sign Up' : 'Login'),
-                        verticalSpace(12.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(_isSignUp ? "Already have an account? " : "Don’t have an account? ",
-                                style: const TextStyle(fontSize: 14, color: Color(0xffCACACA))),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isSignUp = !_isSignUp;
-                                });
-                              },
-                              child: Text(
-                                _isSignUp ? "Login" : "Sign up",
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                              //sign up
+                            } else {
+                              //login
+                              if (_emailController.text != "") {
+                                try {
+                                  if (!_emailController.text
+                                      .endsWith('@test.com')) {
+                                    await ref
+                                        .read(appStateProvider.notifier)
+                                        .login(_emailController.text.trim());
+                                  }
+                                  if (!context.mounted) return;
+                                  await showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) =>
+                                        OTPDialog(
+                                      email: _emailController.text,
+                                      isSignUp: false,
+                                    ),
+                                  );
+                                  if (!context.mounted) return;
+                                  Navigator.of(context).pop();
+                                } catch (e) {
+                                  showErrorDialog(e.toString(), context);
+                                }
+                              }
+                            }
+
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              _isSignUp ? 'Sign Up' : 'Login',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isSignUp = !_isSignUp;
+                            });
+                          },
+                          child: Text(
+                            _isSignUp ? "Back to Login" : "Sign Up",
+                            style: const TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -199,21 +185,49 @@ class OTPDialog extends ConsumerStatefulWidget {
 }
 
 class _OTPDialogState extends ConsumerState<OTPDialog> {
-  final _otpPinFieldController = GlobalKey<OtpPinFieldState>();
+  final List<TextEditingController> _controllers =
+      List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
   bool _isLoading = false;
+
+  // Add this getter to combine the OTP digits
+  String get _otp => _controllers.map((controller) => controller.text).join();
 
   @override
   void initState() {
     super.initState();
+    // Request focus for the first digit input after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNodes[0].requestFocus();
+    });
   }
 
   @override
   void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
     super.dispose();
   }
 
+  void _onOTPDigitChanged(int index) {
+    if (_controllers[index].text.length == 1) {
+      if (index < 3) {
+        _focusNodes[index + 1].requestFocus();
+      } else {
+        _focusNodes[index].unfocus();
+        _submitOTP();
+      }
+    }
+  }
+
   void _submitOTP() {
-    _verifyOTP();
+    if (_otp.length == 4) {
+      _verifyOTP();
+    }
   }
 
   Future<void> _verifyOTP() async {
@@ -229,10 +243,10 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
           await appState.loginSandbox(widget.email.trim());
         }
       } else {
-        await appState.verifyCode(widget.email.trim(), _otpPinFieldController.currentState?.controller.text ?? '');
+        await appState.verifyCode(widget.email.trim(), _otp);
       }
       if (!mounted) return;
-      Navigator.of(context).pop(_otpPinFieldController.currentState?.controller.text);
+      Navigator.of(context).pop(_otp);
     } catch (e) {
       if (!mounted) return;
       if (e.toString().contains('Invalid')) {
@@ -255,98 +269,44 @@ class _OTPDialogState extends ConsumerState<OTPDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).size;
     return AlertDialog(
-      contentPadding: const EdgeInsets.all(8.0),
-      content: Container(
-        width: deviceSize.aspectRatio > 1 ? deviceSize.width * 0.5 : deviceSize.width * 0.85,
-        margin: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: SvgPicture.asset("assets/svg/cancel_icon.svg"))
-              ],
-            ),
-            verticalSpace(4.0),
-            const Text(
-              "Verification",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+      title: const Text('Enter OTP'),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(
+          4,
+          (index) => SizedBox(
+            width: 50,
+            child: TextField(
+              controller: _controllers[index],
+              focusNode: _focusNodes[index],
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              maxLength: 1,
+              decoration: const InputDecoration(
+                counterText: '',
+                border: OutlineInputBorder(),
               ),
-            ),
-            verticalSpace(4.0),
-            const Text(
-              "Verification code has been sent to",
-              style: TextStyle(fontSize: 12, color: Color(0xff8E8E8E)),
-            ),
-            verticalSpace(4.0),
-            Text(
-              widget.email,
-              style: const TextStyle(fontSize: 12, color: Color(0xffF3F3F3)),
-            ),
-            verticalSpace(16.0),
-            OtpPinField(
-              key: _otpPinFieldController,
-              fieldWidth: 60,
-              fieldHeight: 60,
-              autoFillEnable: false,
-              textInputAction: TextInputAction.done,
-              onSubmit: (text) {
-                if (text.length == 4) {
-                  _submitOTP();
-                }
-              },
-              onChange: (text) {},
-              otpPinFieldStyle: OtpPinFieldStyle(
-                textStyle: const TextStyle(color: Colors.white),
-                activeFieldBorderColor: Theme.of(context).colorScheme.primary,
-                defaultFieldBorderColor: const Color(0xff32363A),
-                fieldBorderWidth: 1,
-              ),
-              maxLength: 4,
-              showCursor: true,
-              cursorColor: Colors.white,
-              cursorWidth: 2,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              otpPinFieldDecoration: OtpPinFieldDecoration.defaultPinBoxDecoration,
-            ),
-            verticalSpace(16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: SizedBox(
-                    child: OutlineButton(
-                      onTaps: () => Navigator.of(context).pop(),
-                      buttonTitle: 'Cancel',
-                    ),
-                  ),
-                ),
-                horizontalSpace(8.0),
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : Expanded(
-                        flex: 1,
-                        child: PrimaryButton(
-                          onTaps: _submitOTP,
-                          buttonTitle: 'Submit',
-                        ),
-                      ),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
               ],
-            )
-          ],
+              onChanged: (_) => _onOTPDigitChanged(index),
+            ),
+          ),
         ),
       ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        _isLoading
+            ? const CircularProgressIndicator()
+            : TextButton(
+                child: const Text('Submit'),
+                onPressed: _submitOTP,
+              ),
+      ],
     );
   }
 }

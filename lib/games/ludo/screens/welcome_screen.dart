@@ -233,6 +233,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(_errorMessage, maxLines: 4, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14)),
                     ),
+                   
                   ),
                   GestureDetector(onTap: _dismissError, child: const Icon(Icons.close, size: 24, color: Colors.white)),
                 ],
@@ -706,8 +707,8 @@ class _PlayerAvatarCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: Container(
-        width: size, // Width of the displayed sprite
-        height: size, // Height of the displayed sprite
+        width: size, 
+        height: size, 
         decoration: BoxDecoration(
           color: color, // Background color
           borderRadius: BorderRadius.circular(size / 8), // Rounded corners with radius 24
