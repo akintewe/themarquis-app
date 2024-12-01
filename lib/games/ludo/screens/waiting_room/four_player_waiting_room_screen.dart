@@ -67,7 +67,7 @@ class _FourPlayerWaitingRoomScreenState
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _waitingRoomTopBar(),
+                _waitingRoomTopBar(widget.game),
                 const SizedBox(height: 76),
                 _roomID(session),
                 // const SizedBox(height: 20),
@@ -130,6 +130,7 @@ class _FourPlayerWaitingRoomScreenState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           playerAvatarCard(
+            session,
             index: 0,
             size: 72,
             isSelf: false,
@@ -139,6 +140,7 @@ class _FourPlayerWaitingRoomScreenState
           ),
           for (int i = 1; i < session.sessionUserStatus.length && i < 3; i++)
             playerAvatarCard(
+              session,
               index: i,
               size: 72,
               isSelf: false,
@@ -152,6 +154,7 @@ class _FourPlayerWaitingRoomScreenState
             _invitePlayer(session),
           if (session.sessionUserStatus.length == session.sessionUserStatus[3])
             playerAvatarCard(
+              session,
               index: 3,
               size: 72,
               isSelf: false,
@@ -164,7 +167,8 @@ class _FourPlayerWaitingRoomScreenState
     );
   }
 
-  Widget playerAvatarCard({
+  Widget playerAvatarCard(
+    LudoSessionData session, {
     required int index,
     required double size,
     required bool isSelf,
@@ -174,42 +178,90 @@ class _FourPlayerWaitingRoomScreenState
   }) {
     return Column(
       children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: color, // Background color
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              width: 2,
-              color: const Color(0XFF00ECFF),
-            ),
-          ),
-          child: FittedBox(
-            fit: BoxFit.fill,
-            child: ClipRect(
-              child: Align(
-                alignment: index == 1
-                    ? Alignment.topLeft
-                    : index == 2
-                        ? Alignment.topRight
-                        : index == 3
-                            ? Alignment.bottomLeft
-                            : Alignment.bottomRight,
-                widthFactor: 0.5,
-                heightFactor: 0.5,
-                child: player.status == "ACTIVE"
-                    ? Image.asset(
+        player.status == "ACTIVE"
+            ? Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  color: color, // Background color
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    width: 2,
+                    color: const Color(0XFF00ECFF),
+                  ),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: ClipRect(
+                    child: Align(
+                      alignment: index == 1
+                          ? Alignment.topLeft
+                          : index == 2
+                              ? Alignment.topRight
+                              : index == 3
+                                  ? Alignment.bottomLeft
+                                  : Alignment.bottomRight,
+                      widthFactor: 0.5,
+                      heightFactor: 0.5,
+                      child: Image.asset(
                         'assets/images/avatar_spritesheet.png',
                         width: 4324,
                         height: 4324,
                         fit: BoxFit.none,
-                      )
-                    : null,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : Padding(
+                padding: const EdgeInsets.only(top: 33),
+                child: _invitePlayer(session),
               ),
-            ),
-          ),
-        ),
+        // : Column(
+        //     children: [
+        //       Padding(
+        //         padding: const EdgeInsets.only(top: 33),
+        //         child: Container(
+        //           width: 72,
+        //           height: 72,
+        //           decoration: BoxDecoration(
+        //             color: Colors.transparent,
+        //             borderRadius: BorderRadius.circular(15),
+        //             border: Border.all(
+        //               width: 2,
+        //               color: const Color(0XFF00ECFF),
+        //             ),
+        //           ),
+        //           child: Padding(
+        //             padding: const EdgeInsets.all(14.0),
+        //             child: SvgPicture.asset(
+        //               'assets/svg/invite.svg',
+        //               width: 15,
+        //               height: 15,
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //       const SizedBox(height: 10),
+        //       Container(
+        //         height: 24,
+        //         width: 74,
+        //         decoration: BoxDecoration(
+        //             color: const Color(0XFF00ECFF),
+        //             borderRadius: BorderRadius.circular(5)),
+        //         child: const Center(
+        //           child: Text(
+        //             'Invite',
+        //             style: TextStyle(
+        //               fontSize: 14,
+        //               color: Colors.black,
+        //               fontWeight: FontWeight.w600,
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
         if (showText) const SizedBox(height: 10),
         Text(
           player.email.split("@").first.truncate(6),
@@ -258,7 +310,7 @@ class _FourPlayerWaitingRoomScreenState
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(28.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -271,33 +323,13 @@ class _FourPlayerWaitingRoomScreenState
                           child: Column(
                             children: [
                               playerAvatarCard(
+                                session,
                                 index: index,
-                                size: 40,
+                                size: 72,
                                 isSelf: false,
                                 player: session.sessionUserStatus[index],
                                 color: session.getListOfColors[index],
                                 showText: false,
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 38.0),
-                                child: Text(
-                                  session.sessionUserStatus[index].email
-                                              .split("@")
-                                              .first ==
-                                          ""
-                                      ? "No Player"
-                                      : session.sessionUserStatus[index].email
-                                          .split("@")
-                                          .first
-                                          .truncate(6),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
                               ),
                             ],
                           ),
@@ -798,9 +830,7 @@ class _FourPlayerWaitingRoomScreenState
     );
   }
 
-  
-
-  Widget _waitingRoomTopBar() {
+  Widget _waitingRoomTopBar(LudoGame game) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -812,7 +842,8 @@ class _FourPlayerWaitingRoomScreenState
             children: [
               GestureDetector(
                 onTap: () {
-
+                  // Navigator.pop(context);
+                  game.playState = PlayState.welcome;
                 },
                 child: Container(
                   decoration: ShapeDecoration(
