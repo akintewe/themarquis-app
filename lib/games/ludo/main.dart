@@ -120,15 +120,12 @@
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marquis_v2/games/ludo/components/game_top_bar.dart';
-import 'package:marquis_v2/games/ludo/components/welcome_top_bar.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/screens/game_over_screen.dart';
+import 'package:marquis_v2/games/ludo/screens/waiting_room/four_player_waiting_room_screen.dart';
 import 'package:marquis_v2/games/ludo/screens/welcome_screen.dart';
-import 'package:marquis_v2/games/ludo/screens/waiting_room_screen.dart';
-import 'package:marquis_v2/games/ludo/widgets/message_overlay.dart';
 import 'package:marquis_v2/router/route_path.dart';
 
 void main() {
@@ -160,23 +157,6 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: ValueListenableBuilder<PlayState>(
-          valueListenable: _game.playStateNotifier,
-          builder: (context, playState, child) {
-            return AppBar(
-              automaticallyImplyLeading: false,
-              title: playState == PlayState.welcome 
-                  ? WelcomeTopBar(game: _game)
-                  : GameTopBar(game: _game),
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              titleSpacing: 0,
-            );
-          },
-        ),
-      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -226,7 +206,7 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
       game: _game,
       overlayBuilderMap: {
         PlayState.welcome.name: (context, game) => LudoWelcomeScreen(game: game),
-        PlayState.waiting.name: (context, game) => WaitingRoomScreen(game: game),
+        PlayState.waiting.name: (context, game) => FourPlayerWaitingRoomScreen(game: game),
         PlayState.finished.name: (context, game) => MatchResultsScreen(
           game: game,
           session: ref.read(ludoSessionProvider)!,
