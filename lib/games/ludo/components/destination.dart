@@ -136,7 +136,8 @@ class Destination extends PositionComponent with HasGameReference<LudoGame> {
     _bars[pin.playerIndex]![index].lightUp();
     if (index == 3) {
       // Show winner announcement before changing game state
-      game.showMessage('The Winner is ${game.playerNames[pin.playerIndex]}!',
+      game.showGameMessage(
+          message: 'The Winner is ${game.playerNames[pin.playerIndex]}!',
           durationSeconds: 5);
 
       // Delay the game over screen

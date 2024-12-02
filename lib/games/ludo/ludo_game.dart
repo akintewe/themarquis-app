@@ -10,7 +10,6 @@ import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/foundation.dart';
 
 import 'package:marquis_v2/games/ludo/components/board.dart';
 import 'package:marquis_v2/games/ludo/components/destination.dart';
@@ -22,8 +21,6 @@ import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/games/ludo/components/dice_container.dart';
-import 'package:marquis_v2/games/ludo/components/game_top_bar.dart';
-import 'package:marquis_v2/games/ludo/components/welcome_top_bar.dart';
 
 enum PlayState { welcome, waiting, playing, finished }
 
@@ -52,7 +49,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   dart_async.Timer? _messageTimer;
   Completer<void>? ludoSessionLoadingCompleter;
 
-  final ValueNotifier<PlayState> playStateNotifier = ValueNotifier(PlayState.welcome);
+  final ValueNotifier<PlayState> playStateNotifier =
+      ValueNotifier(PlayState.welcome);
 
   LudoGame()
       : super(
@@ -89,7 +87,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       final res = await ref.read(ludoSessionProvider.notifier).generateMove();
       return res;
     } catch (e) {
-      showErrorDialog(e.toString());
+      showGameMessage(
+        message: e.toString(),
+        backgroundColor: Colors.red,
+      );
       return [];
     }
   }
@@ -110,7 +111,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       }
     } catch (e) {
       diceContainer.currentDice.state = DiceState.rolledDice;
-      showErrorDialog(e.toString());
+      showGameMessage(
+        message: e.toString(),
+        backgroundColor: Colors.red,
+      );
     }
   }
 
@@ -118,7 +122,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   set playState(PlayState value) {
     if (playStateNotifier.value != value) {
       playStateNotifier.value = value;
-      
+
       switch (value) {
         case PlayState.welcome:
         case PlayState.waiting:
@@ -136,12 +140,109 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         case PlayState.finished:
           overlays.clear();
           overlays.add(value.name);
-          Future.microtask(() {
+          Future.microtask(() async {
             if (buildContext != null && buildContext!.mounted) {
               // Force rebuild of game over screen
               (buildContext! as Element).markNeedsBuild();
+
+              if (playState == PlayState.finished) {
+                if (buildContext != null && buildContext!.mounted) {
+                  await showDialog(
+                    context: buildContext!,
+                    barrierDismissible: false,
+                    builder: (context) => Center(
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.topCenter,
+                        children: [
+                          // Main Dialog Container
+                          Container(
+                            margin: const EdgeInsets.only(top: 40),
+                            width: 180,
+                            decoration: BoxDecoration(
+                              color: Color.fromRGBO(26, 32, 45, 1),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(height: 60),
+                                const Text(
+                                  'REWARD',
+                                  style: TextStyle(
+                                    color: Color(0xFF00ECFF),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/images/starknet-token-strk-logo (4) 7.svg',
+                                      height: 24,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      '400',
+                                      style: TextStyle(
+                                        color: Colors.yellow,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/images/会员.svg',
+                                      height: 24,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      '400 EXP',
+                                      style: TextStyle(
+                                        color: Color(0xFF00ECFF),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: SvgPicture.asset(
+                                      'assets/images/ok_btn.svg'),
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ),
+                          // Header Image positioned on top
+                          Positioned(
+                            top: -20,
+                            child: Image.asset(
+                              'assets/images/header.png',
+                              height: 100,
+                              width: 300,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              }
             }
           });
+
           break;
       }
     }
@@ -151,7 +252,6 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> onLoad() async {
     await super.onLoad();
     _sessionData = ref.read(ludoSessionProvider);
-    
     overlays.clear();
     overlays.add(PlayState.welcome.name);
     playStateNotifier.value = PlayState.welcome;
@@ -171,7 +271,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     _sessionData = next;
     if (_sessionData != null) {
       if (_sessionData!.message != null) {
-        showErrorDialog(_sessionData!.message!);
+        showGameMessage(
+          message: _sessionData!.message!,
+          backgroundColor: Colors.red,
+        );
         if (_sessionData!.message!.startsWith("EXITED")) {
           await ref
               .read(ludoSessionProvider.notifier)
@@ -257,7 +360,10 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             });
           }
         } catch (e) {
-          showErrorDialog(e.toString());
+          showGameMessage(
+            message: e.toString(),
+            backgroundColor: Colors.red,
+          );
         }
       }
     }
@@ -310,12 +416,14 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           color: Colors.white,
           shadows: [
             Shadow(
-              color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+              color: _sessionData!.getListOfColors[_currentPlayer]
+                  .withOpacity(0.8),
               offset: const Offset(0, 0),
               blurRadius: 20,
             ),
             Shadow(
-              color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+              color: _sessionData!.getListOfColors[_currentPlayer]
+                  .withOpacity(0.8),
               offset: const Offset(0, 0),
               blurRadius: 10,
             ),
@@ -379,15 +487,14 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         ),
       ],
     );
-    
+
     await add(messageContainer);
   }
 
   void updateTurnText() {
     final playerName = playerNames[_currentPlayer];
-    turnText.text = _currentPlayer == _userIndex 
-        ? 'Your Turn'
-        : "$playerName's Turn";
+    turnText.text =
+        _currentPlayer == _userIndex ? 'Your Turn' : "$playerName's Turn";
     turnText.textRenderer = TextPaint(
       style: TextStyle(
         fontSize: unitSize * 1.2,
@@ -401,7 +508,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             blurRadius: 10,
           ),
           Shadow(
-            color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+            color:
+                _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
             offset: const Offset(0, 0),
             blurRadius: 6,
           ),
@@ -413,7 +521,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   Future<void> rollDice() async {
     print("rollDice called, playerCanMove: $playerCanMove");
     if (playerCanMove) return;
-    
+
     // Show animated dice dialog
     if (buildContext != null && buildContext!.mounted) {
       await showDialog(
@@ -432,135 +540,62 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
     print("Rolling dice...");
     await diceContainer.currentDice.roll();
-    playState = PlayState.finished;
-    
-    if (playState == PlayState.finished) {
-      if (buildContext != null && buildContext!.mounted) {
-        await showDialog(
-          context: buildContext!,
-          barrierDismissible: false,
-          builder: (context) => Center(
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.topCenter,
-              children: [
-                // Main Dialog Container
-                Container(
-                  margin: const EdgeInsets.only(top: 40),
-                  width: 180,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(26, 32, 45, 1),
-                    borderRadius: BorderRadius.circular(30),
-                   
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 60),
-                      const Text(
-                        'REWARD',
-                        style: TextStyle(
-                          color: Color(0xFF00ECFF),
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/images/starknet-token-strk-logo (4) 7.svg',
-                            height: 24,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            '400',
-                            style: TextStyle(
-                              color: Colors.yellow,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/images/会员.svg',
-                            height: 24,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            '400 EXP',
-                            style: TextStyle(
-                              color: Color(0xFF00ECFF),
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: SvgPicture.asset('assets/images/ok_btn.svg'),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
-                // Header Image positioned on top
-                Positioned(
-                  top: -20,
-                  child: Image.asset(
-                    'assets/images/header.png',
-                    height: 100,
-                    width: 300,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+    // // playState = PlayState.finished;
+
+    print("Dice rolled, value: ${diceContainer.currentDice.value}");
+
+    List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(_userIndex);
+    List<PlayerPin> movablePins = [];
+
+    for (PlayerPin pin in listOfPlayerPin) {
+      if (pin.canMove) {
+        movablePins.add(pin);
       }
     }
 
-    print("Dice rolled, value: ${diceContainer.currentDice.value}");
-   
-  }
-
-  void showMessage(String message,
-      {bool isError = false, int durationSeconds = 3}) {
-    currentMessage = message;
-    isErrorMessage = isError;
-
-    // Cancel any existing timer
-    _messageTimer?.cancel();
-
-    if (!overlays.isActive('message')) {
-      overlays.add('message');
-    } else {
-      overlays.remove('message');
-      overlays.add('message');
+    // If there are no movable pins and the dice value is less than 6, show a snackbar
+    if (movablePins.isEmpty) {
+      final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
+      if (diceContainer.currentDice.value < 6) {
+        if (pinsAtHome.isNotEmpty) {
+          showGameMessage(
+              message: "Can not move from Basement, try to get a 6!!");
+          // If there are pins at home, play the first one (dummy move)
+          await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+          return;
+        } else {
+          showGameMessage(message: "No pins to move!!");
+          // If there are no pins at home, play the first pin on the board (dummy move)
+          final pins = board.getPlayerPinsOnBoard(_userIndex);
+          await playMove(pins[0].homeIndex, isAuto: true);
+          return;
+        }
+      } else {
+        // If the dice value is greater or equal to 6, play the first pin on the board or the only pin at home
+        if (pinsAtHome.isEmpty) {
+          showGameMessage(message: "No pins to move!!");
+          // If there are no pins at home, play the first pin on the board (dummy move)
+          final pins = board.getPlayerPinsOnBoard(_userIndex);
+          await playMove(pins[0].homeIndex, isAuto: true);
+          return;
+        } else if (pinsAtHome.length == 1) {
+          // If there is only one pin at home, play it
+          await playMove(pinsAtHome[0]!.homeIndex);
+          return;
+        }
+      }
     }
 
-    // Set a timer to remove the message after the specified duration
-    _messageTimer = dart_async.Timer(Duration(seconds: durationSeconds), () {
-      overlays.remove('message');
-    });
-  }
+    if ((movablePins.length == 1 && diceContainer.currentDice.value < 6) ||
+        (movablePins.length == 1 &&
+            diceContainer.currentDice.value > 6 &&
+            playerHomes[_userIndex].pinsAtHome.isEmpty)) {
+      // Automatically play move on the only movable pin
+      await playMove(movablePins[0].homeIndex);
+      return;
+    }
 
-  void showSnackBar(String message) {
-    showMessage(message, durationSeconds: 5);
-  }
-
-  void showErrorDialog(String errorMessage) {
-    showMessage(errorMessage, isError: true, durationSeconds: 5);
+    playerCanMove = true;
   }
 
   @override
@@ -626,17 +661,6 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     }
   }
 
-  Widget? buildTopBar(BuildContext context) {
-    switch (playState) {
-      case PlayState.welcome:
-        return WelcomeTopBar(game: this);
-      case PlayState.waiting:
-      case PlayState.playing:
-      case PlayState.finished:
-        return GameTopBar(game: this);
-    }
-  }
-
   Future<void> showGameMessage({
     required String message,
     Color backgroundColor = const Color(0xFF1A3B44),
@@ -674,7 +698,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         ),
       ],
     );
-    
+
     await add(messageContainer);
 
     if (durationSeconds > 0) {
@@ -726,12 +750,12 @@ class DiceAnimationWidget extends StatefulWidget {
   _DiceAnimationWidgetState createState() => _DiceAnimationWidgetState();
 }
 
-class _DiceAnimationWidgetState extends State<DiceAnimationWidget> 
+class _DiceAnimationWidgetState extends State<DiceAnimationWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late int currentDiceFace = 1;
   final List<int> diceSequence = [1, 2, 3, 4, 5, 6];
-  
+
   @override
   void initState() {
     super.initState();
@@ -743,9 +767,7 @@ class _DiceAnimationWidgetState extends State<DiceAnimationWidget>
     _controller.addListener(() {
       // Change dice face every ~166ms (1000ms / 6 faces)
       setState(() {
-        currentDiceFace = diceSequence[
-          (_controller.value * 6).floor() % 6
-        ];
+        currentDiceFace = diceSequence[(_controller.value * 6).floor() % 6];
       });
     });
 

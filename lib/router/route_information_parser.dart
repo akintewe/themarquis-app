@@ -23,7 +23,7 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
           return ProfilePath();
         case 'game':
           if (uri.pathSegments.length >= 2) {
-            if (uri.pathSegments[1] == 'ludo') {
+            if (uri.pathSegments[1] == 'ludo' && uri.pathSegments.length == 3) {
               return LudoGameAppPath(uri.pathSegments[2]);
             }
             return GamePath(uri.pathSegments[1]);

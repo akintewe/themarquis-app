@@ -47,7 +47,7 @@
 //           builder: (context, playState, child) {
 //             return AppBar(
 //               automaticallyImplyLeading: false,
-//               title: playState == PlayState.welcome 
+//               title: playState == PlayState.welcome
 //                   ? null
 //                   : GameTopBar(game: _game),
 //               elevation: 0,
@@ -116,10 +116,10 @@
 //   }
 // }
 
-
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marquis_v2/games/ludo/components/game_top_bar.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_game.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
@@ -179,11 +179,36 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
     return ValueListenableBuilder<PlayState>(
       valueListenable: _game.playStateNotifier,
       builder: (context, playState, child) {
-        if (playState == PlayState.playing || playState == PlayState.finished) {
+        if (playState == PlayState.playing) {
+          return Column(
+            children: [
+              GameTopBar(
+                game: _game,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 80.0, right: 80),
+                  child: AspectRatio(
+                    aspectRatio: 7 / 20,
+                    child: FittedBox(
+                      fit: BoxFit.fitHeight,
+                      child: SizedBox(
+                        width: gameWidth,
+                        height: gameHeight,
+                        child: _buildRiverpodGameWidget(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+        if (playState == PlayState.finished) {
           return Padding(
             padding: const EdgeInsets.only(left: 80.0, right: 80),
             child: AspectRatio(
-              aspectRatio: 7/20,
+              aspectRatio: 7 / 20,
               child: FittedBox(
                 fit: BoxFit.fitHeight,
                 child: SizedBox(
@@ -205,12 +230,14 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
       key: _gameWidgetKey,
       game: _game,
       overlayBuilderMap: {
-        PlayState.welcome.name: (context, game) => LudoWelcomeScreen(game: game),
-        PlayState.waiting.name: (context, game) => FourPlayerWaitingRoomScreen(game: game),
+        PlayState.welcome.name: (context, game) =>
+            LudoWelcomeScreen(game: game),
+        PlayState.waiting.name: (context, game) =>
+            FourPlayerWaitingRoomScreen(game: game),
         PlayState.finished.name: (context, game) => MatchResultsScreen(
-          game: game,
-          session: ref.read(ludoSessionProvider)!,
-        ),
+              game: game,
+              session: ref.read(ludoSessionProvider)!,
+            ),
       },
     );
   }
