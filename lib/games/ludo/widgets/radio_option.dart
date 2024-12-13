@@ -7,6 +7,7 @@ class RadioOption<T> extends StatelessWidget {
   final double _width;
   final EdgeInsetsGeometry _padding;
   final Widget _child;
+  final bool _useGradient;
 
   const RadioOption({
     required T? value,
@@ -18,6 +19,7 @@ class RadioOption<T> extends StatelessWidget {
     required double width,
     required EdgeInsetsGeometry padding,
     required Widget child,
+    bool useGradient = true,
     super.key,
   })  : _value = value,
         _globalValue = globalValue,
@@ -27,6 +29,7 @@ class RadioOption<T> extends StatelessWidget {
         _borderColor = borderColor,
         _width = width,
         _padding = padding,
+        _useGradient = useGradient,
         _child = child;
 
   bool get _isActive => _globalValue == _value && _value != null;
@@ -46,7 +49,7 @@ class RadioOption<T> extends StatelessWidget {
           width: _width,
           decoration: BoxDecoration(
             border: Border.all(color: _isActive ? _backgroundColor : _borderColor),
-            gradient: !_isActive ? null : RadialGradient(colors: [Colors.transparent, Color(0xFF00ECFF).withOpacity(0.6)], radius: 1.7),
+            gradient: !_isActive || !_useGradient ? null : RadialGradient(colors: [Colors.transparent, Color(0xFF00ECFF).withOpacity(0.6)], radius: 1.7),
             borderRadius: BorderRadius.circular(8),
           ),
           clipBehavior: Clip.antiAlias,
@@ -55,7 +58,7 @@ class RadioOption<T> extends StatelessWidget {
             padding: _padding,
             width: _width,
             decoration: BoxDecoration(
-              gradient: !_isActive
+              gradient: !_isActive || !_useGradient
                   ? null
                   : LinearGradient(
                       begin: Alignment.topCenter,
