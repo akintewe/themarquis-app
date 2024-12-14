@@ -404,8 +404,9 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                       .getTokenBalance(_selectedTokenAddress!)
                                                       .whenComplete(() => _shouldRetrieveBalance = false),
                                               builder: (context, snapshot) {
-                                                if (snapshot.connectionState == ConnectionState.waiting)
+                                                if (snapshot.connectionState == ConnectionState.waiting) {
                                                   return const Center(child: CircularProgressIndicator());
+                                                }
                                                 if (snapshot.hasData) {
                                                   _selectedTokenBalance = snapshot.data!.toDouble();
                                                 }
@@ -434,7 +435,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                             double.parse(value) > (_selectedTokenBalance / 1e18) ||
                                                             double.parse(value) == 0) {
                                                           setState(() {
-                                                            _selectedTokenAmount = 0;
+                                                            _selectedTokenAmount = null;
                                                           });
                                                           return;
                                                         }
