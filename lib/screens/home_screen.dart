@@ -132,6 +132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             verticalSpace(8.0),
                             const LockedGameWidget(
+                              showIconButton: true,
                               title: 'Checkers',
                               subTitle: 'Board Game',
                               image: 'assets/images/checkers.png',
@@ -151,7 +152,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       Positioned(
                         right: 0,
-                        top: 0,
+                        top: 100,
                         child: SvgPicture.asset(
                           'assets/svg/locked_badge.svg',
                         ),
