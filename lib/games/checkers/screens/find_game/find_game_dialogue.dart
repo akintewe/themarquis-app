@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:marquis_v2/games/checkers/screens/find_game/room_found_dialogue.dart';
 
 class CheckersFindRoomDialog extends ConsumerStatefulWidget {
   const CheckersFindRoomDialog({super.key});
@@ -125,7 +126,10 @@ class CheckersFindRoomDialogState
         const SizedBox(width: 8),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pop(context);
+              _roomFoundDialog(ctx: context);
+            },
             style: OutlinedButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
@@ -138,6 +142,15 @@ class CheckersFindRoomDialogState
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> _roomFoundDialog({required BuildContext ctx}) {
+    return showDialog(
+      context: ctx,
+      builder: (BuildContext context) {
+        return RoomFoundDialogue();
+      },
     );
   }
 }
