@@ -673,11 +673,13 @@ class _OpenSessionRoomCard extends StatelessWidget {
         .reduce((value, element) => value + element);
     final roomColor = sessionData.playAmount == '0'
         ? const Color(0xFF00ECFF)
-        : sessionData.playToken == "STRK"
+        : sessionData.playToken ==
+                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
             ? const Color(0xFF0077FF)
-            : sessionData.playToken == "ETH"
+            : sessionData.playToken ==
+                    "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
                 ? const Color(0xFF7531F4)
-                : const Color(0xFF404040);
+                : const Color.fromARGB(255, 144, 50, 50);
 
     return Theme(
       data: Theme.of(context)
@@ -1070,14 +1072,13 @@ class _FindGameChooseColorDialogState
       .reduce((value, element) => value + element);
   late final roomColor = widget.selectedSession.playAmount == '0'
       ? const Color(0xFF00ECFF)
-      : widget.selectedSession.playToken == "STRK"
+      : widget.selectedSession.playToken ==
+              "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
           ? const Color(0xFF0077FF)
-          : widget.selectedSession.playToken == "ETH"
+          : widget.selectedSession.playToken ==
+                  "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7"
               ? const Color(0xFF7531F4)
               : const Color(0xFF404040);
-  late final roomStake = widget.selectedSession.playAmount == '0'
-      ? "Free"
-      : "${widget.selectedSession.playAmount} ${widget.selectedSession.playToken}";
 
   void _selectColor(String color) {
     setState(() {
@@ -1143,29 +1144,54 @@ class _FindGameChooseColorDialogState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text("ROOM $roomName",
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white)),
-                          const SizedBox(width: 4),
-                          Container(
-                            decoration: BoxDecoration(
-                                border: Border.all(color: roomColor),
-                                borderRadius: BorderRadius.circular(30)),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 8),
-                            child: Text(roomStake,
+                      Expanded(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("ROOM $roomName",
                                 style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white)),
-                          ),
-                        ],
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border.all(color: roomColor),
+                                    borderRadius: BorderRadius.circular(30)),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 4, horizontal: 8),
+                                child: FutureBuilder(
+                                    future: ref
+                                        .read(userProvider.notifier)
+                                        .getSupportedTokens(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Text("");
+                                      } else {
+                                        final roomStake = widget.selectedSession
+                                                    .playAmount ==
+                                                '0'
+                                            ? "Free"
+                                            : "${(((double.tryParse(widget.selectedSession.playAmount)) ?? 0) / 1e18).toStringAsFixed(7)} ${snapshot.data!.firstWhere((e) => e["tokenAddress"] == widget.selectedSession.playToken)["tokenName"]}";
+                                        return Text(
+                                          roomStake,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.white,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }
+                                    }),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 5),
                       Text("$noOfPlayers/4 Players",
                           style: const TextStyle(
                               fontSize: 12,
