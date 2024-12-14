@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:marquis_v2/games/checkers/screens/home_screen/checkers_home_screen.dart';
+import 'package:marquis_v2/games/checkers/views/screens/home_screen/checkers_home_screen.dart';
 import 'package:marquis_v2/games/ludo/main.dart';
 import 'package:marquis_v2/models/app_state.dart';
 import 'package:marquis_v2/router/app_shell.dart';

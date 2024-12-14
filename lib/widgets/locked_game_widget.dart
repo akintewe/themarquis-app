@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/dialog/auth_dialog.dart';
-import 'package:marquis_v2/games/checkers/screens/home_screen/checkers_home_screen.dart';
+import 'package:marquis_v2/games/checkers/views/screens/home_screen/checkers_home_screen.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
 

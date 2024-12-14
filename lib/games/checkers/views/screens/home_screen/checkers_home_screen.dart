@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marquis_v2/games/checkers/screens/find_game/find_game_dialogue.dart';
-import 'package:marquis_v2/games/checkers/screens/join_game/join_game_dialogue.dart';
-import 'package:marquis_v2/games/checkers/widgets/checkers_menu_button_widget.dart';
+import 'package:marquis_v2/games/checkers/views/screens/create_game/checkers_create_game.dart';
+import 'package:marquis_v2/games/checkers/views/screens/find_game/find_game_dialogue.dart';
+import 'package:marquis_v2/games/checkers/views/screens/join_game/join_game_dialogue.dart';
+import 'package:marquis_v2/games/checkers/views/widgets/checkers_menu_button_widget.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/balance_appbar.dart';
 
@@ -33,7 +34,7 @@ class CheckersHomeScreenState extends ConsumerState<CheckersHomeScreen> {
             child: SafeArea(
               child: Column(
                 children: [
-                  _topBar(),
+                  _topBar(context),
                   _checkerNavigationItems(scaledHeight, context),
                 ],
               ),
@@ -61,7 +62,9 @@ class CheckersHomeScreenState extends ConsumerState<CheckersHomeScreen> {
               child: CheckersMenuButtonWidget(
                 icon: 'assets/svg/addIcon.svg',
                 label: 'Create Game',
-                onTap: () {},
+                onTap: () {
+                  _createRoomDialog(ctx: context);
+                },
               ),
             ),
           ),
@@ -115,34 +118,42 @@ class CheckersHomeScreenState extends ConsumerState<CheckersHomeScreen> {
     );
   }
 
-  Future<void> _joinGameDialog({required BuildContext ctx}) {
-    return showDialog(
-      context: ctx,
-      builder: (BuildContext context) {
-        return CheckersJoinGameDialog();
-      },
+  void _createRoomDialog({required BuildContext ctx}) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CheckersCreateGame(),
+      ),
     );
   }
+}
 
-  Future<void> _findGameDialog({required BuildContext ctx}) {
-    return showDialog(
-      context: ctx,
-      builder: (BuildContext context) {
-        return CheckersFindRoomDialog();
-      },
-    );
-  }
+Future<void> _joinGameDialog({required BuildContext ctx}) {
+  return showDialog(
+    context: ctx,
+    builder: (BuildContext context) {
+      return CheckersJoinGameDialog();
+    },
+  );
+}
 
-  Widget _topBar() {
-    return Column(
-      children: [
-        const BalanceAppBar(),
-        Image.asset(
-          'assets/images/checkersHome.png',
-          width: MediaQuery.of(context).size.width,
-          fit: BoxFit.fill,
-        ),
-      ],
-    );
-  }
+Future<void> _findGameDialog({required BuildContext ctx}) {
+  return showDialog(
+    context: ctx,
+    builder: (BuildContext context) {
+      return CheckersFindRoomDialog();
+    },
+  );
+}
+
+Widget _topBar(BuildContext ctx) {
+  return Column(
+    children: [
+      const BalanceAppBar(),
+      Image.asset(
+        'assets/images/checkersHome.png',
+        width: MediaQuery.of(ctx).size.width,
+        fit: BoxFit.fill,
+      ),
+    ],
+  );
 }

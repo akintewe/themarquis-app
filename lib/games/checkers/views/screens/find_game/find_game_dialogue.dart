@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:marquis_v2/games/checkers/screens/find_game/room_found_dialogue.dart';
+import 'package:marquis_v2/games/checkers/views/screens/find_game/room_found_dialogue.dart';
 
 class CheckersFindRoomDialog extends ConsumerStatefulWidget {
   const CheckersFindRoomDialog({super.key});

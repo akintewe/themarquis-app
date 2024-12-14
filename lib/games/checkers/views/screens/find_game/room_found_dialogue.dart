@@ -149,7 +149,7 @@ class RoomFoundDialogueState extends ConsumerState<RoomFoundDialogue> {
               ),
               SizedBox(height: 8),
               Row(
-               mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
                     height: MediaQuery.of(context).size.height * 0.043,
