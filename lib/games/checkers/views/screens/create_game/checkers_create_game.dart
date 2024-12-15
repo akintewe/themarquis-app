@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:marquis_v2/games/checkers/core/utils/checkers_enum.dart';
@@ -23,9 +24,12 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
   GameMode? _gameMode;
   String? _selectedTokenAddress;
 
+  final Map<String, String> _supportedTokens = {};
+  final _tokenAmountController = TextEditingController();
+
   double? _selectedTokenAmount;
   final bool _isLoading = false;
-  final Map<String, String> _supportedTokens = {};
+  // final Map<String, String> _supportedTokens = {};
 
   @override
   Widget build(BuildContext context) {
@@ -361,7 +365,61 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
                 }
                 return Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 50),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Amount",
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w400),
+                          ),
+                          const SizedBox(height: 4),
+                          TextField(
+                            controller: _tokenAmountController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Color(0xFF363D43),
+                              hintText: "Enter Amount",
+                              border: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Color(0xFF363D43))),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Color(0xFF363D43))),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Color(0xFF363D43))),
+                            ),
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w400),
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp("[.0-9]"))
+                            ],
+                            onChanged: (value) {
+                              if (value.isEmpty) return;
+                              if (double.tryParse(value) == null ||
+                                  double.parse(value) >
+                                      (_selectedTokenBalance / 1e18) ||
+                                  double.parse(value) == 0) {
+                                setState(() {
+                                  _selectedTokenAmount = null;
+                                });
+                                return;
+                              }
+                              _selectTokenAmount(double.parse(value) * 1e18);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 10),
                     Slider(
                       min: 0,
                       thumbColor: Colors.white,
@@ -670,10 +728,11 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
   }
 
   void _selectTokenAmount(double amount) {
-    if (amount == 0) {
-      _selectedTokenAmount = amount;
-      return;
-    }
+    // if (amount == 0) {
+    //   _selectedTokenAmount = amount;
+    //   return;
+    // }
+    _tokenAmountController.text = amount == 0 ? "0" : "${amount / 1e18}";
     setState(() {
       _selectedTokenAmount = amount;
     });
