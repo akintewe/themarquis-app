@@ -26,7 +26,7 @@ class CeateGameWaitingRoom extends StatelessWidget {
               padding: const EdgeInsets.only(left: 120),
               child: _roomID(),
             ),
-            if (activeTab == 2 && gameMode == GameMode.token) _amount(),
+            if (activeTab == 3 && gameMode == GameMode.token) _amount(),
             SizedBox(height: 32),
             _gradientContainer(),
             Padding(
@@ -43,9 +43,9 @@ class CeateGameWaitingRoom extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(
                 right: 40,
-                bottom: (activeTab == 2 && gameMode == GameMode.token)
-                    ? MediaQuery.of(context).size.height * 0.21
-                    : MediaQuery.of(context).size.height * 0.3,
+                bottom: (activeTab == 3 && gameMode == GameMode.token)
+                    ? MediaQuery.of(context).size.height * 0.22
+                    : MediaQuery.of(context).size.height * 0.30,
               ),
               child: _players(),
             ),
