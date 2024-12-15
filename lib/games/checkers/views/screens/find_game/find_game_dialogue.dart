@@ -42,12 +42,13 @@ class CheckersFindRoomDialogState
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   'Find Game',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500),
+                  style: GoogleFonts.montserrat(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 _textField(),
@@ -65,12 +66,15 @@ class CheckersFindRoomDialogState
   Widget _textField() {
     return Column(
       children: [
-        const Align(
+        Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            "Room ID",
-            style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500),
+            'Room ID',
+            style: GoogleFonts.montserrat(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
         SizedBox(
@@ -82,10 +86,11 @@ class CheckersFindRoomDialogState
               contentPadding:
                   const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
               hintText: "Please enter room ID",
-              hintStyle: const TextStyle(
-                  color: Color(0xFF8B8B8B),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400),
+              hintStyle: GoogleFonts.montserrat(
+                color: Color(0xFF8B8B8B),
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              ),
               fillColor: const Color(0xFF363D43),
               filled: true,
               border: OutlineInputBorder(
@@ -122,7 +127,14 @@ class CheckersFindRoomDialogState
                 color: Color(0xFFF3B46E),
               ),
             ),
-            child: const Text("Cancel"),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.montserrat(
+                color: Color(0xFFF3B46E),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 8),
@@ -140,7 +152,14 @@ class CheckersFindRoomDialogState
             ),
             child: isLoading
                 ? const CircularProgressIndicator()
-                : const Text("Confirm"),
+                : Text(
+                    'Confirm',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
           ),
         ),
       ],

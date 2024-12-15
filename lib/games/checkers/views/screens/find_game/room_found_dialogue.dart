@@ -39,7 +39,7 @@ class RoomFoundDialogueState extends ConsumerState<RoomFoundDialogue> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _topBar(context),
-                SizedBox(height: 16),
+                SizedBox(height: 14),
                 _roomFoundDetails(context),
                 SizedBox(height: 16),
                 _buttons(context),
@@ -68,10 +68,13 @@ class RoomFoundDialogueState extends ConsumerState<RoomFoundDialogue> {
             ),
           ),
         ),
-        const Text(
+        Text(
           'Room Found!',
-          style: TextStyle(
-              color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+          style: GoogleFonts.montserrat(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
     );
@@ -91,13 +94,22 @@ class RoomFoundDialogueState extends ConsumerState<RoomFoundDialogue> {
                 color: Color(0xFFF3B46E),
               ),
             ),
-            child: const Text("Back"),
+            child: Text(
+              'Back',
+              style: GoogleFonts.montserrat(
+                color: Color(0xFFF3B46E),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pop(context);
+            },
             style: OutlinedButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
@@ -106,7 +118,14 @@ class RoomFoundDialogueState extends ConsumerState<RoomFoundDialogue> {
             ),
             child: isLoading
                 ? const CircularProgressIndicator()
-                : const Text("Join"),
+                : Text(
+                    'Join',
+                    style: GoogleFonts.montserrat(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
           ),
         ),
       ],
@@ -133,19 +152,21 @@ class RoomFoundDialogueState extends ConsumerState<RoomFoundDialogue> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 'ROOM 0028',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600),
+                style: GoogleFonts.orbitron(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const Text(
+              Text(
                 '1/2 Players',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500),
+                style: GoogleFonts.orbitron(
+                  color: const Color(0xFF979797),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               SizedBox(height: 8),
               Row(

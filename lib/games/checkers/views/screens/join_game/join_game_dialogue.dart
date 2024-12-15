@@ -76,10 +76,13 @@ class CheckersJoinGameDialogState
             ),
           ),
         ),
-        const Text(
+        Text(
           'Join Game',
-          style: TextStyle(
-              color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+          style: GoogleFonts.montserrat(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
     );
@@ -117,29 +120,34 @@ class CheckersJoinGameDialogState
   Widget _joinMenu() {
     return Column(
       children: [
-        const Text(
+        Text(
           '1/2 Players',
-          style: TextStyle(
-            color: Color(0xFF979797),
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
+          style: GoogleFonts.orbitron(
+            color: const Color(0xFF979797),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
           ),
         ),
         SizedBox(height: 15),
-        Container(
-          height: 33,
-          width: 94,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF3B46E),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Center(
-            child: Text(
-              'Join',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+        GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Container(
+            height: 33,
+            width: 94,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3B46E),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Center(
+              child: Text(
+                'Join',
+                style: GoogleFonts.orbitron(
+                  color: Colors.black,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
@@ -152,9 +160,9 @@ class CheckersJoinGameDialogState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'ROOM 0030',
-          style: TextStyle(
+          style: GoogleFonts.orbitron(
             color: Colors.white,
             fontSize: 13,
             fontWeight: FontWeight.w600,

@@ -9,6 +9,7 @@ class CheckersRadio<T> extends StatelessWidget {
   final double _width;
   final EdgeInsetsGeometry _padding;
   final Widget _child;
+  final bool _useGradient;
 
   const CheckersRadio({
     required T? value,
@@ -20,6 +21,7 @@ class CheckersRadio<T> extends StatelessWidget {
     required double width,
     required EdgeInsetsGeometry padding,
     required Widget child,
+    bool useGradient = true,
     super.key,
   })  : _value = value,
         _globalValue = globalValue,
@@ -29,6 +31,7 @@ class CheckersRadio<T> extends StatelessWidget {
         _borderColor = borderColor,
         _width = width,
         _padding = padding,
+        _useGradient = useGradient,
         _child = child;
 
   bool get _isActive => _globalValue == _value && _value != null;
@@ -51,15 +54,12 @@ class CheckersRadio<T> extends StatelessWidget {
             border: Border.all(
               color: _isActive ? _backgroundColor : _borderColor,
             ),
-            gradient: !_isActive
+            gradient: !_isActive || !_useGradient
                 ? null
-                : RadialGradient(
-                    colors: [
-                      Colors.transparent,
-                      const Color(0xFFF3B46E).withOpacity(0.6)
-                    ],
-                    radius: 1.7,
-                  ),
+                : RadialGradient(colors: [
+                    Colors.transparent,
+                    const Color(0xFFF3B46E).withOpacity(0.6)
+                  ], radius: 1.7),
             borderRadius: BorderRadius.circular(8),
           ),
           clipBehavior: Clip.antiAlias,
@@ -68,7 +68,7 @@ class CheckersRadio<T> extends StatelessWidget {
             padding: _padding,
             width: _width,
             decoration: BoxDecoration(
-              gradient: !_isActive
+              gradient: !_isActive || !_useGradient
                   ? null
                   : LinearGradient(
                       begin: Alignment.topCenter,
