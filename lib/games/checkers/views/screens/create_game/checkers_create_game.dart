@@ -29,6 +29,7 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
 
   double? _selectedTokenAmount;
   final bool _isLoading = false;
+  bool _shouldRetrieveBalance = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,82 +41,84 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
               return (height / 749) * constraints.maxHeight;
             }
 
-            return Column(
-              children: [
-                _topBar(context, scaledHeight),
-                SizedBox(height: 31),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal:
-                          (_activeTab == 2 && _gameMode == GameMode.free)
-                              ? 0
-                              : 12),
-                  child: Column(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 32,
-                            child:
-                                (_activeTab == 2 && _gameMode == GameMode.free)
-                                    ? SizedBox()
-                                    : (_activeTab == 3 &&
-                                            _gameMode == GameMode.token)
-                                        ? const SizedBox()
-                                        : CheckersStepper(
-                                            gameMode: _gameMode,
-                                            activeTab: _activeTab,
-                                            numberOfSteps: _numberOfTabs,
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  _topBar(context, scaledHeight),
+                  SizedBox(height: 31),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal:
+                            (_activeTab == 2 && _gameMode == GameMode.free)
+                                ? 0
+                                : 12),
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 32,
+                              child: (_activeTab == 2 &&
+                                      _gameMode == GameMode.free)
+                                  ? SizedBox()
+                                  : (_activeTab == 3 &&
+                                          _gameMode == GameMode.token)
+                                      ? const SizedBox()
+                                      : CheckersStepper(
+                                          gameMode: _gameMode,
+                                          activeTab: _activeTab,
+                                          numberOfSteps: _numberOfTabs,
+                                        ),
+                            ),
+                            const SizedBox(width: 12),
+                            Flexible(
+                              child: (_activeTab == 2 &&
+                                      _gameMode == GameMode.free)
+                                  ? CeateGameWaitingRoom(
+                                      activeTab: _activeTab,
+                                      gameMode: _gameMode,
+                                    )
+                                  : (_activeTab == 3 &&
+                                          _gameMode == GameMode.token)
+                                      ? CeateGameWaitingRoom(
+                                          activeTab: _activeTab,
+                                          gameMode: _gameMode,
+                                        )
+                                      : Container(
+                                          height: scaledHeight(462),
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            color: const Color(0xFF21262B),
                                           ),
-                          ),
-                          const SizedBox(width: 12),
-                          Flexible(
-                            child: (_activeTab == 2 &&
-                                    _gameMode == GameMode.free)
-                                ? CeateGameWaitingRoom(
-                                    activeTab: _activeTab,
-                                    gameMode: _gameMode,
-                                  )
-                                : (_activeTab == 3 &&
-                                        _gameMode == GameMode.token)
-                                    ? CeateGameWaitingRoom(
-                                        activeTab: _activeTab,
-                                        gameMode: _gameMode,
-                                      )
-                                    : Container(
-                                        height: scaledHeight(462),
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          color: const Color(0xFF21262B),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              if (_activeTab == 0)
+                                                _selectGame(scaledHeight),
+                                              if (_activeTab == 1)
+                                                _selectCharacter(scaledHeight),
+                                              if (_activeTab == 2 &&
+                                                  _gameMode == GameMode.token)
+                                                _selectPlayAmount(),
+                                            ],
+                                          ),
                                         ),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            if (_activeTab == 0)
-                                              _selectGame(scaledHeight),
-                                            if (_activeTab == 1)
-                                              _selectCharacter(scaledHeight),
-                                            if (_activeTab == 2 &&
-                                                _gameMode == GameMode.token)
-                                              _selectPlayAmount(),
-                                          ],
-                                        ),
-                                      ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(
-                  height: scaledHeight(20),
-                ),
-                _buttons(scaledHeight),
-              ],
+                  SizedBox(
+                    height: scaledHeight(20),
+                  ),
+                  _buttons(scaledHeight),
+                ],
+              ),
             );
           },
         ),
@@ -205,10 +208,7 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
           : null,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-              child: CircularProgressIndicator(
-            color: Color(0xFFF3B46E),
-          ));
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasData) {
           _supportedTokens.clear();
@@ -345,19 +345,15 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
             ),
             const SizedBox(height: 8),
             FutureBuilder(
-              future: _selectedTokenAddress == null ||
-                      ((_selectedTokenAmount ?? 0)) > 0
+              future: !_shouldRetrieveBalance
                   ? null
                   : ref
                       .read(userProvider.notifier)
-                      .getTokenBalance(_selectedTokenAddress!),
+                      .getTokenBalance(_selectedTokenAddress!)
+                      .whenComplete(() => _shouldRetrieveBalance = false),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFFF3B46E),
-                    ),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasData) {
                   _selectedTokenBalance = snapshot.data!.toDouble();
@@ -724,14 +720,11 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
       _selectedTokenAmount = null;
       _selectedTokenAddress = tokenAddress;
       _selectedTokenBalance = 0;
+      _shouldRetrieveBalance = true;
     });
   }
 
   void _selectTokenAmount(double amount) {
-    // if (amount == 0) {
-    //   _selectedTokenAmount = amount;
-    //   return;
-    // }
     _tokenAmountController.text = amount == 0 ? "0" : "${amount / 1e18}";
     setState(() {
       _selectedTokenAmount = amount;
