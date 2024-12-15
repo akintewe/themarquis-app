@@ -208,7 +208,11 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
           : null,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFFF3B46E),
+            ),
+          );
         }
         if (snapshot.hasData) {
           _supportedTokens.clear();
@@ -353,7 +357,11 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
                       .whenComplete(() => _shouldRetrieveBalance = false),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFFF3B46E),
+                    ),
+                  );
                 }
                 if (snapshot.hasData) {
                   _selectedTokenBalance = snapshot.data!.toDouble();
