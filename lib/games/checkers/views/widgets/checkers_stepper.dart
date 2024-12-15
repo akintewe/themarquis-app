@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:marquis_v2/games/checkers/core/utils/checkers_enum.dart';
 
 class CheckersStepper extends StatelessWidget {
   final int _activeTab, _numberOfSteps;
+  final GameMode? gameMode;
   const CheckersStepper(
-      {required int activeTab, required int numberOfSteps, super.key})
+      {required int activeTab,
+      required int numberOfSteps,
+      required this.gameMode,
+      super.key})
       : _activeTab = activeTab,
         _numberOfSteps = numberOfSteps;
 
@@ -17,7 +22,11 @@ class CheckersStepper extends StatelessWidget {
           children: [
             if (index != 0)
               ...List.generate(
-                30,
+                (_activeTab == 1 && gameMode == GameMode.free)
+                    ? 65
+                    : (_activeTab == 1 && gameMode == GameMode.token)
+                        ? 65
+                        : 30,
                 (index2) => Container(
                   width: 3,
                   height: 3,
@@ -30,21 +39,12 @@ class CheckersStepper extends StatelessWidget {
               width: 11,
               height: 11,
               decoration: BoxDecoration(
-                color:
-                    index <= _activeTab ? const Color(0xFFF3B46E) : Color(0XFF242E39),
+                color: index <= _activeTab
+                    ? const Color(0xFFF3B46E)
+                    : Color(0XFF242E39),
                 shape: BoxShape.circle,
               ),
             ),
-            // if (index != _numberOfSteps - 1)
-            //   ...List.generate(
-            //     10,
-            //     (index2) => Container(
-            //       width: 3,
-            //       height: 3,
-            //       color: Colors.grey,
-            //       margin: const EdgeInsets.only(bottom: 4),
-            //     ),
-            //   ),
           ],
         );
       },

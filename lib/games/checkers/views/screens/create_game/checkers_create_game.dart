@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:marquis_v2/games/checkers/core/utils/checkers_enum.dart';
+import 'package:marquis_v2/games/checkers/views/screens/create_game/create_game_waiting_room.dart';
 import 'package:marquis_v2/games/checkers/views/widgets/checkers_radio.dart';
 import 'package:marquis_v2/games/checkers/views/widgets/checkers_stepper.dart';
-import 'package:marquis_v2/games/ludo/ludo_game.dart';
-import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
 import 'package:marquis_v2/games/ludo/widgets/divider_shape.dart';
-import 'package:marquis_v2/games/ludo/widgets/radio_option.dart';
-import 'package:marquis_v2/widgets/balance_appbar.dart';
-import 'package:marquis_v2/widgets/error_dialog.dart';
+import 'package:marquis_v2/providers/user.dart';
 
 class CheckersCreateGame extends ConsumerStatefulWidget {
   @override
@@ -21,416 +18,429 @@ class CheckersCreateGame extends ConsumerStatefulWidget {
 
 class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
   int _activeTab = 0;
+  int? _selectedCharacterIndex;
+  int? _selectedTokenIndex;
   double _selectedTokenBalance = 0;
-  NumberOfPlayers? _numberOfPlayers;
   GameMode? _gameMode;
   String? _selectedTokenAddress;
 
   double? _selectedTokenAmount;
-  String? _playerColor;
   bool _isLoading = false;
   final Map<String, String> _supportedTokens = {};
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const BalanceAppBar(),
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          double scaledHeight(double height) {
-            return (height / 749) * constraints.maxHeight;
-          }
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            double scaledHeight(double height) {
+              return (height / 749) * constraints.maxHeight;
+            }
 
-          return Column(
-            children: [
-              _topBar(context, scaledHeight),
-              SizedBox(height: _activeTab == _numberOfTabs ? 31 : 21),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 32,
-                      child: CheckersStepper(
-                        activeTab: _activeTab,
-                        numberOfSteps: _numberOfTabs,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Flexible(
-                      child: Container(
-                        height: scaledHeight(462),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: const Color(0xFF21262B),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (_activeTab == 0) _selectGame(scaledHeight),
-                            if (_activeTab == 1) _selectCharacter(scaledHeight),
-                            if (_activeTab == 2 && _gameMode == GameMode.token)
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 28),
-                                child: _selectPlayAmount(),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // ],
-                    if (_activeTab == _numberOfTabs && _playerColor != null)
-                      SizedBox(
-                        width: constraints.maxWidth - 24,
-                        height: scaledHeight(462),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 4),
-                            if (_selectedTokenAddress != null) ...[
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: const Color(0xFF21262B),
-                                      borderRadius: BorderRadius.circular(8)),
-                                  alignment: Alignment.center,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Text('Play Amount'),
-                                      const SizedBox(height: 12),
-                                      RadioOption(
-                                        value: _selectedTokenAddress,
-                                        globalValue: _selectedTokenAddress,
-                                        onTap: (_) {},
-                                        selectedBackgroundColor:
-                                            const Color(0x1200ECFF),
-                                        unSelectedBackgroundColor:
-                                            Colors.transparent,
-                                        borderColor: const Color(0xFF00ECFF),
-                                        width: 130,
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 4),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Image.asset(
-                                              "assets/images/${_supportedTokens['ETH'] == _selectedTokenAddress ? 'eth_icon' : _supportedTokens['STRK'] == _selectedTokenAddress ? 'STRK_logo' : _supportedTokens['LORDS'] == _selectedTokenAddress ? 'lords_icon' : 'brother_logo'}.png",
-                                            ),
-                                            const Flexible(
-                                                child: SizedBox(width: 10)),
-                                            Text(
-                                              (_selectedTokenAmount! / 1e18)
-                                                  .toStringAsFixed(7),
-                                              maxLines: 1,
-                                              style: const TextStyle(
-                                                  color: Color(0xFF00ECFF)),
-                                            ),
-                                          ],
-                                        ),
+            return Column(
+              children: [
+                _topBar(context, scaledHeight),
+                SizedBox(height: 31),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal:
+                          (_activeTab == 2 && _gameMode == GameMode.free)
+                              ? 0
+                              : 12),
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 32,
+                            child:
+                                (_activeTab == 2 && _gameMode == GameMode.free)
+                                    ? const SizedBox()
+                                    : CheckersStepper(
+                                        gameMode: _gameMode,
+                                        activeTab: _activeTab,
+                                        numberOfSteps: _numberOfTabs,
                                       ),
-                                    ],
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: (_activeTab == 2 &&
+                                    _gameMode == GameMode.free)
+                                ? CeateGameWaitingRoom(
+                                    activeTab: _activeTab,
+                                    gameMode: _gameMode,
+                                  )
+                                : Container(
+                                    height: scaledHeight(462),
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: const Color(0xFF21262B),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        if (_activeTab == 0)
+                                          _selectGame(scaledHeight),
+                                        if (_activeTab == 1)
+                                          _selectCharacter(scaledHeight),
+                                        if (_activeTab == 2 &&
+                                            _gameMode == GameMode.token)
+                                          _selectPlayAmount(),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                            ],
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: scaledHeight(20),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  children: [
-                    if (_activeTab == 3) ...[
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            minimumSize: Size(
-                              double.infinity,
-                              scaledHeight(43),
-                            ),
-                            side: const BorderSide(
-                              color: Color(0xFFF3B46E),
-                            ),
-                            foregroundColor: const Color(0xFFF3B46E),
-                            textStyle: GoogleFonts.montserrat(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
                           ),
-                          onPressed: _switchToPreviousTab,
-                          child: const Text('Back'),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
                     ],
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          minimumSize: Size(
-                            double.infinity,
-                            scaledHeight(43),
-                          ),
-                          disabledBackgroundColor: const Color(0xFF32363A),
-                          backgroundColor: const Color(0xFFF3B46E),
-                          disabledForegroundColor: const Color(0xFF939393),
-                          foregroundColor: const Color(0xFF000000),
-                          textStyle: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        onPressed: _activeTab == _numberOfTabs
-                            ? _createGame
-                            : _isNextEnabled
-                                ? _switchToNextTab
-                                : null,
-                        child: _isLoading
-                            ? const CircularProgressIndicator()
-                            : Text(
-                                _activeTab == _numberOfTabs &&
-                                        _playerColor != null
-                                    ? 'Create Game'
-                                    : 'Next',
-                              ),
-                      ),
-                    ),
-                  ],
+                  ),
+                ),
+                SizedBox(
+                  height: scaledHeight(20),
+                ),
+                _buttons(scaledHeight),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buttons(double Function(double height) scaledHeight) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          if (_activeTab == 3) ...[
+            Expanded(
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minimumSize: Size(
+                    double.infinity,
+                    scaledHeight(43),
+                  ),
+                  side: const BorderSide(
+                    color: Color(0xFFF3B46E),
+                  ),
+                  foregroundColor: const Color(0xFFF3B46E),
+                  textStyle: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onPressed: _switchToPreviousTab,
+                child: const Text('Back'),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                minimumSize: Size(
+                  double.infinity,
+                  scaledHeight(43),
+                ),
+                disabledBackgroundColor: const Color(0xFF32363A),
+                backgroundColor: const Color(0xFFF3B46E),
+                disabledForegroundColor: const Color(0xFF939393),
+                foregroundColor: const Color(0xFF000000),
+                textStyle: GoogleFonts.montserrat(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-            ],
-          );
-        },
+              onPressed: _activeTab == _numberOfTabs
+                  ? () {}
+                  : _isNextEnabled
+                      ? _switchToNextTab
+                      : null,
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : Text(
+                      _activeTab == 2 && _gameMode == GameMode.free
+                          ? 'Invite Game'
+                          : _activeTab == 1
+                              ? 'Create Game'
+                              : 'Next',
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _selectPlayAmount() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text(
-          'Select Play Amount',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
+    return FutureBuilder(
+      future: _supportedTokens.isEmpty
+          ? ref.read(userProvider.notifier).getSupportedTokens()
+          : null,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasData) {
+          _supportedTokens.clear();
+          for (var item in snapshot.data!) {
+            _supportedTokens
+                .addAll({item["tokenName"]!: item["tokenAddress"]!});
+          }
+        }
+        if (_supportedTokens.isEmpty) {
+          return Center(
+              child: TextButton(
+                  onPressed: () => setState(() {}),
+                  child: const Text('retry')));
+        }
+        return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CheckersRadio(
-              value: _supportedTokens["STRK"],
-              globalValue: _selectedTokenAddress,
-              onTap: _selectTokenAddress,
-              selectedBackgroundColor: const Color(0x1200ECFF),
-              unSelectedBackgroundColor: Colors.transparent,
-              borderColor: const Color(0xFFF3B46E),
-              width: 130,
-              padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
-              child: Row(
-                children: [
-                  Image.asset('assets/images/STRK_logo.png'),
-                  const SizedBox(width: 4),
-                  Text(
-                    'STRK',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFFF3B46E),
-                    ),
-                  ),
-                ],
+            const Text(
+              'Select Play Amount',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(width: 8),
-            CheckersRadio(
-              value: _supportedTokens["ETH"],
-              globalValue: _selectedTokenAddress,
-              onTap: _selectTokenAddress,
-              selectedBackgroundColor: const Color(0x1200ECFF),
-              unSelectedBackgroundColor: Colors.transparent,
-              borderColor: const Color(0xFFF3B46E),
-              width: 130,
-              padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
-              child: Row(
-                children: [
-                  Image.asset('assets/images/eth_icon.png'),
-                  const SizedBox(width: 4),
-                  Text(
-                    'ETH',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFFF3B46E),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CheckersRadio(
-              value: _supportedTokens["LORDS"],
-              globalValue: _selectedTokenAddress,
-              onTap: _selectTokenAddress,
-              selectedBackgroundColor: const Color(0x1200ECFF),
-              unSelectedBackgroundColor: Colors.transparent,
-              borderColor: const Color(0xFFF3B46E),
-              width: 130,
-              padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
-              child: Row(
-                children: [
-                  Image.asset('assets/images/lords_icon.png'),
-                  const SizedBox(width: 4),
-                  Text(
-                    'LORDS',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFFF3B46E),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 4),
-            CheckersRadio(
-              value: _supportedTokens["BROTHER"],
-              globalValue: _selectedTokenAddress,
-              onTap: _selectTokenAddress,
-              selectedBackgroundColor: const Color(0x1200ECFF),
-              unSelectedBackgroundColor: Colors.transparent,
-              borderColor: const Color(0xFFF3B46E),
-              width: 130,
-              padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
-              child: Row(
-                children: [
-                  Image.asset('assets/images/brother_icon.png'),
-                  const SizedBox(width: 4),
-                  Text(
-                    'BROTHER',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFFF3B46E),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Slider(
-              min: 0,
-              divisions: 100,
-              activeColor: Colors.white,
-              label: ((_selectedTokenAmount ?? 0) / 1e18).toStringAsFixed(7),
-              secondaryActiveColor: Colors.cyan,
-              allowedInteraction: SliderInteraction.slideThumb,
-              max: _selectedTokenBalance.toDouble(),
-              value: _selectedTokenAmount ?? 0,
-              onChanged: _selectTokenAmount,
-            ),
+            const SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      'Min',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 10,
-                          color: const Color(0xFFFFFFFF),
-                          fontWeight: FontWeight.w400),
-                    ),
-                    const SizedBox(width: 13),
-                    SizedBox(
-                      width: 80,
-                      child: Text(
-                        ((_selectedTokenAmount ?? 0) / 1e18).toStringAsFixed(7),
-                        style: GoogleFonts.montserrat(
-                          fontSize: 10,
-                          color: const Color(0xFFFFFFFF),
+                CheckersRadio(
+                  value: _supportedTokens["STRK"],
+                  globalValue: _selectedTokenAddress,
+                  onTap: _selectTokenAddress,
+                  selectedBackgroundColor: const Color(0x1200ECFF),
+                  unSelectedBackgroundColor: Colors.transparent,
+                  borderColor: const Color(0xFFF3B46E),
+                  width: 130,
+                  padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
+                  child: Row(
+                    children: [
+                      Image.asset('assets/images/STRK_logo.png'),
+                      const SizedBox(width: 4),
+                      Text(
+                        'STRK',
+                        style: TextStyle(
+                          fontSize: 12,
                           fontWeight: FontWeight.w400,
+                          color: const Color(0xFFF3B46E),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                const SizedBox(width: 8),
+                CheckersRadio(
+                  value: _supportedTokens["ETH"],
+                  globalValue: _selectedTokenAddress,
+                  onTap: _selectTokenAddress,
+                  selectedBackgroundColor: const Color(0x1200ECFF),
+                  unSelectedBackgroundColor: Colors.transparent,
+                  borderColor: const Color(0xFFF3B46E),
+                  width: 130,
+                  padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
+                  child: Row(
+                    children: [
+                      Image.asset('assets/images/eth_icon.png'),
+                      const SizedBox(width: 4),
+                      Text(
+                        'ETH',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFFF3B46E),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CheckersRadio(
+                  value: _supportedTokens["LORDS"],
+                  globalValue: _selectedTokenAddress,
+                  onTap: _selectTokenAddress,
+                  selectedBackgroundColor: const Color(0x1200ECFF),
+                  unSelectedBackgroundColor: Colors.transparent,
+                  borderColor: const Color(0xFFF3B46E),
+                  width: 130,
+                  padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
+                  child: Row(
+                    children: [
+                      Image.asset('assets/images/lords_icon.png'),
+                      const SizedBox(width: 4),
+                      Text(
+                        'LORDS',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFFF3B46E),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 4),
+                CheckersRadio(
+                  value: _supportedTokens["BROTHER"],
+                  globalValue: _selectedTokenAddress,
+                  onTap: _selectTokenAddress,
+                  selectedBackgroundColor: const Color(0x1200ECFF),
+                  unSelectedBackgroundColor: Colors.transparent,
+                  borderColor: const Color(0xFFF3B46E),
+                  width: 130,
+                  padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4),
+                  child: Row(
+                    children: [
+                      Image.asset('assets/images/brother_icon.png'),
+                      const SizedBox(width: 4),
+                      Text(
+                        'BROTHER',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFFF3B46E),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            FutureBuilder(
+              future: _selectedTokenAddress == null ||
+                      ((_selectedTokenAmount ?? 0)) > 0
+                  ? null
+                  : ref
+                      .read(userProvider.notifier)
+                      .getTokenBalance(_selectedTokenAddress!),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasData) {
+                  _selectedTokenBalance = snapshot.data!.toDouble();
+                }
+                return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Max',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 10,
-                          color: const Color(0xFFFFFFFF),
-                          fontWeight: FontWeight.w400),
+                    Slider(
+                      min: 0,
+                      thumbColor: Colors.white,
+                      divisions: 100,
+                      inactiveColor: Colors.white,
+                      activeColor: const Color(0xFFF3B46E),
+                      label: ((_selectedTokenAmount ?? 0) / 1e18)
+                          .toStringAsFixed(7),
+                      secondaryActiveColor: const Color(0xFFF3B46E),
+                      allowedInteraction: SliderInteraction.slideThumb,
+                      max: _selectedTokenBalance.toDouble(),
+                      value: _selectedTokenAmount ?? 0,
+                      onChanged: _selectTokenAmount,
                     ),
-                    const SizedBox(width: 13),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Balance\t\t',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 10,
-                            color: const Color(0xFFFFFFFF),
-                            fontWeight: FontWeight.w400,
-                          ),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 20),
+                              child: Text(
+                                'Min',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 13),
+                            SizedBox(
+                              width: 80,
+                              child: Text(
+                                ((_selectedTokenAmount ?? 0) / 1e18)
+                                    .toStringAsFixed(7),
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 12,
+                                  color: const Color(0xFFFFFFFF),
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          (_selectedTokenBalance.toDouble() / 1e18)
-                              .toStringAsFixed(7),
-                          style: GoogleFonts.montserrat(
-                            fontSize: 10,
-                            color: const Color(0xFFFFFFFF),
-                            fontWeight: FontWeight.w400,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 20),
+                              child: Text(
+                                'Max',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 12,
+                                    color: const Color(0xFFFFFFFF),
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ),
+                            const SizedBox(width: 13),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 20),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'Balance\t\t',
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 12,
+                                      color: const Color(0xFFFFFFFF),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
+                                    (_selectedTokenBalance.toDouble() / 1e18)
+                                        .toStringAsFixed(7),
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 10,
+                                      color: const Color(0xFFFFFFFF),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
                       ],
-                    ),
+                    )
                   ],
-                )
-              ],
-            )
+                );
+              },
+            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -492,6 +502,13 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
   }
 
   Widget _selectCharacter(double Function(double height) scaledHeight) {
+    final characterAssets = [
+      'assets/images/jason.png',
+      'assets/images/desire.png',
+      'assets/images/esther.png',
+      'assets/images/olivia.png',
+    ];
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -507,71 +524,47 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: 72,
-              width: 72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFFF3B46E),
-              ),
-              child: Center(
-                child: Image.asset(
-                  'assets/images/jason.png',
-                  width: 91,
-                  height: 91,
+          children: List.generate(
+            characterAssets.length,
+            (index) => GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedCharacterIndex = index;
+                });
+              },
+              child: Container(
+                height: 72,
+                width: 72,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFF3B46E),
+                  border: Border.all(
+                    color: _selectedCharacterIndex == index
+                        ? Colors.white
+                        : Colors.transparent,
+                    width: 3,
+                  ),
+                  boxShadow: _selectedCharacterIndex == index
+                      ? [
+                          BoxShadow(
+                            color: Colors.orange.withOpacity(0.5),
+                            blurRadius: 10,
+                            spreadRadius: 5,
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Center(
+                  child: Image.asset(
+                    characterAssets[index],
+                    width: 91,
+                    height: 91,
+                  ),
                 ),
               ),
             ),
-            SizedBox(width: 12),
-            Container(
-              height: 72,
-              width: 72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFFF3B46E),
-              ),
-              child: Center(
-                child: Image.asset(
-                  'assets/images/desire.png',
-                  width: 91,
-                  height: 91,
-                ),
-              ),
-            ),
-            SizedBox(width: 12),
-            Container(
-              height: 72,
-              width: 72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFFF3B46E),
-              ),
-              child: Center(
-                child: Image.asset(
-                  'assets/images/esther.png',
-                  width: 91,
-                  height: 91,
-                ),
-              ),
-            ),
-            SizedBox(width: 12),
-            Container(
-              height: 72,
-              width: 72,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFFF3B46E),
-              ),
-              child: Center(
-                child: Image.asset(
-                  'assets/images/olivia.png',
-                  width: 91,
-                  height: 91,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ],
     );
@@ -591,8 +584,10 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'CREATE GAME',
+              Text(
+                (_activeTab == 2 && _gameMode == GameMode.free)
+                    ? 'WAITING ROOM'
+                    : 'CREATE GAME',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
@@ -636,23 +631,11 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
     );
   }
 
-  void _selectNumberOfPlayers(NumberOfPlayers numberOfPlayers) {
-    setState(() {
-      _numberOfPlayers = numberOfPlayers;
-    });
-  }
-
   void _selectGameMode(GameMode gameMode) {
     setState(() {
       _gameMode = gameMode;
       _selectedTokenAddress = null;
       _selectedTokenAmount = null;
-    });
-  }
-
-  void _selectPinColor(String pinColor) {
-    setState(() {
-      _playerColor = pinColor;
     });
   }
 
@@ -687,43 +670,29 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
   }
 
   bool get _isNextEnabled {
-    if (_activeTab == 0) return _gameMode != null;
-    if (_activeTab == 1) return _numberOfPlayers != null;
-    if (_activeTab == 2 && _gameMode == GameMode.token) {
-      return _selectedTokenAddress != null && _selectedTokenAmount != null;
+    switch (_activeTab) {
+      case 0:
+        return _gameMode != null;
+      case 1:
+        return _selectedCharacterIndex != null;
+      case 2:
+        if (_gameMode == GameMode.token) {
+          return _selectedTokenAddress != null && _selectedTokenAmount != null;
+        } else if (_gameMode == GameMode.free) {
+          return _selectedCharacterIndex != null;
+        }
+      // break;
+      // case 3:
+      //   return _selectedCharacterIndex != null;
+      default:
+        return false;
     }
-    if (_activeTab == 2 && _gameMode == GameMode.free) {
-      return _playerColor != null;
-    }
-    if (_activeTab == 3) return _playerColor != null;
     return false;
   }
 
-  int get _numberOfTabs => 3;
-
-  Future<void> _createGame() async {
-    final game = ModalRoute.of(context)!.settings.arguments as LudoGame;
-    final color =
-        _playerColor!.split("/").last.split(".").first.split("_").first;
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-      await ref.read(ludoSessionProvider.notifier).createSession(
-            _gameMode == GameMode.free ? '0' : '$_selectedTokenAmount',
-            color,
-            _selectedTokenAddress ?? "0",
-          );
-      if (!mounted) return;
-      Navigator.of(context).pop();
-      game.playState = PlayState.waiting;
-    } catch (e) {
-      if (!context.mounted) return;
-      showErrorDialog(e.toString(), context);
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+  int get _numberOfTabs => (_activeTab == 1 && _gameMode == GameMode.free)
+      ? 2
+      : (_activeTab == 1 && _gameMode == GameMode.token)
+          ? 2
+          : 3;
 }

@@ -28,7 +28,9 @@ class CheckersFindRoomDialogState
       data: Theme.of(context)
           .copyWith(textTheme: GoogleFonts.montserratTextTheme()),
       child: Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         clipBehavior: Clip.antiAlias,
         backgroundColor: const Color(0xFF21262B),
         child: SizedBox(
