@@ -29,7 +29,6 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
 
   double? _selectedTokenAmount;
   final bool _isLoading = false;
-  // final Map<String, String> _supportedTokens = {};
 
   @override
   Widget build(BuildContext context) {
@@ -400,7 +399,8 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
                             keyboardType:
                                 TextInputType.numberWithOptions(decimal: true),
                             inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp("[.0-9]"))
+                              FilteringTextInputFormatter.allow(
+                                  RegExp("[.0-9]"))
                             ],
                             onChanged: (value) {
                               if (value.isEmpty) return;
