@@ -36,6 +36,6 @@ class CheckersState extends Component with HasGameReference<CheckersGame> {
   void switchTurn() {
     isBlackTurn = !isBlackTurn;
     game.currentPlayer = isBlackTurn ? 0 : 1;
-    game.turnText.text = '${isBlackTurn ? 'Black' : 'White'}\'s Turn';
+    
   }
 } 

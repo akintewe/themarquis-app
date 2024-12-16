@@ -10,11 +10,11 @@ enum CheckersPlayState { welcome, waiting, playing, finished }
 
 class CheckersGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   static const double gameWidth = 450;
-  static const double gameHeight = 450;
+  static const double gameHeight = 800;
   
   bool isInit = false;
   CheckersBoard? board;
-  late TextComponent turnText;
+  late UserStatsComponent userStats;
   int currentPlayer = 0;
   int userIndex = -1;
   bool playerCanMove = false;
@@ -42,14 +42,33 @@ class CheckersGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     await super.onLoad();
     camera.viewfinder.anchor = Anchor.center;
     
+    // Add user stats component first
+    userStats = UserStatsComponent()
+      ..position = Vector2(0, 20);
+    await add(userStats);
+    
     // Create and position the board at the center
     board = CheckersBoard()
       ..position = Vector2(
         center.x - (width * 0.8) / 1.8,
-        center.y - (width * 0.8) / 400,
+        center.y - (width * 0.8) / 2,
       );
     
     await add(board!);
+  }
+
+  void updateStats({
+    required int playerIndex,
+    int? lostPieces,
+    int? winPieces,
+    int? queens,
+  }) {
+    userStats.updateStats(
+      playerIndex: playerIndex,
+      lostPieces: lostPieces,
+      winPieces: winPieces,
+      queens: queens,
+    );
   }
 
   @override

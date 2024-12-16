@@ -20,9 +20,10 @@ class CheckersGameScreen extends StatelessWidget {
           'gameUI': (context, game) => SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child:GestureDetector(
+              child: GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: Image.asset('assets/images/Group 1171276336.png'))
+                child: Image.asset('assets/images/Group 1171276336.png'),
+              ),
             ),
           ),
         },
