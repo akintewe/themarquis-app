@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:marquis_v2/games/checkers/views/screens/home_screen/checkers_home_screen.dart';
 import 'package:marquis_v2/games/ludo/main.dart';
 import 'package:marquis_v2/models/app_state.dart';
 import 'package:marquis_v2/router/app_shell.dart';
@@ -31,7 +32,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
 
   AppRouterDelegate(this.ref) : navigatorKey = GlobalKey<NavigatorState>() {
     _appState = ref.read(appStateProvider);
-    
+
     // Listen to state changes and force rebuild
     ref.listen<AppStateData>(appStateProvider, (previous, next) {
       _appState = next;
@@ -208,6 +209,10 @@ class InnerRouterDelegate extends RouterDelegate<AppRoutePath>
             "ludo" => FadeAnimationPage(
                 key: ValueKey('LudoGame${_appState.selectedGame}Page'),
                 child: const LudoGameApp(),
+              ),
+            "checkers" => FadeAnimationPage(
+                key:  ValueKey('CheckersHomeScreen${_appState.selectedGame}Page'),
+                child: const CheckersHomeScreen(),
               ),
             _ => FadeAnimationPage(
                 key: ValueKey('Game${_appState.selectedGame}Page'),

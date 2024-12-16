@@ -240,7 +240,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                                   icon: Icons.casino,
                                   label: 'Join Game',
                                   onTap: () => _joinGameDialog(
-                                      ctx: context, game: widget.game)),
+                                      ctx: context, game: widget.game),),
                             ),
                           ),
                           SizedBox(height: scaledHeight(20)),
