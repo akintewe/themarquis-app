@@ -8,6 +8,7 @@ class CheckersPin extends PositionComponent {
   final String spritePath;
   bool isKing = false;
   late PictureInfo checkerSprite;
+  late PictureInfo kingSprite;
 
   CheckersPin({
     required this.isBlack,
@@ -37,5 +38,15 @@ class CheckersPin extends PositionComponent {
     );
     canvas.drawPicture(checkerSprite.picture);
     canvas.restore();
+  }
+
+  void promoteToKing() {
+    isKing = true;
+    // You'll need to add king piece sprites and handle the visual change
+  }
+
+  bool canMove(int newRow, int currentRow) {
+    if (isKing) return true;
+    return isBlack ? newRow > currentRow : newRow < currentRow;
   }
 } 

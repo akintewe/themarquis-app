@@ -6,19 +6,24 @@ import 'package:flame/flame.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/checkers/core/components/checkers_pin.dart';
 import '../game/checkers_game.dart';
+import 'checkers_state.dart';
 
 class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGame>, TapCallbacks {
   static const int BOARD_SIZE = 8;
   late PictureInfo blackPinSprite;
   late PictureInfo whitePinSprite;
   
-  // Track game state
+  // Track selected piece
   CheckersPin? selectedPiece;
-  List<Vector2> validMoves = [];
+  Vector2? selectedPosition;
+  
+  // Add this line to track pieces
   List<List<CheckersPin?>> pieces = List.generate(
     BOARD_SIZE, 
     (_) => List.filled(BOARD_SIZE, null)
   );
+  
+  late CheckersState gameState;
   
   CheckersBoard() : super(
     paint: Paint()..color = Colors.transparent,
@@ -28,6 +33,10 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
   Future<void> onLoad() async {
     await super.onLoad();
     size = Vector2.all(game.width * 0.8);
+    
+    // Initialize game state
+    gameState = CheckersState();
+    await add(gameState);
     
     // Load the SVG sprites
     final blackData = await rootBundle.load('assets/images/blackchecker.svg');
@@ -151,7 +160,7 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
 
     // Highlight valid moves if a piece is selected
     if (selectedPiece != null) {
-      for (final move in validMoves) {
+      for (final move in gameState.validMoves) {
         final rect = RRect.fromRectAndRadius(
           Rect.fromLTWH(
             move.x * squareSize,
@@ -175,30 +184,44 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
   @override
   bool onTapUp(TapUpEvent event) {
     final squareSize = size.x / BOARD_SIZE;
-    final col = (event.canvasPosition.x / squareSize).floor();
-    final row = (event.canvasPosition.y / squareSize).floor();
+    final col = (event.localPosition.x / squareSize).floor();
+    final row = (event.localPosition.y / squareSize).floor();
 
-    if (col < 0 || col >= BOARD_SIZE || row < 0 || row >= BOARD_SIZE) return false;
+    if (!isValidPosition(row, col)) return true;
 
-    if (selectedPiece == null) {
-      // Select piece
-      final piece = pieces[row][col];
-      if (piece != null) {
-        selectedPiece = piece;
-        validMoves = getValidMoves(row, col);
+    if (gameState.selectedPiece == null) {
+      // First tap - try to select a piece
+      final isBlackSquare = (row + col) % 2 == 1;
+      if (isBlackSquare) {
+        final isBlackTurn = game.currentPlayer == 0;
+        if ((row < 3 && isBlackTurn) || (row >= 5 && !isBlackTurn)) {
+          final piece = CheckersPin(
+            isBlack: isBlackTurn,
+            position: Vector2(
+              col * squareSize + squareSize / 2,
+              row * squareSize + squareSize / 2,
+            ),
+            dimensions: Vector2.all(squareSize * 0.8),
+            spritePath: isBlackTurn ? 'assets/images/blackchecker.svg' : 'assets/images/whitechecker.svg',
+          );
+          gameState.selectPiece(piece, Vector2(col.toDouble(), row.toDouble()));
+        }
       }
     } else {
-      // Try to move piece
+      // Second tap - try to move piece
       final targetPos = Vector2(col.toDouble(), row.toDouble());
-      if (validMoves.contains(targetPos)) {
-        movePiece(selectedPiece!, row, col);
+      if (gameState.validMoves.contains(targetPos)) {
+        movePiece(gameState.selectedPiece!, row, col);
+        gameState.switchTurn();
       }
-      // Clear selection
-      selectedPiece = null;
-      validMoves.clear();
+      gameState.clearSelection();
     }
     
-    return false;
+    return true;
+  }
+
+  bool isValidPosition(int row, int col) {
+    return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
   }
 
   List<Vector2> getValidMoves(int row, int col) {
@@ -206,24 +229,32 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
     final piece = pieces[row][col];
     if (piece == null) return moves;
 
-    // Regular moves (diagonal forward)
-    final directions = piece.isBlack ? [1] : [-1];  // Black moves down, white moves up
+    // Directions for movement (diagonal)
+    List<int> directions = [];
+    if (piece.isKing) {
+      directions = [-1, 1];  // Kings can move both directions
+    } else {
+      directions = [piece.isBlack ? 1 : -1];  // Regular pieces move one direction
+    }
     
+    // Check for regular moves and captures
     for (final dRow in directions) {
-      for (final dCol in [-1, 1]) {  // Left and right diagonals
+      for (final dCol in [-1, 1]) {
+        // Check regular move
         final newRow = row + dRow;
         final newCol = col + dCol;
         
-        // Check regular move
         if (isValidPosition(newRow, newCol) && pieces[newRow][newCol] == null) {
           moves.add(Vector2(newCol.toDouble(), newRow.toDouble()));
         }
         
-        // Check jump move
-        final jumpRow = row + dRow * 2;
-        final jumpCol = col + dCol * 2;
+        // Check capture move
+        final jumpRow = row + (dRow * 2);
+        final jumpCol = col + (dCol * 2);
+        
         if (isValidPosition(jumpRow, jumpCol) && 
-            pieces[jumpRow][jumpCol] == null && 
+            pieces[jumpRow][jumpCol] == null &&
+            pieces[newRow][newCol] != null &&
             pieces[newRow][newCol]?.isBlack != piece.isBlack) {
           moves.add(Vector2(jumpCol.toDouble(), jumpRow.toDouble()));
         }
@@ -231,10 +262,6 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
     }
 
     return moves;
-  }
-
-  bool isValidPosition(int row, int col) {
-    return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
   }
 
   void movePiece(CheckersPin piece, int newRow, int col) {
@@ -257,5 +284,50 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
       col * size.x / BOARD_SIZE + size.x / BOARD_SIZE / 2,
       newRow * size.x / BOARD_SIZE + size.x / BOARD_SIZE / 2,
     );
+  }
+
+  bool checkGameOver() {
+    bool blackHasPieces = false;
+    bool whiteHasPieces = false;
+    bool blackCanMove = false;
+    bool whiteCanMove = false;
+
+    for (int row = 0; row < BOARD_SIZE; row++) {
+      for (int col = 0; col < BOARD_SIZE; col++) {
+        final piece = pieces[row][col];
+        if (piece != null) {
+          if (piece.isBlack) {
+            blackHasPieces = true;
+            if (getValidMoves(row, col).isNotEmpty) {
+              blackCanMove = true;
+            }
+          } else {
+            whiteHasPieces = true;
+            if (getValidMoves(row, col).isNotEmpty) {
+              whiteCanMove = true;
+            }
+          }
+        }
+      }
+    }
+
+    if (!blackHasPieces) {
+      game.winnerIndex = 1; // White wins
+      return true;
+    }
+    if (!whiteHasPieces) {
+      game.winnerIndex = 0; // Black wins
+      return true;
+    }
+    if (!blackCanMove) {
+      game.winnerIndex = 1; // White wins
+      return true;
+    }
+    if (!whiteCanMove) {
+      game.winnerIndex = 0; // Black wins
+      return true;
+    }
+
+    return false;
   }
 } 
