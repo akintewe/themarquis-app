@@ -2,11 +2,13 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../game/checkers_game.dart';
 import 'checkers_pin.dart';
+import 'dart:math';
 
 class CheckersState extends Component with HasGameReference<CheckersGame> {
   CheckersPin? selectedPiece;
   List<Vector2> validMoves = [];
   bool isBlackTurn = true;
+  final Random _random = Random();
   
   void selectPiece(CheckersPin piece, Vector2 position) {
     selectedPiece = piece;
@@ -37,5 +39,25 @@ class CheckersState extends Component with HasGameReference<CheckersGame> {
     isBlackTurn = !isBlackTurn;
     game.currentPlayer = isBlackTurn ? 0 : 1;
     
+  }
+  
+  void randomizePositions() {
+    // Get all available black squares on the board (8x8)
+    List<Vector2> availablePositions = [];
+    for (int row = 0; row < 8; row++) {
+      for (int col = 0; col < 8; col++) {
+        if ((row + col) % 2 == 1) { // Black squares only
+          availablePositions.add(Vector2(col.toDouble(), row.toDouble()));
+        }
+      }
+    }
+    
+    // Shuffle the positions
+    availablePositions.shuffle(_random);
+    
+    // Tell the board to update positions
+    if (game.board != null) {
+      game.board!.randomizePieces(availablePositions);
+    }
   }
 } 

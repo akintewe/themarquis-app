@@ -50,6 +50,51 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
       SvgStringLoader(String.fromCharCodes(whiteData.buffer.asUint8List())),
       null,
     );
+
+    // Initialize pieces array with default positions
+    final squareSize = size.x / BOARD_SIZE;
+    
+    // Initialize black pieces
+    final blackPositions = [
+      [0, 2, 4, 6],     // Row 0
+      [1, 3, 5, 7],     // Row 1
+      [0, 2, 4, 6],     // Row 2
+    ];
+    
+    for (int row = 0; row < 3; row++) {
+      for (int col in blackPositions[row]) {
+        pieces[row][col] = CheckersPin(
+          isBlack: true,
+          position: Vector2(
+            col * squareSize + squareSize / 2,
+            row * squareSize + squareSize / 2,
+          ),
+          dimensions: Vector2.all(squareSize * 0.8),
+          spritePath: 'assets/images/blackchecker.svg',
+        );
+      }
+    }
+
+    // Initialize white pieces
+    final whitePositions = [
+      [1, 3, 5, 7],     // Row 5
+      [0, 2, 4, 6],     // Row 6
+      [1, 3, 5, 7],     // Row 7
+    ];
+    
+    for (int row = 0; row < 3; row++) {
+      for (int col in whitePositions[row]) {
+        pieces[BOARD_SIZE - 3 + row][col] = CheckersPin(
+          isBlack: false,
+          position: Vector2(
+            col * squareSize + squareSize / 2,
+            (BOARD_SIZE - 3 + row) * squareSize + squareSize / 2,
+          ),
+          dimensions: Vector2.all(squareSize * 0.8),
+          spritePath: 'assets/images/whitechecker.svg',
+        );
+      }
+    }
   }
 
   @override
@@ -96,65 +141,29 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
       }
     }
 
-    // Define positions for black pieces
-    final blackPositions = [
-      [0, 2, 4, 6],     // Row 0: 4 pieces
-      [1, 3, 5, 7],     // Row 1: 4 pieces
-      [0, 2, 4, 6],     // Row 2: 4 pieces
-    ];
-
-    // Draw black pieces
-    for (int row = 0; row < 3; row++) {
-      for (int col in blackPositions[row]) {
-        canvas.save();
-        canvas.translate(
-          col * squareSize + squareSize / 2,
-          row * squareSize + squareSize / 2,
-        );
-        
-        canvas.scale(
-          pinSize / blackPinSprite.size.width,
-          pinSize / blackPinSprite.size.height,
-        );
-        
-        canvas.translate(
-          -blackPinSprite.size.width / 2,
-          -blackPinSprite.size.height / 2,
-        );
-        
-        canvas.drawPicture(blackPinSprite.picture);
-        canvas.restore();
-      }
-    }
-
-    // Define positions for white pieces
-    final whitePositions = [
-      [1, 3, 5, 7],     // Row 5: 4 pieces
-      [0, 2, 4, 6],     // Row 6: 4 pieces
-      [1, 3, 5, 7],     // Row 7: 4 pieces
-    ];
-
-    // Draw white pieces
-    for (int row = 0; row < 3; row++) {
-      for (int col in whitePositions[row]) {
-        canvas.save();
-        canvas.translate(
-          col * squareSize + squareSize / 2,
-          (BOARD_SIZE - 3 + row) * squareSize + squareSize / 2,
-        );
-        
-        canvas.scale(
-          pinSize / whitePinSprite.size.width,
-          pinSize / whitePinSprite.size.height,
-        );
-        
-        canvas.translate(
-          -whitePinSprite.size.width / 2,
-          -whitePinSprite.size.height / 2,
-        );
-        
-        canvas.drawPicture(whitePinSprite.picture);
-        canvas.restore();
+    // Draw pieces from the pieces array
+    for (int row = 0; row < BOARD_SIZE; row++) {
+      for (int col = 0; col < BOARD_SIZE; col++) {
+        if (pieces[row][col] != null) {
+          canvas.save();
+          canvas.translate(
+            pieces[row][col]!.position.x,
+            pieces[row][col]!.position.y,
+          );
+          
+          canvas.scale(
+            pinSize / (pieces[row][col]!.isBlack ? blackPinSprite : whitePinSprite).size.width,
+            pinSize / (pieces[row][col]!.isBlack ? blackPinSprite : whitePinSprite).size.height,
+          );
+          
+          canvas.translate(
+            -(pieces[row][col]!.isBlack ? blackPinSprite : whitePinSprite).size.width / 2,
+            -(pieces[row][col]!.isBlack ? blackPinSprite : whitePinSprite).size.height / 2,
+          );
+          
+          canvas.drawPicture((pieces[row][col]!.isBlack ? blackPinSprite : whitePinSprite).picture);
+          canvas.restore();
+        }
       }
     }
 
@@ -186,38 +195,14 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
     final squareSize = size.x / BOARD_SIZE;
     final col = (event.localPosition.x / squareSize).floor();
     final row = (event.localPosition.y / squareSize).floor();
-
-    if (!isValidPosition(row, col)) return true;
-
-    if (gameState.selectedPiece == null) {
-      // First tap - try to select a piece
-      final isBlackSquare = (row + col) % 2 == 1;
-      if (isBlackSquare) {
-        final isBlackTurn = game.currentPlayer == 0;
-        if ((row < 3 && isBlackTurn) || (row >= 5 && !isBlackTurn)) {
-          final piece = CheckersPin(
-            isBlack: isBlackTurn,
-            position: Vector2(
-              col * squareSize + squareSize / 2,
-              row * squareSize + squareSize / 2,
-            ),
-            dimensions: Vector2.all(squareSize * 0.8),
-            spritePath: isBlackTurn ? 'assets/images/blackchecker.svg' : 'assets/images/whitechecker.svg',
-          );
-          gameState.selectPiece(piece, Vector2(col.toDouble(), row.toDouble()));
-        }
-      }
-    } else {
-      // Second tap - try to move piece
-      final targetPos = Vector2(col.toDouble(), row.toDouble());
-      if (gameState.validMoves.contains(targetPos)) {
-        movePiece(gameState.selectedPiece!, row, col);
-        gameState.switchTurn();
-      }
-      gameState.clearSelection();
+    
+    // If a piece is clicked, randomize all pieces
+    if (pieces[row][col] != null) {
+      gameState.randomizePositions();
+      return true;
     }
     
-    return true;
+    return false;
   }
 
   bool isValidPosition(int row, int col) {
@@ -329,5 +314,33 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
     }
 
     return false;
+  }
+
+  void randomizePieces(List<Vector2> randomPositions) {
+    int positionIndex = 0;
+    final squareSize = size.x / BOARD_SIZE;
+    
+    // Move all pieces to new random positions
+    for (int row = 0; row < BOARD_SIZE; row++) {
+      for (int col = 0; col < BOARD_SIZE; col++) {
+        if (pieces[row][col] != null) {
+          final newPos = randomPositions[positionIndex];
+          final newRow = newPos.y.toInt();
+          final newCol = newPos.x.toInt();
+          
+          // Update piece position
+          pieces[row][col]!.position = Vector2(
+            newCol * squareSize + squareSize / 2,
+            newRow * squareSize + squareSize / 2,
+          );
+          
+          // Update board state
+          pieces[newRow][newCol] = pieces[row][col];
+          pieces[row][col] = null;
+          
+          positionIndex++;
+        }
+      }
+    }
   }
 } 

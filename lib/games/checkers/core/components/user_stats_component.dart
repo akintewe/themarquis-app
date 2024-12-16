@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/flame.dart';
 import '../game/checkers_game.dart';
+import 'dart:math';
 
 class UserStatsComponent extends PositionComponent with HasGameReference<CheckersGame> {
   late TextComponent player1Name;
@@ -124,14 +125,16 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
     // Stats label ABOVE container
     final label = TextComponent(
       text: text,
+      
       textRenderer: TextPaint(
         style: const TextStyle(
+          
           color: Colors.white,
           fontSize: 12,
         ),
       ),
     );
-    label.position = position + Vector2(0, -20); // Position above container
+    label.position = position + Vector2(5, -20); // Position above container
     await add(label);
 
     // Container background
@@ -186,5 +189,22 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
   void _updateStatValue(String statName, String newValue, bool isBottom) {
     // Implementation to update the specific stat text component
     // You'll need to store references to these text components when creating them
+  }
+
+  void updateRandomStats() {
+    // Generate random stats for both players
+    final random = Random();
+    updateStats(
+      playerIndex: 0,
+      lostPieces: random.nextInt(12),
+      winPieces: random.nextInt(12),
+      queens: random.nextInt(4),
+    );
+    updateStats(
+      playerIndex: 1,
+      lostPieces: random.nextInt(12),
+      winPieces: random.nextInt(12),
+      queens: random.nextInt(4),
+    );
   }
 } 
