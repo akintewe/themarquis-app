@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flame/flame.dart';
@@ -6,10 +7,18 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/checkers/core/components/checkers_pin.dart';
 import '../game/checkers_game.dart';
 
-class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGame> {
+class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGame>, TapCallbacks {
   static const int BOARD_SIZE = 8;
   late PictureInfo blackPinSprite;
   late PictureInfo whitePinSprite;
+  
+  // Track game state
+  CheckersPin? selectedPiece;
+  List<Vector2> validMoves = [];
+  List<List<CheckersPin?>> pieces = List.generate(
+    BOARD_SIZE, 
+    (_) => List.filled(BOARD_SIZE, null)
+  );
   
   CheckersBoard() : super(
     paint: Paint()..color = Colors.transparent,
@@ -139,5 +148,114 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
         canvas.restore();
       }
     }
+
+    // Highlight valid moves if a piece is selected
+    if (selectedPiece != null) {
+      for (final move in validMoves) {
+        final rect = RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            move.x * squareSize,
+            move.y * squareSize,
+            squareSize,
+            squareSize,
+          ),
+          const Radius.circular(3),
+        );
+        
+        canvas.drawRRect(
+          rect,
+          Paint()
+            ..color = const Color.fromRGBO(76, 175, 80, 0.5)  // Green highlight
+            ..style = PaintingStyle.fill,
+        );
+      }
+    }
+  }
+
+  @override
+  bool onTapUp(TapUpEvent event) {
+    final squareSize = size.x / BOARD_SIZE;
+    final col = (event.canvasPosition.x / squareSize).floor();
+    final row = (event.canvasPosition.y / squareSize).floor();
+
+    if (col < 0 || col >= BOARD_SIZE || row < 0 || row >= BOARD_SIZE) return false;
+
+    if (selectedPiece == null) {
+      // Select piece
+      final piece = pieces[row][col];
+      if (piece != null) {
+        selectedPiece = piece;
+        validMoves = getValidMoves(row, col);
+      }
+    } else {
+      // Try to move piece
+      final targetPos = Vector2(col.toDouble(), row.toDouble());
+      if (validMoves.contains(targetPos)) {
+        movePiece(selectedPiece!, row, col);
+      }
+      // Clear selection
+      selectedPiece = null;
+      validMoves.clear();
+    }
+    
+    return false;
+  }
+
+  List<Vector2> getValidMoves(int row, int col) {
+    List<Vector2> moves = [];
+    final piece = pieces[row][col];
+    if (piece == null) return moves;
+
+    // Regular moves (diagonal forward)
+    final directions = piece.isBlack ? [1] : [-1];  // Black moves down, white moves up
+    
+    for (final dRow in directions) {
+      for (final dCol in [-1, 1]) {  // Left and right diagonals
+        final newRow = row + dRow;
+        final newCol = col + dCol;
+        
+        // Check regular move
+        if (isValidPosition(newRow, newCol) && pieces[newRow][newCol] == null) {
+          moves.add(Vector2(newCol.toDouble(), newRow.toDouble()));
+        }
+        
+        // Check jump move
+        final jumpRow = row + dRow * 2;
+        final jumpCol = col + dCol * 2;
+        if (isValidPosition(jumpRow, jumpCol) && 
+            pieces[jumpRow][jumpCol] == null && 
+            pieces[newRow][newCol]?.isBlack != piece.isBlack) {
+          moves.add(Vector2(jumpCol.toDouble(), jumpRow.toDouble()));
+        }
+      }
+    }
+
+    return moves;
+  }
+
+  bool isValidPosition(int row, int col) {
+    return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
+  }
+
+  void movePiece(CheckersPin piece, int newRow, int col) {
+    final oldRow = piece.position.y ~/ (size.x / BOARD_SIZE);
+    final oldCol = piece.position.x ~/ (size.x / BOARD_SIZE);
+    
+    // Update board state
+    pieces[oldRow][oldCol] = null;
+    pieces[newRow][col] = piece;
+    
+    // Check if this was a jump move
+    if ((newRow - oldRow).abs() == 2) {
+      final capturedRow = (newRow + oldRow) ~/ 2;
+      final capturedCol = (col + oldCol) ~/ 2;
+      pieces[capturedRow][capturedCol] = null;
+    }
+    
+    // Move the piece
+    piece.position = Vector2(
+      col * size.x / BOARD_SIZE + size.x / BOARD_SIZE / 2,
+      newRow * size.x / BOARD_SIZE + size.x / BOARD_SIZE / 2,
+    );
   }
 } 
