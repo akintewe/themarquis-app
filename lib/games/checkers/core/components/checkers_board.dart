@@ -102,13 +102,13 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
     final squareSize = size.x / BOARD_SIZE;
     final pinSize = squareSize * 0.8;
     
-    // Draw the background container with border radius and larger padding
+   
     final boardBackground = RRect.fromRectAndRadius(
       Rect.fromLTWH(
-        -squareSize * 0.3,  // Increased padding (30% of square size)
-        -squareSize * 0.3,  // Increased padding (30% of square size)
-        size.x + squareSize * 0.6,  // Added padding to both sides
-        size.y + squareSize * 0.6,  // Added padding to both sides
+        -squareSize * 0.3,  
+        -squareSize * 0.3,  
+        size.x + squareSize * 0.6,  
+        size.y + squareSize * 0.6,  
       ),
       const Radius.circular(12),
     );
@@ -183,7 +183,7 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
         canvas.drawRRect(
           rect,
           Paint()
-            ..color = const Color.fromRGBO(76, 175, 80, 0.5)  // Green highlight
+            ..color = const Color.fromRGBO(76, 175, 80, 0.5)  
             ..style = PaintingStyle.fill,
         );
       }

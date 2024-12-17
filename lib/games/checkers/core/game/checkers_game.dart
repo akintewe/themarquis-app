@@ -42,16 +42,20 @@ class CheckersGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     await super.onLoad();
     camera.viewfinder.anchor = Anchor.center;
     
-    // Add user stats component first
+  
     userStats = UserStatsComponent()
       ..position = Vector2(0, 20);
     await add(userStats);
     
-    // Create and position the board at the center
+    // Calculate board size (80% of the smaller screen dimension to maintain square shape)
+    final boardSize = size.x < size.y ? size.x * 0.8 : size.y * 0.8;
+    
+    // Create and add the board with centered position
     board = CheckersBoard()
+      ..size = Vector2.all(boardSize)  // Set the board size explicitly
       ..position = Vector2(
-        center.x - (width * 0.8) / 1.8,
-        center.y - (width * 0.8) / 2,
+        (size.x - boardSize) / 2.7,  // Center horizontally
+        (size.y - boardSize) / 2,  // Center vertically
       );
     
     await add(board!);

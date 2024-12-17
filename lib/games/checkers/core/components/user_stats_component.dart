@@ -23,7 +23,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
     await _createStatsContainer(
       text: "LOST PIECES",
       value: "10",
-      position: Vector2(15, 90),
+      position: Vector2(20, 100),
       icon: blackPieceSprite,
       containerSize: Vector2(80, 60),
     );
@@ -31,7 +31,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
     await _createStatsContainer(
       text: "WIN PIECES",
       value: "9",
-      position: Vector2(130, 90),
+      position: Vector2(130, 100),
       icon: blackPieceSprite,
       containerSize: Vector2(80, 60),
     );
@@ -39,7 +39,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
     await _createStatsContainer(
       text: "QUEENS",
       value: "2",
-      position: Vector2(240, 90),
+      position: Vector2(240, 100),
       icon: queenSprite,
       containerSize: Vector2(80, 60),
     );
@@ -55,12 +55,12 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
         ),
       ),
     );
-    player1Name.position = Vector2(340,70);
+    player1Name.position = Vector2(340,75);
     await add(player1Name);
 
     player1Avatar = SpriteComponent(
       sprite: topAvatar,
-      position: Vector2(340, 90),
+      position: Vector2(340, 100),
       size: Vector2(60, 60),
     );
     await add(player1Avatar);
@@ -76,12 +76,12 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
         ),
       ),
     );
-    player2Name.position = Vector2(15, game.height - 210);
+    player2Name.position = Vector2(20, game.height - 210);
     await add(player2Name);
 
     player2Avatar = SpriteComponent(
       sprite: bottomAvatar,
-      position: Vector2(15, game.height - 190),
+      position: Vector2(20, game.height - 190),
       size: Vector2(60, 60),
     );
     await add(player2Avatar);
@@ -90,7 +90,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
     await _createStatsContainer(
       text: "LOST PIECES",
       value: "2",
-      position: Vector2(100, game.height - 190),
+      position: Vector2(110, game.height - 190),
       icon: whitePieceSprite,
       containerSize: Vector2(80, 60),
     );
@@ -98,7 +98,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
     await _createStatsContainer(
       text: "WIN PIECES",
       value: "1",
-      position: Vector2(215, game.height - 190),
+      position: Vector2(220, game.height - 190),
       icon: whitePieceSprite,
       containerSize: Vector2(80, 60),
     );
@@ -106,7 +106,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
     await _createStatsContainer(
       text: "QUEENS",
       value: "0",
-      position: Vector2(320, game.height - 190),
+      position: Vector2(325, game.height - 190),
       icon: queenSprite,
       containerSize: Vector2(80, 60),
     );
