@@ -317,29 +317,37 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
   }
 
   void randomizePieces(List<Vector2> randomPositions) {
-    int positionIndex = 0;
-    final squareSize = size.x / BOARD_SIZE;
-    
-    // Move all pieces to new random positions
+    // Create a list of all current pieces
+    List<CheckersPin> currentPieces = [];
     for (int row = 0; row < BOARD_SIZE; row++) {
       for (int col = 0; col < BOARD_SIZE; col++) {
         if (pieces[row][col] != null) {
-          final newPos = randomPositions[positionIndex];
-          final newRow = newPos.y.toInt();
-          final newCol = newPos.x.toInt();
-          
-          // Update piece position
-          pieces[row][col]!.position = Vector2(
-            newCol * squareSize + squareSize / 2,
-            newRow * squareSize + squareSize / 2,
-          );
-          
-          // Update board state
-          pieces[newRow][newCol] = pieces[row][col];
-          pieces[row][col] = null;
-          
-          positionIndex++;
+          currentPieces.add(pieces[row][col]!);
         }
+      }
+    }
+    
+    // Clear the current board
+    pieces = List.generate(
+      BOARD_SIZE, 
+      (_) => List.filled(BOARD_SIZE, null)
+    );
+    
+    // Place pieces in new positions
+    final squareSize = size.x / BOARD_SIZE;
+    for (int i = 0; i < currentPieces.length; i++) {
+      if (i < randomPositions.length) {
+        final newRow = randomPositions[i].y.toInt();
+        final newCol = randomPositions[i].x.toInt();
+        
+        // Update piece position
+        currentPieces[i].position = Vector2(
+          newCol * squareSize + squareSize / 2,
+          newRow * squareSize + squareSize / 2,
+        );
+        
+        // Update board state
+        pieces[newRow][newCol] = currentPieces[i];
       }
     }
   }

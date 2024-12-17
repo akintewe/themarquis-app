@@ -52,8 +52,21 @@ class CheckersState extends Component with HasGameReference<CheckersGame> {
       }
     }
     
-    // Shuffle the positions
+    // Count total pieces on the board
+    int totalPieces = 0;
+    if (game.board != null) {
+      for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+          if (game.board!.pieces[row][col] != null) {
+            totalPieces++;
+          }
+        }
+      }
+    }
+    
+    // Shuffle only the positions we need
     availablePositions.shuffle(_random);
+    availablePositions = availablePositions.take(totalPieces).toList();
     
     // Tell the board to update positions
     if (game.board != null) {
