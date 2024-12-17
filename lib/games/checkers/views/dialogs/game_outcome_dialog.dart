@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:marquis_v2/games/checkers/views/screens/match_result/match_result_screen.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
 
 class GameOutcomeDialog extends StatefulWidget {
@@ -129,6 +130,11 @@ class RewardDetailsWidget extends StatelessWidget {
         GestureDetector(
           onTap: () {
             Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const MatchResultScreen(),
+              ),
+            );
           },
           child: Container(
             height: 43,
@@ -251,6 +257,11 @@ class WinnerDetailsWidget extends StatelessWidget {
         GestureDetector(
           onTap: () {
             Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const MatchResultScreen(),
+              ),
+            );
           },
           child: Container(
             height: 43,
