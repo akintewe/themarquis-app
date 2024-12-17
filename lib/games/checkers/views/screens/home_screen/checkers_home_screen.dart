@@ -151,7 +151,7 @@ Future<void> _winDialog({required BuildContext context}) {
       context: context,
       builder: (BuildContext context){
         return GameOutcomeDialog(
-          didUserWin: false,
+          didUserWin: true,
         );
       }
   );
