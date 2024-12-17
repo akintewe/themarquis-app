@@ -5,13 +5,11 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/checkers/core/components/checkers_board.dart';
 import 'package:marquis_v2/games/checkers/core/components/user_stats_component.dart';
+import 'package:marquis_v2/games/checkers/core/utils/constants.dart';
 
 enum CheckersPlayState { welcome, waiting, playing, finished }
 
 class CheckersGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
-  static const double gameWidth = 450;
-  static const double gameHeight = 800;
-  
   bool isInit = false;
   CheckersBoard? board;
   late UserStatsComponent userStats;

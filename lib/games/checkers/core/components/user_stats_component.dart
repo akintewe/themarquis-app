@@ -12,106 +12,117 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
   
   @override
   Future<void> onLoad() async {
-    // Load sprites
-    final topAvatar = await Sprite.load('Frame 2085661553.png');
-    final bottomAvatar = await Sprite.load('Frame 2085661554.png');
-    final blackPieceSprite = await Sprite.load('blackchecker.png');
-    final whitePieceSprite = await Sprite.load('whitechecker.png');
-    final queenSprite = await Sprite.load('queen.png');
+    try {
+      // Load sprites with proper error handling
+      final topAvatar = await Flame.images.load('Frame 2085661553.png');
+      final bottomAvatar = await Flame.images.load('Frame 2085661554.png');
+      final blackPieceSprite = await Flame.images.load('blackchecker.png');
+      final whitePieceSprite = await Flame.images.load('whitechecker.png');
+      final queenSprite = await Flame.images.load('queen.png');
 
-    // Top player stats sections with reduced spacing
-    await _createStatsContainer(
-      text: "LOST PIECES",
-      value: "10",
-      position: Vector2(20, 100),
-      icon: blackPieceSprite,
-      containerSize: Vector2(80, 60),
-    );
+      // Create sprites from loaded images
+      final topAvatarSprite = Sprite(topAvatar);
+      final bottomAvatarSprite = Sprite(bottomAvatar);
+      final blackPieceComponentSprite = Sprite(blackPieceSprite);
+      final whitePieceComponentSprite = Sprite(whitePieceSprite);
+      final queenComponentSprite = Sprite(queenSprite);
 
-    await _createStatsContainer(
-      text: "WIN PIECES",
-      value: "9",
-      position: Vector2(130, 100),
-      icon: blackPieceSprite,
-      containerSize: Vector2(80, 60),
-    );
+      // Top player stats sections with reduced spacing
+      await _createStatsContainer(
+        text: "LOST PIECES",
+        value: "10",
+        position: Vector2(20, 100),
+        icon: blackPieceComponentSprite,
+        containerSize: Vector2(80, 60),
+      );
 
-    await _createStatsContainer(
-      text: "QUEENS",
-      value: "2",
-      position: Vector2(240, 100),
-      icon: queenSprite,
-      containerSize: Vector2(80, 60),
-    );
+      await _createStatsContainer(
+        text: "WIN PIECES",
+        value: "9",
+        position: Vector2(130, 100),
+        icon: blackPieceComponentSprite,
+        containerSize: Vector2(80, 60),
+      );
 
-    // Top player name and avatar
-    player1Name = TextComponent(
-      text: 'VYCHU...',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+      await _createStatsContainer(
+        text: "QUEENS",
+        value: "2",
+        position: Vector2(240, 100),
+        icon: queenComponentSprite,
+        containerSize: Vector2(80, 60),
+      );
+
+      // Top player name and avatar
+      player1Name = TextComponent(
+        text: 'VYCHU...',
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      ),
-    );
-    player1Name.position = Vector2(340,75);
-    await add(player1Name);
+      );
+      player1Name.position = Vector2(340,75);
+      await add(player1Name);
 
-    player1Avatar = SpriteComponent(
-      sprite: topAvatar,
-      position: Vector2(340, 100),
-      size: Vector2(60, 60),
-    );
-    await add(player1Avatar);
+      player1Avatar = SpriteComponent(
+        sprite: topAvatarSprite,
+        position: Vector2(340, 100),
+        size: Vector2(60, 60),
+      );
+      await add(player1Avatar);
 
-    // Bottom player name and avatar (starting from left)
-    player2Name = TextComponent(
-      text: 'SOOBIN...',
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+      // Bottom player name and avatar (starting from left)
+      player2Name = TextComponent(
+        text: 'SOOBIN...',
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      ),
-    );
-    player2Name.position = Vector2(20, game.height - 210);
-    await add(player2Name);
+      );
+      player2Name.position = Vector2(20, game.height - 210);
+      await add(player2Name);
 
-    player2Avatar = SpriteComponent(
-      sprite: bottomAvatar,
-      position: Vector2(20, game.height - 190),
-      size: Vector2(60, 60),
-    );
-    await add(player2Avatar);
+      player2Avatar = SpriteComponent(
+        sprite: bottomAvatarSprite,
+        position: Vector2(20, game.height - 190),
+        size: Vector2(60, 60),
+      );
+      await add(player2Avatar);
 
-    // Bottom player stats sections with reduced spacing (following avatar)
-    await _createStatsContainer(
-      text: "LOST PIECES",
-      value: "2",
-      position: Vector2(110, game.height - 190),
-      icon: whitePieceSprite,
-      containerSize: Vector2(80, 60),
-    );
+      // Bottom player stats sections with reduced spacing (following avatar)
+      await _createStatsContainer(
+        text: "LOST PIECES",
+        value: "2",
+        position: Vector2(110, game.height - 190),
+        icon: whitePieceComponentSprite,
+        containerSize: Vector2(80, 60),
+      );
 
-    await _createStatsContainer(
-      text: "WIN PIECES",
-      value: "1",
-      position: Vector2(220, game.height - 190),
-      icon: whitePieceSprite,
-      containerSize: Vector2(80, 60),
-    );
+      await _createStatsContainer(
+        text: "WIN PIECES",
+        value: "1",
+        position: Vector2(220, game.height - 190),
+        icon: whitePieceComponentSprite,
+        containerSize: Vector2(80, 60),
+      );
 
-    await _createStatsContainer(
-      text: "QUEENS",
-      value: "0",
-      position: Vector2(325, game.height - 190),
-      icon: queenSprite,
-      containerSize: Vector2(80, 60),
-    );
+      await _createStatsContainer(
+        text: "QUEENS",
+        value: "0",
+        position: Vector2(325, game.height - 190),
+        icon: queenComponentSprite,
+        containerSize: Vector2(80, 60),
+      );
 
-  
+    } catch (e) {
+      print('Error loading assets: $e');
+      rethrow;
+    }
   }
 
   Future<void> _createStatsContainer({
