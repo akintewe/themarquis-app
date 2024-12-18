@@ -19,6 +19,9 @@ class _CheckersGameScreenState extends ConsumerState<CheckersGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.shortestSide >= 600;
+    
     return Scaffold(
       body: Stack(
         children: [
@@ -28,32 +31,60 @@ class _CheckersGameScreenState extends ConsumerState<CheckersGameScreen> {
             width: double.infinity,
             height: double.infinity,
           ),
+          
           Center(
-            child: AspectRatio(
-              aspectRatio: gameWidth / gameHeight,
-              child: ValueListenableBuilder<CheckersPlayState>(
-                valueListenable: _game.playStateNotifier,
-                builder: (context, playState, _) {
-                  return RiverpodAwareGameWidget<CheckersGame>(
-                    key: _gameWidgetKey,
-                    game: _game,
-                    overlayBuilderMap: {
-                      'gameUI': (context, game) => SafeArea(
-                        child: Transform.translate(
-                          offset: const Offset(0, topBarOffset),
-                          child: Padding(
-                            padding: const EdgeInsets.all(uiPadding),
-                            child: GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: Image.asset('assets/images/Group 1171276336.png'),
+            child: Padding(
+              padding: isTablet 
+                  ? EdgeInsets.symmetric(horizontal: screenSize.width * 0.05)
+                  : EdgeInsets.zero,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: isTablet ? 80.0 : 20.0),
+                      child: AspectRatio(
+                        aspectRatio: isTablet ? 0.75 : (gameWidth / gameHeight),
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: SizedBox(
+                            width: gameWidth ,
+                            height: gameHeight ,
+                            child: ValueListenableBuilder<CheckersPlayState>(
+                              valueListenable: _game.playStateNotifier,
+                              builder: (context, playState, _) {
+                                return RiverpodAwareGameWidget<CheckersGame>(
+                                  key: _gameWidgetKey,
+                                  game: _game,
+                                  overlayBuilderMap: {
+                                    'gameUI': (context, game) => SafeArea(
+                                      child: Transform.translate(
+                                        offset: Offset(isTablet ? -40 : 0, isTablet ? topBarOffset * 0.1 : topBarOffset),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(isTablet ? uiPadding * 1.2 : uiPadding * 0.3),
+                                          child: GestureDetector(
+                                            onTap: () => Navigator.pop(context),
+                                            child: Image.asset(
+                                              'assets/images/Group 1171276336.png',
+                                              width: isTablet ? 50 : 55,
+                                              height: isTablet ? 50 : 55,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  },
+                                  initialActiveOverlays: const ['gameUI'],
+                                );
+                              },
                             ),
                           ),
                         ),
                       ),
-                    },
-                    initialActiveOverlays: const ['gameUI'],
-                  );
-                },
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

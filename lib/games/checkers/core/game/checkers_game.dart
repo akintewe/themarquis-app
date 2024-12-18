@@ -9,18 +9,17 @@ import 'package:marquis_v2/games/checkers/core/utils/constants.dart';
 
 enum CheckersPlayState { welcome, waiting, playing, finished }
 
-class CheckersGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
+class CheckersGame extends FlameGame with RiverpodGameMixin {
   bool isInit = false;
-  CheckersBoard? board;
+  late CheckersBoard? board;
   late UserStatsComponent userStats;
   int currentPlayer = 0;
   int userIndex = -1;
   bool playerCanMove = false;
-  int? winnerIndex;
+  int winnerIndex = -1;
   bool isErrorMessage = false;
 
-  final ValueNotifier<CheckersPlayState> playStateNotifier = 
-      ValueNotifier(CheckersPlayState.welcome);
+  final playStateNotifier = ValueNotifier<CheckersPlayState>(CheckersPlayState.playing);
 
   CheckersGame()
       : super(
@@ -32,8 +31,10 @@ class CheckersGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   double get width => size.x;
   double get height => size.y;
-  double get unitSize => size.x / 17;
+  double get unitSize => isTablet ? size.x / 10 : size.x / 15.3;
   Vector2 get center => size / 2;
+
+  bool get isTablet => width / height > 0.7;
 
   @override
   Future<void> onLoad() async {
@@ -44,15 +45,13 @@ class CheckersGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       ..position = Vector2(0, 20);
     await add(userStats);
     
-    // Calculate board size (80% of the smaller screen dimension to maintain square shape)
-    final minDimension = size.x < size.y ? size.x : size.y;
-    final boardSize = minDimension * boardSizePercentage;
+    final boardSizeMultiplier = isTablet ? 22 : 13;
+    final boardSize = unitSize * boardSizeMultiplier;
     
-    // Calculate the horizontal and vertical offsets to center the board
-    final horizontalOffset = (size.x - boardSize) * 0.37;
-    final verticalOffset = (size.y - boardSize) * 0.5;
+    final tabletOffset = isTablet ? -width * 0.12 : 0.0;
+    final horizontalOffset = (width - boardSize) / 2 + tabletOffset;
+    final verticalOffset = (height - boardSize) / 2;
     
-    // Create and add the board with centered position
     board = CheckersBoard()
       ..size = Vector2.all(boardSize)
       ..position = Vector2(horizontalOffset, verticalOffset);

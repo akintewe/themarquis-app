@@ -20,6 +20,15 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
       final whitePieceSprite = await Flame.images.load('whitechecker.png');
       final queenSprite = await Flame.images.load('queen.png');
 
+      // Calculate scaling based on screen size
+      final isTablet = game.width / game.height > 0.7;
+      final scale = isTablet ? 1.2 : 1.0; // Increase size by 20% for tablets
+      
+      // Adjust component sizes and positions for larger screens
+      final baseSize = Vector2(80, 60) * scale;
+      final spacing = isTablet ? 24.0 : 20.0;
+      final fontSize = isTablet ? 18.0 : 14.0;
+      
       // Create sprites from loaded images
       final topAvatarSprite = Sprite(topAvatar);
       final bottomAvatarSprite = Sprite(bottomAvatar);
@@ -33,7 +42,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
         value: "10",
         position: Vector2(20, 100),
         icon: blackPieceComponentSprite,
-        containerSize: Vector2(80, 60),
+        containerSize: baseSize,
       );
 
       await _createStatsContainer(
@@ -41,7 +50,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
         value: "9",
         position: Vector2(120, 100),
         icon: blackPieceComponentSprite,
-        containerSize: Vector2(80, 60),
+        containerSize: baseSize,
       );
 
       await _createStatsContainer(
@@ -49,7 +58,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
         value: "2",
         position: Vector2(235, 100),
         icon: queenComponentSprite,
-        containerSize: Vector2(80, 60),
+        containerSize: baseSize,
       );
 
       // Top player name and avatar
@@ -58,17 +67,16 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
         textRenderer: TextPaint(
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
         ),
       );
-      player1Name.position = Vector2(343,75);
+      player1Name.position = Vector2(isTablet ? 400 : 360, 75);
       await add(player1Name);
 
       player1Avatar = SpriteComponent(
         sprite: topAvatarSprite,
-        position: Vector2(game.width - 105, 100),
+        position: Vector2(isTablet ? game.width - 125 : game.width - 85, 100),
         size: Vector2(60, 60),
       );
       await add(player1Avatar);
@@ -79,7 +87,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
         textRenderer: TextPaint(
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 14,
+         
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -89,7 +97,7 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
 
       player2Avatar = SpriteComponent(
         sprite: bottomAvatarSprite,
-        position: Vector2(20, game.height - 190),
+        position: Vector2(20, game.height - 187),
         size: Vector2(60, 60),
       );
       await add(player2Avatar);
@@ -98,25 +106,25 @@ class UserStatsComponent extends PositionComponent with HasGameReference<Checker
       await _createStatsContainer(
         text: "LOST PIECES",
         value: "2",
-        position: Vector2(105, game.height - 190),
+        position: Vector2(105, game.height - 187),
         icon: whitePieceComponentSprite,
-        containerSize: Vector2(80, 60),
+        containerSize: baseSize,
       );
 
       await _createStatsContainer(
         text: "WIN PIECES",
         value: "1",
-        position: Vector2(220, game.height - 190),
+        position: Vector2(220, game.height - 187),
         icon: whitePieceComponentSprite,
-        containerSize: Vector2(80, 60),
+        containerSize: baseSize,
       );
 
       await _createStatsContainer(
         text: "QUEENS",
         value: "0",
-        position: Vector2(game.width - 125, game.height - 190),
+        position: Vector2(isTablet ? game.width - 145 : game.width - 100, game.height - 187),
         icon: queenComponentSprite,
-        containerSize: Vector2(80, 60),
+        containerSize: baseSize,
       );
 
     } catch (e) {

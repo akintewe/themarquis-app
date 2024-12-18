@@ -19,4 +19,4 @@ const double boardPadding = 0.3;
 
 // UI constants
 const double topBarOffset = -90.0;
-const double uiPadding = 16.0; 
+const double uiPadding = 10.0; 

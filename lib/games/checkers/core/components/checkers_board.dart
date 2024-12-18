@@ -32,7 +32,27 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    size = Vector2.all(game.width * 0.8);
+    
+    final isTablet = game.width / game.height > 0.7;
+    
+    // Calculate base board size
+    final baseBoardSize = game.unitSize * (isTablet ? 24 : 13);
+    
+    // For tablets, make width larger while keeping height the same
+    final boardWidth = isTablet ? baseBoardSize * 1.3 : baseBoardSize; // 30% wider on tablets
+    final boardHeight = baseBoardSize;
+    
+    // Set non-square size for tablets
+    size = Vector2(boardWidth, boardHeight);
+    
+    // Keep the same tablet offset
+    final tabletOffset = isTablet ? -game.width * 0.15 : 0.0;
+    
+    // Center the board using game dimensions with tablet offset
+    position = Vector2(
+      (game.width - size.x) / 2 + tabletOffset,
+      (game.height - size.y) / 2
+    );
     
     // Initialize game state
     gameState = CheckersState();
