@@ -79,7 +79,7 @@ class CheckersHomeScreenState extends ConsumerState<CheckersHomeScreen> {
                 icon: 'assets/svg/threeFriend.svg',
                 label: 'Find Game',
                 onTap: () {
-                  _winDialog(context: context);
+                  _gameOutComeDialog(context: context);
                 },
               ),
             ),
@@ -146,12 +146,12 @@ Future<void> _findGameDialog({required BuildContext ctx}) {
   );
 }
 
-Future<void> _winDialog({required BuildContext context}) {
+Future<void> _gameOutComeDialog({required BuildContext context}) {
   return showDialog(
       context: context,
       builder: (BuildContext context){
         return GameOutcomeDialog(
-          didUserWin: true,
+          didUserWin: false,
         );
       }
   );

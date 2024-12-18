@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:marquis_v2/games/checkers/views/screens/home_screen/checkers_home_screen.dart';
+import 'package:marquis_v2/games/checkers/views/widgets/match_result_widget.dart';
 import 'package:marquis_v2/widgets/ui_widgets.dart';
 import '../../../../ludo/widgets/chevron_border.dart';
+import '../../../../ludo/widgets/custom_divider_shape.dart';
 import '../../../../ludo/widgets/divider_shape.dart';
 
 class MatchResultScreen extends StatelessWidget {
@@ -177,6 +179,60 @@ class MatchResultScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                ),
+                verticalSpace(30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Container(
+                          height: scaledHeight(10),
+                          decoration: ShapeDecoration(
+                            color: Color(0xFFF3B46E),
+                            shape: CustomDividerShape(
+                              color: Color(0xFFF3B46E),
+                              isReversed: true
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: SvgPicture.asset("assets/svg/dojo_icon.svg", width: 44, height: 32),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: scaledHeight(10),
+                        decoration: ShapeDecoration(
+                          color: Color(0xFFF3B46E),
+                          shape: CustomDividerShape(
+                            color: Color(0xFFF3B46E),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                verticalSpace(30.0),
+                MatchResultWidget(
+                    title: 'LOST',
+                    value: '11',
+                    icon: SvgPicture.asset('assets/svg/black_checkers_icon.svg', width: 20, height: 20)
+                ),
+                verticalSpace(8.0),
+                MatchResultWidget(
+                    title: 'QUEENS',
+                    value: '2',
+                    icon: Image.asset("assets/images/queen_checkers.png", width: 20)
+                ),
+                verticalSpace(8.0),
+                MatchResultWidget(
+                    title: 'WIN',
+                    value: '11',
+                    icon: SvgPicture.asset('assets/svg/white_checkers_icon.svg', width: 20, height: 20)
                 ),
                 Spacer(),
                 Padding(
