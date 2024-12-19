@@ -173,7 +173,7 @@ class RoomFoundDialogueState extends ConsumerState<RoomFoundDialogue> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.043,
+                    height: 40,
                     width: 40,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(2),
@@ -185,7 +185,7 @@ class RoomFoundDialogueState extends ConsumerState<RoomFoundDialogue> {
                   ),
                   SizedBox(width: 8),
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.043,
+                    height: 40,
                     width: 40,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(2),

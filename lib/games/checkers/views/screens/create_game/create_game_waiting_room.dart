@@ -49,8 +49,8 @@ class CeateGameWaitingRoom extends StatelessWidget {
               padding: EdgeInsets.only(
                 right: 40,
                 bottom: (activeTab == 3 && gameMode == GameMode.token)
-                    ? MediaQuery.of(context).size.height * 0.22
-                    : MediaQuery.of(context).size.height * 0.30,
+                    ? 100
+                    : 160,
               ),
               child: _players(),
             ),

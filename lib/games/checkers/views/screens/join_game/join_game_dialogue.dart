@@ -180,7 +180,7 @@ class CheckersJoinGameDialogState
         Row(
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.043,
+              height: 40,
               width: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(2),
@@ -192,7 +192,7 @@ class CheckersJoinGameDialogState
             ),
             SizedBox(width: 8),
             Container(
-              height: MediaQuery.of(context).size.height * 0.043,
+              height: 40,
               width: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(2),
@@ -201,7 +201,8 @@ class CheckersJoinGameDialogState
                 ),
               ),
               child: Center(
-                  child: SvgPicture.asset('assets/svg/userCheckers.svg')),
+                child: SvgPicture.asset('assets/svg/userCheckers.svg'),
+              ),
             )
           ],
         ),
