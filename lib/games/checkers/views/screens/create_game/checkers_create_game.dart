@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:marquis_v2/games/checkers/core/utils/checkers_enum.dart';
 import 'package:marquis_v2/games/checkers/views/screens/create_game/create_game_waiting_room.dart';
+import 'package:marquis_v2/games/checkers/views/screens/game/checkers_game_screen.dart';
 import 'package:marquis_v2/games/checkers/views/widgets/checkers_radio.dart';
 import 'package:marquis_v2/games/checkers/views/widgets/checkers_stepper.dart';
 import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
@@ -177,11 +178,26 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
                 ),
               ),
               onPressed: _activeTab == _numberOfTabs
-                  ? () {}
+                  ? () {
+                      Navigator.push(context, 
+                        MaterialPageRoute(builder: (context) => const CheckersGameScreen())
+                      );
+                    }
                   : _gameMode == GameMode.free && _activeTab == 2
-                      ? () {}
+                      ? () {
+                          Navigator.push(context, 
+                            MaterialPageRoute(builder: (context) => const CheckersGameScreen())
+                          );
+                        }
                       : _isNextEnabled
-                          ? _switchToNextTab
+                          ? () {
+                              _switchToNextTab();
+                              if (_activeTab == 1) {
+                                Navigator.push(context, 
+                                  MaterialPageRoute(builder: (context) => const CheckersGameScreen())
+                                );
+                              }
+                            }
                           : null,
               child: _isLoading
                   ? const CircularProgressIndicator()
