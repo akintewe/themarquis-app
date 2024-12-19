@@ -64,11 +64,14 @@ class _CheckersGameScreenState extends ConsumerState<CheckersGameScreen> {
                                           padding: EdgeInsets.all(isTablet ? uiPadding * 1.2 : uiPadding * 0.3),
                                           child: GestureDetector(
                                             onTap: () => Navigator.pop(context),
-                                            child: Image.asset(
-                                              'assets/images/Group 1171276336.png',
-                                              width: isTablet ? 50 : 55,
-                                              height: isTablet ? 50 : 55,
-                                              fit: BoxFit.cover,
+                                            child: SizedBox(
+                                                width: isTablet ? 60 : 60,
+                                                height: isTablet ? 60 : 60,
+                                              child: Image.asset(
+                                                'assets/images/Group 1171276336.png',
+                                              
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
