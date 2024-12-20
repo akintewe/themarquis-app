@@ -3,11 +3,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/checkers/core/utils/checkers_enum.dart';
 import 'package:marquis_v2/games/ludo/components/string_validation.dart';
 
-class CeateGameWaitingRoom extends StatelessWidget {
+class CreateGameWaitingRoom extends StatelessWidget {
   final int activeTab;
   final GameMode? gameMode;
 
-  const CeateGameWaitingRoom({
+  const CreateGameWaitingRoom({
     super.key,
     required this.activeTab,
     required this.gameMode,
