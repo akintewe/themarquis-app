@@ -87,6 +87,8 @@ class RewardDetailsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.shortestSide >= 600;
     return Center(
       child: Row(
         children: [
@@ -94,8 +96,9 @@ class RewardDetailsWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
                 Padding(
-                  padding: const EdgeInsets.only(left: 70.0),
+                  padding: EdgeInsets.only(left: isTablet ? 100: 70.0),
                   child: Text(
                     'REWARD',
                     style: GoogleFonts.orbitron(
@@ -107,7 +110,7 @@ class RewardDetailsWidget extends StatelessWidget {
                 ),
                 verticalSpace(10),
                 Padding(
-                  padding: const EdgeInsets.only(left: 70.0),
+                  padding: EdgeInsets.only(left: isTablet ? 100: 70.0),
                   child: Row(
                     children: [
                       SvgPicture.asset("assets/svg/STRK_logo.svg", width: 19),
@@ -125,7 +128,7 @@ class RewardDetailsWidget extends StatelessWidget {
                 ),
                 verticalSpace(10),
                 Padding(
-                  padding: const EdgeInsets.only(left: 70.0),
+                  padding: EdgeInsets.only(left: isTablet ? 100: 70.0),
                   child: Row(
                     children: [
                       Image.asset('assets/images/member.png'),
