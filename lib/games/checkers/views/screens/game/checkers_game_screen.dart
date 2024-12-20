@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flame/game.dart';
 import 'package:marquis_v2/games/checkers/core/game/checkers_game.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:marquis_v2/games/checkers/core/utils/constants.dart';
+
+import '../../dialogs/game_outcome_dialog.dart';
 
 class CheckersGameScreen extends ConsumerStatefulWidget {
   const CheckersGameScreen({super.key});
@@ -63,13 +64,20 @@ class _CheckersGameScreenState extends ConsumerState<CheckersGameScreen> {
                                         child: Padding(
                                           padding: EdgeInsets.all(isTablet ? uiPadding * 1.2 : uiPadding * 0.3),
                                           child: GestureDetector(
-                                            onTap: () => Navigator.pop(context),
+                                            onTap: () => showDialog(
+                                                context: context,
+                                                builder: (BuildContext context){
+                                                  return GameOutcomeDialog(
+                                                    didUserWin: false,
+                                                  );
+                                                }
+                                            ),
                                             child: SizedBox(
                                                 width: isTablet ? 60 : 60,
                                                 height: isTablet ? 60 : 60,
                                               child: Image.asset(
                                                 'assets/images/Group 1171276336.png',
-                                              
+
                                                 fit: BoxFit.cover,
                                               ),
                                             ),

@@ -20,6 +20,8 @@ class GameOutcomeDialog extends StatefulWidget {
 class _GameOutcomeDialogState extends State<GameOutcomeDialog> {
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isTablet = screenSize.shortestSide >= 600;
     return Stack(children: [
       GestureDetector(
         onTap: ()=> Navigator.of(context).pop,
@@ -38,7 +40,7 @@ class _GameOutcomeDialogState extends State<GameOutcomeDialog> {
         child: Stack(children: [
           Container(
             height: widget.didUserWin ? 255 : 270,
-            width: double.infinity,
+            width: isTablet ? 350 : double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(bottomLeft: Radius.circular(21.0), bottomRight: Radius.circular(21.0)),
               border: Border(
