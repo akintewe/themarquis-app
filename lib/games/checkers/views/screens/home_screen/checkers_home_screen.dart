@@ -54,7 +54,7 @@ class CheckersHomeScreenState extends ConsumerState<CheckersHomeScreen> {
         left: 69,
         right: 35,
         top: scaledHeight(15),
-      
+
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

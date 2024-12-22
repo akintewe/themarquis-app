@@ -215,7 +215,7 @@ class CheckersBoard extends RectangleComponent with HasGameReference<CheckersGam
     final squareSize = size.x / BOARD_SIZE;
     final col = (event.localPosition.x / squareSize).floor();
     final row = (event.localPosition.y / squareSize).floor();
-    
+
     // If a piece is clicked, randomize all pieces
     if (pieces[row][col] != null) {
       gameState.randomizePositions();

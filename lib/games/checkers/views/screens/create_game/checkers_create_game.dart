@@ -73,13 +73,13 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
                         Flexible(
                           child: (_activeTab == 2 &&
                                   _gameMode == GameMode.free)
-                              ? CeateGameWaitingRoom(
+                              ? CreateGameWaitingRoom(
                                   activeTab: _activeTab,
                                   gameMode: _gameMode,
                                 )
                               : (_activeTab == 3 &&
                                       _gameMode == GameMode.token)
-                                  ? CeateGameWaitingRoom(
+                                  ? CreateGameWaitingRoom(
                                       activeTab: _activeTab,
                                       gameMode: _gameMode,
                                     )
