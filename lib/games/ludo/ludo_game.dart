@@ -99,7 +99,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     try {
       if (!isAuto) {
         diceContainer.currentDice.state = DiceState.preparing;
-        await Future.delayed(const Duration(seconds: 8), () async {
+        await Future.delayed(const Duration(seconds: 4), () async {
           diceContainer.currentDice.state = DiceState.playingMove;
           await ref
               .read(ludoSessionProvider.notifier)
@@ -355,7 +355,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           movePinsCompleter.complete();
           if (_currentPlayer == _userIndex &&
               diceContainer.currentDice.state == DiceState.preparing) {
-            Future.delayed(const Duration(seconds: 8), () {
+            Future.delayed(const Duration(seconds: 4), () {
               diceContainer.currentDice.state = DiceState.active;
             });
           }
