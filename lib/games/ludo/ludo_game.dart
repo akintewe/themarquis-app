@@ -97,18 +97,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   Future<void> playMove(int index, {bool isAuto = false}) async {
     try {
-      if (!isAuto) {
-        diceContainer.currentDice.state = DiceState.preparing;
-        await Future.delayed(const Duration(seconds: 4), () async {
-          diceContainer.currentDice.state = DiceState.playingMove;
-          await ref
-              .read(ludoSessionProvider.notifier)
-              .playMove(index.toString());
-        });
-      } else {
         diceContainer.currentDice.state = DiceState.playingMove;
         await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
-      }
     } catch (e) {
       diceContainer.currentDice.state = DiceState.rolledDice;
       showGameMessage(
@@ -301,11 +291,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             await prepareNextPlayerDice(prevPlayer, diceValue);
           }
           if (_currentPlayer == _userIndex) {
-            if (_sessionData!.playMoveFailed ?? false) {
-              diceContainer.currentDice.state = DiceState.active;
-            } else {
-              diceContainer.currentDice.state = DiceState.preparing;
-            }
+            diceContainer.currentDice.state = DiceState.active;
           } else {
             diceContainer.currentDice.state = DiceState.inactive;
           }
@@ -353,12 +339,6 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             }
           }
           movePinsCompleter.complete();
-          if (_currentPlayer == _userIndex &&
-              diceContainer.currentDice.state == DiceState.preparing) {
-            Future.delayed(const Duration(seconds: 4), () {
-              diceContainer.currentDice.state = DiceState.active;
-            });
-          }
         } catch (e) {
           showGameMessage(
             message: e.toString(),

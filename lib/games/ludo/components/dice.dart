@@ -9,7 +9,7 @@ import 'package:marquis_v2/games/ludo/ludo_game.dart';
 
 enum DiceState {
   inactive,
-  preparing,
+  // preparing,
   active,
   rollingDice,
   rolledDice,
@@ -137,7 +137,7 @@ class Dice extends PositionComponent
         _renderLoadingIndicator(canvas);
         break;
       case DiceState.playingMove:
-      case DiceState.preparing:
+      // case DiceState.preparing:
         // _renderDice(canvas); // Comment out dice rendering
         _renderLoadingIndicator(canvas);
         break;
@@ -173,7 +173,7 @@ class Dice extends PositionComponent
         indicatorPaint.color = Colors.red;
         break;
       case DiceState.active:
-      case DiceState.preparing:
+      // case DiceState.preparing:
         indicatorPaint.color = Colors.green;
         break;
       case DiceState.rollingDice:
