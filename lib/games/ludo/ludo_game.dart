@@ -1,4 +1,3 @@
-import 'dart:async' as dart_async;
 import 'dart:async';
 
 // ignore_for_file: unused_field
@@ -46,8 +45,11 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   int pendingMoves = 0;
   String? currentMessage;
   bool isErrorMessage = false;
-  dart_async.Timer? _messageTimer;
+  Timer? _messageTimer;
   Completer<void>? ludoSessionLoadingCompleter;
+  Timer? _moveTimer;
+  int _moveTimeLeft = 60; 
+  TextComponent? _timerText;
 
   final ValueNotifier<PlayState> playStateNotifier =
       ValueNotifier(PlayState.welcome);
@@ -99,6 +101,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     try {
         diceContainer.currentDice.state = DiceState.playingMove;
         await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
+        _moveTimer?.reset();
     } catch (e) {
       diceContainer.currentDice.state = DiceState.rolledDice;
       showGameMessage(
@@ -290,11 +293,13 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             int diceValue = _sessionData!.currentDiceValue!;
             await prepareNextPlayerDice(prevPlayer, diceValue);
           }
+          
           if (_currentPlayer == _userIndex) {
             diceContainer.currentDice.state = DiceState.active;
           } else {
             diceContainer.currentDice.state = DiceState.inactive;
           }
+          startMoveTimer();
           final movePinsCompleter = Completer<void>();
           for (final player in _sessionData!.sessionUserStatus) {
             final pinLocations = player.playerTokensPosition;
@@ -384,6 +389,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     await add(destination);
 
     await createAndSetCurrentPlayerDice();
+    startMoveTimer();
 
     turnText = TextComponent(
       text: '',
@@ -441,7 +447,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     isInit = true;
     // Add message container with text
     final messageContainer = CustomRectangleComponent(
-      position: Vector2(size.x / 2, size.y - 170),
+      position: Vector2(size.x / 2, size.y - 140),
       size: Vector2(500, 50),
       anchor: Anchor.center,
       color: const Color(0xFF1A3B44),
@@ -581,11 +587,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   @override
   Color backgroundColor() => const Color(0xff0f1118);
 
-  @override
-  void onRemove() {
-    _messageTimer?.cancel();
-    super.onRemove();
-  }
+@override
+void onRemove() {
+  _moveTimer?.stop();
+  _messageTimer?.reset();
+  super.onRemove();
+}
 
   Future<void> createAndSetCurrentPlayerDice() async {
     final newDice = Dice(
@@ -596,6 +603,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     );
     if (_currentPlayer == _userIndex) {
       newDice.state = DiceState.active;
+      startMoveTimer();
     } else {
       newDice.state = DiceState.inactive;
     }
@@ -652,7 +660,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     });
 
     final messageContainer = CustomRectangleComponent(
-      position: Vector2(size.x / 2, size.y - 170),
+      position: Vector2(size.x / 2, size.y - 140),
       size: Vector2(500, 50),
       anchor: Anchor.center,
       color: backgroundColor,
@@ -689,18 +697,95 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       });
     }
   }
+
+  void updateTimerDisplay() {
+    if (_timerText != null) {
+      final minutes = (_moveTimeLeft ~/ 60).toString().padLeft(2, '0');
+      final seconds = (_moveTimeLeft % 60).toString().padLeft(2, '0');
+      _timerText!.text = 'Time $minutes:$seconds';
+    }
+  }
+
+  void startMoveTimer() {
+    if (_timerText == null) {
+      _timerText = TextComponent(
+        text: 'Time 60:00',
+        position: Vector2(100, 25),  
+        anchor: Anchor.center,
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+
+      final timerContainer = CustomRectangleComponent(
+        position: Vector2(size.x / 2, size.y - 200), 
+        size: Vector2(200, 50),
+        anchor: Anchor.center,
+        color: Colors.transparent,
+        borderRadius: 15,
+        borderColor: const Color(0xFF00ECFF),
+        borderWidth: 2,
+        children: [_timerText!],
+      );
+      
+      add(timerContainer);
+    }
+    
+    _moveTimer = Timer(
+      60,
+      onTick: () {
+        if (_moveTimeLeft > 0) {
+          _moveTimeLeft--;
+          updateTimerDisplay();
+        } else {
+          if (currentPlayer == userIndex) {
+            if (playerCanMove) {
+              List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(userIndex);
+              if (listOfPlayerPin.isNotEmpty) {
+                playMove(listOfPlayerPin[0].homeIndex, isAuto: true);
+              }
+            } else {
+              rollDice();
+            }
+          }
+        }
+      },
+      repeat: true,
+      autoStart: true,
+    );
+    
+    updateTimerDisplay();
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (_moveTimer != null) {
+      _moveTimer!.update(dt);
+      _moveTimeLeft = (60 - _moveTimer!.current).floor();
+      updateTimerDisplay();
+    }
+  }
 }
 
 // Custom Rectangle Component with rounded corners
 class CustomRectangleComponent extends PositionComponent {
   final Color color;
   final double borderRadius;
+  final Color borderColor;
+  final double borderWidth;
 
   CustomRectangleComponent({
     required Vector2 position,
     required Vector2 size,
     required this.color,
     required this.borderRadius,
+    this.borderColor = Colors.transparent,
+    this.borderWidth = 0,
     Anchor anchor = Anchor.topLeft,
     List<Component>? children,
   }) : super(
@@ -716,10 +801,24 @@ class CustomRectangleComponent extends PositionComponent {
       size.toRect(),
       Radius.circular(borderRadius),
     );
+    
+    // Draw border if borderWidth > 0
+    if (borderWidth > 0) {
+      canvas.drawRRect(
+        rrect,
+        Paint()
+          ..color = borderColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth,
+      );
+    }
+    
+    // Draw background
     canvas.drawRRect(
       rrect,
       Paint()..color = color,
     );
+    
     super.render(canvas);
   }
 }

@@ -348,7 +348,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
 
     // Show invalid move message
     final messageContainer = CustomRectangleComponent(
-      position: Vector2(game.size.x / 2, game.size.y - 170),
+      position: Vector2(game.size.x / 2, game.size.y - 120),
       size: Vector2(500, 50),
       anchor: Anchor.center,
       color: const Color(0xFFFF4D4D),
@@ -384,7 +384,7 @@ class Board extends RectangleComponent with HasGameReference<LudoGame> {
     // Only show original message if it's still not player's turn
     if (game.currentPlayer != game.userIndex) {
       final originalMessage = CustomRectangleComponent(
-        position: Vector2(game.size.x / 2, game.size.y - 170),
+        position: Vector2(game.size.x / 2, game.size.y - 100),
         size: Vector2(500, 50),
         anchor: Anchor.center,
         color: const Color(0xFF1A3B44),
