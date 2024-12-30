@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
-import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -33,78 +32,33 @@ class TwoPlayerWaitingRoomScreen extends ConsumerStatefulWidget {
 
 class _TwoPlayerWaitingRoomScreenState
     extends ConsumerState<TwoPlayerWaitingRoomScreen> {
-  Timer? _moveTimer;
-  int _moveTimeLeft = 120;
-  TextComponent? _timerText;
-
-  @override
-  void initState() {
-    super.initState();
-    startSessionTimer();
-  }
-
-  void startSessionTimer() {
-    if (_timerText == null) {
-      _timerText = TextComponent(
-        text: 'Time 02:00',
-        position: Vector2(75, 30),
-        anchor: Anchor.center,
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      );
-
-      final timerContainer = CustomRectangleComponent(
-        position: Vector2(widget.game.size.x / 2, widget.game.size.y - 350),
-        size: Vector2(200, 50),
-        anchor: Anchor.center,
-        color: Colors.transparent,
-        borderRadius: 15,
-        borderColor: const Color(0xFF00ECFF),
-        borderWidth: 2,
-        children: [_timerText!],
-      );
-      
-      widget.game.add(timerContainer);
-    }
-    
-    _moveTimer = Timer(
-      1,
-      onTick: () {
-        if (_moveTimeLeft > 0) {
-          _moveTimeLeft--;
-          updateTimerDisplay();
-        }
-      },
-      repeat: true,
-      autoStart: true,
-    );
-    
-    updateTimerDisplay();
-  }
-
-  void updateTimerDisplay() {
-    if (_timerText != null) {
-      final minutes = (_moveTimeLeft ~/ 60).toString().padLeft(2, '0');
-      final seconds = (_moveTimeLeft % 60).toString().padLeft(2, '0');
-      _timerText!.text = 'Time $minutes:$seconds';
-    }
-  }
+  Timer? _countdownTimer;
+  int _countdown = 15;
 
   @override
   void dispose() {
-    _moveTimer?.stop();
+    _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdown = 15;
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          _countdownTimer?.cancel();
+          widget.game.playState = PlayState.playing;
+        }
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(ludoSessionProvider);
-    if (_isRoomFull(session) && _moveTimer == null) startSessionTimer();
+    if (_isRoomFull(session) && _countdownTimer == null) _startCountdown();
     return Scaffold(
       backgroundColor: Colors.black,
       body: session == null
@@ -150,9 +104,9 @@ class _TwoPlayerWaitingRoomScreenState
               Center(
                 child: Text(
                   _isRoomFull(session)
-                      ? _moveTimer == null
+                      ? _countdownTimer == null
                           ? 'Start Game'
-                          : 'Starting in $_moveTimeLeft'
+                          : 'Starting in $_countdown'
                       : 'Waiting for players',
                   style: const TextStyle(
                     color: Colors.black,
