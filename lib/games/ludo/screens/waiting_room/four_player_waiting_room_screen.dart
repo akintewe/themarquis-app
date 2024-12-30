@@ -139,10 +139,12 @@ class _FourPlayerWaitingRoomScreenState
   }
 
   Widget _bottom(LudoSessionData session) {
+    final isSessionExpired = _sessionTimeLeft <= 0;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
-        onTap: _isRoomFull(session)
+        onTap: (_isRoomFull(session) && !isSessionExpired)
             ? () {
                 widget.game.playState = PlayState.playing;
               }
@@ -158,11 +160,13 @@ class _FourPlayerWaitingRoomScreenState
               ),
               Center(
                 child: Text(
-                  _isRoomFull(session)
-                      ? _countdownTimer == null
-                          ? 'Start Game'
-                          : 'Starting in $_countdown'
-                      : 'Waiting for players',
+                  isSessionExpired 
+                      ? 'Session Expired'
+                      : _isRoomFull(session)
+                          ? _countdownTimer == null
+                              ? 'Start Game'
+                              : 'Starting in $_countdown'
+                          : 'Waiting for players',
                   style: const TextStyle(
                     color: Colors.black,
                     fontSize: 15,
