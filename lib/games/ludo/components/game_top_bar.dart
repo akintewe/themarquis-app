@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/models/enums.dart';
+import 'package:marquis_v2/models/marquis_game.dart';
 import 'package:marquis_v2/providers/user.dart';
 
 class GameTopBar extends StatelessWidget {
-  final LudoGame game;
+  final MarquisGameController game;
 
   const GameTopBar({super.key, required this.game});
 
@@ -15,9 +16,7 @@ class GameTopBar extends StatelessWidget {
       height: kToolbarHeight,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: game.playState == PlayState.finished 
-            ? Colors.black.withOpacity(0.3)
-            : Color.fromRGBO(48, 239, 253, 0.25),
+        color: game.playState == PlayState.finished ? Colors.black.withOpacity(0.3) : Color.fromRGBO(48, 239, 253, 0.25),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(16),
           bottomRight: Radius.circular(16),
@@ -37,6 +36,7 @@ class GameTopBar extends StatelessWidget {
                 } else {
                   showDialog(
                     context: context,
+                    useRootNavigator: false,
                     builder: (context) => AlertDialog(
                       title: Text('Leave Game?'),
                       content: Text('Are you sure you want to leave the game?'),
@@ -71,8 +71,7 @@ class GameTopBar extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   FutureBuilder<BigInt>(
-                    future: ref.read(userProvider.notifier).getTokenBalance(
-                        "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
+                    future: ref.read(userProvider.notifier).getTokenBalance("0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const SizedBox(
@@ -88,10 +87,7 @@ class GameTopBar extends StatelessWidget {
                         return Container();
                       }
                       return Text(
-                        ((snapshot.data! / BigInt.from(1e18))
-                            .toStringAsFixed(8)
-                            .replaceAll(RegExp(r'0+$'), '')
-                            .replaceAll(RegExp(r'\.$'), '')),
+                        ((snapshot.data! / BigInt.from(1e18)).toStringAsFixed(8).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '')),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -108,4 +104,4 @@ class GameTopBar extends StatelessWidget {
       ),
     );
   }
-} 
+}
