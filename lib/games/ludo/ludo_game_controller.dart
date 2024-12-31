@@ -1,34 +1,29 @@
 import 'dart:async';
 
-// ignore_for_file: unused_field
-
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
-import 'package:flame/game.dart';
-import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import 'package:marquis_v2/games/ludo/components/board.dart';
 import 'package:marquis_v2/games/ludo/components/destination.dart';
 import 'package:marquis_v2/games/ludo/components/dice.dart';
+import 'package:marquis_v2/games/ludo/components/dice_container.dart';
 import 'package:marquis_v2/games/ludo/components/player_home.dart';
 import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
+import 'package:marquis_v2/models/enums.dart';
+import 'package:marquis_v2/models/marquis_game.dart';
 import 'package:marquis_v2/providers/user.dart';
-import 'package:marquis_v2/games/ludo/components/dice_container.dart';
 
-enum PlayState { welcome, waiting, playing, finished }
-
-class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
+class LudoGameController extends MarquisGameController {
   bool isInit = false;
-  late DiceContainer diceContainer;
-  late Board board;
+  DiceContainer? diceContainer;
+  Board? board;
   late TextComponent turnText;
-  late Destination destination;
+  Destination? destination;
   final List<PlayerHome> playerHomes = [];
   final List<List<int>> playerPinLocations = [
     [0, 0, 0, 0],
@@ -51,23 +46,13 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   int _moveTimeLeft = 60; 
   TextComponent? _timerText;
 
-  final ValueNotifier<PlayState> playStateNotifier =
-      ValueNotifier(PlayState.welcome);
-
-  LudoGame()
-      : super(
-          camera: CameraComponent.withFixedResolution(
-            width: gameWidth,
-            height: gameHeight,
-          ),
-        );
-
-  double get width => size.x;
-  double get height => size.y;
-  double get unitSize => size.x / 17;
-  Vector2 get center => size / 2;
+  LudoGameController() : super(camera: CameraComponent.withFixedResolution(width: kLudoGameWidth, height: kLudoGameHeight));
 
   int get currentPlayer => _currentPlayer;
+
+  @override
+  double get unitSize => size.x / 17;
+
   List<Color> get listOfColors =>
       _sessionData?.getListOfColors ??
       const [
@@ -77,11 +62,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         Color(0xffb0d02f),
       ];
   int get userIndex => _userIndex;
-  List<String> get playerNames => _sessionData!.sessionUserStatus
-      .map((user) => user.email.split('@')[0])
-      .toList();
+  List<String> get playerNames => _sessionData!.sessionUserStatus.map((user) => user.email.split('@')[0]).toList();
 
-  Dice get currentDice => diceContainer.currentDice;
+  Dice get currentDice => diceContainer!.currentDice;
   Dice? getPlayerDice(int playerIndex) => playerHomes[playerIndex].playerDice;
 
   Future<List<int>> generateMove() async {
@@ -89,10 +72,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       final res = await ref.read(ludoSessionProvider.notifier).generateMove();
       return res;
     } catch (e) {
-      showGameMessage(
-        message: e.toString(),
-        backgroundColor: Colors.red,
-      );
+      showGameMessage(message: e.toString(), backgroundColor: Colors.red);
       return [];
     }
   }
@@ -103,141 +83,155 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
         _moveTimer?.reset();
     } catch (e) {
-      diceContainer.currentDice.state = DiceState.rolledDice;
-      showGameMessage(
-        message: e.toString(),
-        backgroundColor: Colors.red,
-      );
+      diceContainer!.currentDice.state = DiceState.rolledDice;
+      showGameMessage(message: e.toString(), backgroundColor: Colors.red);
     }
   }
 
-  PlayState get playState => playStateNotifier.value;
+  @override
   set playState(PlayState value) {
-    if (playStateNotifier.value != value) {
-      playStateNotifier.value = value;
+    if (playStateNotifier.value == value) return;
+    if (value != PlayState.playing) {
+      if (board != null) {
+        add(board!);
+        Future.microtask(() => remove(board!));
+      }
+      if (diceContainer != null) {
+        add(diceContainer!);
+        Future.microtask(() => remove(diceContainer!));
+      }
+      if (playerHomes.isNotEmpty) {
+        addAll(playerHomes);
+        Future.microtask(() => removeAll(playerHomes));
+      }
+      if (destination != null) {
+        add(destination!);
+        Future.microtask(() => remove(destination!));
+      }
+    }
+    playStateNotifier.value = value;
 
-      switch (value) {
-        case PlayState.welcome:
-        case PlayState.waiting:
-          overlays.clear();
-          overlays.add(value.name);
-          break;
-        case PlayState.playing:
-          overlays.clear();
-          if (_sessionData != null) {
-            Future.microtask(() async {
-              await initGame();
-            });
-          }
-          break;
-        case PlayState.finished:
-          overlays.clear();
-          overlays.add(value.name);
+    switch (value) {
+      case PlayState.welcome:
+      case PlayState.waiting:
+        overlays.clear();
+        overlays.add(value.name);
+        break;
+      case PlayState.playing:
+        overlays.clear();
+        if (_sessionData != null) {
           Future.microtask(() async {
-            if (buildContext != null && buildContext!.mounted) {
-              // Force rebuild of game over screen
-              (buildContext! as Element).markNeedsBuild();
+            await initGame();
+          });
+        }
+        break;
+      case PlayState.finished:
+        overlays.clear();
+        overlays.add(value.name);
+        Future.microtask(() async {
+          if (buildContext != null && buildContext!.mounted) {
+            // Force rebuild of game over screen
+            (buildContext! as Element).markNeedsBuild();
 
-              if (playState == PlayState.finished) {
-                if (buildContext != null && buildContext!.mounted) {
-                  await showDialog(
-                    context: buildContext!,
-                    barrierDismissible: false,
-                    builder: (context) => Center(
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        alignment: Alignment.topCenter,
-                        children: [
-                          // Main Dialog Container
-                          Container(
-                            margin: const EdgeInsets.only(top: 40),
-                            width: 180,
-                            decoration: BoxDecoration(
-                              color: Color.fromRGBO(26, 32, 45, 1),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const SizedBox(height: 60),
-                                const Text(
-                                  'REWARD',
-                                  style: TextStyle(
-                                    color: Color(0xFF00ECFF),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
+            if (playState == PlayState.finished) {
+              if (buildContext != null && buildContext!.mounted) {
+                await showDialog(
+                  context: buildContext!,
+                  useRootNavigator: false,
+                  barrierDismissible: false,
+                  builder: (context) => Center(
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.topCenter,
+                      children: [
+                        // Main Dialog Container
+                        Container(
+                          margin: const EdgeInsets.only(top: 40),
+                          width: 180,
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(26, 32, 45, 1),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(height: 60),
+                              const Text(
+                                'REWARD',
+                                style: TextStyle(
+                                  color: Color(0xFF00ECFF),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/images/starknet-token-strk-logo (4) 7.svg',
+                                    height: 24,
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/images/starknet-token-strk-logo (4) 7.svg',
-                                      height: 24,
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    '400',
+                                    style: TextStyle(
+                                      color: Colors.yellow,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    const SizedBox(width: 8),
-                                    const Text(
-                                      '400',
-                                      style: TextStyle(
-                                        color: Colors.yellow,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/images/会员.svg',
+                                    height: 24,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    '400 EXP',
+                                    style: TextStyle(
+                                      color: Color(0xFF00ECFF),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/images/会员.svg',
-                                      height: 24,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text(
-                                      '400 EXP',
-                                      style: TextStyle(
-                                        color: Color(0xFF00ECFF),
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 24),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: SvgPicture.asset(
-                                      'assets/images/ok_btn.svg'),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
+                                child: SvgPicture.asset('assets/images/ok_btn.svg'),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
                           ),
-                          // Header Image positioned on top
-                          Positioned(
-                            top: -20,
-                            child: Image.asset(
-                              'assets/images/header.png',
-                              height: 100,
-                              width: 300,
-                            ),
+                        ),
+                        // Header Image positioned on top
+                        Positioned(
+                          top: -20,
+                          child: Image.asset(
+                            'assets/images/header.png',
+                            height: 100,
+                            width: 300,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  );
-                }
+                  ),
+                );
               }
             }
-          });
+          }
+        });
 
-          break;
-      }
+        break;
     }
   }
 
@@ -269,11 +263,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           backgroundColor: Colors.red,
         );
         if (_sessionData!.message!.startsWith("EXITED")) {
-          await ref
-              .read(ludoSessionProvider.notifier)
-              .clearData(refreshUser: true);
-          overlays.remove(PlayState.waiting.name);
-          overlays.remove(PlayState.finished.name);
+          await ref.read(ludoSessionProvider.notifier).clearData(refreshUser: true);
+          overlays.clear();
           playState = PlayState.welcome;
           return;
         }
@@ -295,9 +286,9 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           }
           
           if (_currentPlayer == _userIndex) {
-            diceContainer.currentDice.state = DiceState.active;
+            diceContainer?.currentDice.state = DiceState.active;
           } else {
-            diceContainer.currentDice.state = DiceState.inactive;
+            diceContainer?.currentDice.state = DiceState.inactive;
           }
           startMoveTimer();
           final movePinsCompleter = Completer<void>();
@@ -306,19 +297,16 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             final currentPinLocations = playerPinLocations[player.playerId];
             final playerHome = playerHomes[player.playerId];
             for (int i = 0; i < pinLocations.length; i++) {
-              final pinLocation = int.parse(pinLocations[i]) +
-                  (player.playerTokensCircled?[i] ?? false ? 52 : 0);
-              if (player.playerWinningTokens[i] == true &&
-                  currentPinLocations[i] != -1) {
+              final pinLocation = int.parse(pinLocations[i]) + (player.playerTokensCircled?[i] ?? false ? 52 : 0);
+              if (player.playerWinningTokens[i] == true && currentPinLocations[i] != -1) {
                 // Remove from board and add to destination
                 playerPinLocations[player.playerId][i] = -1;
-                final pin = board.getPinWithIndex(player.playerId, i);
+                final pin = board!.getPinWithIndex(player.playerId, i);
                 await pin?.movePin(56);
                 // board.remove(pin!);
                 // await pin.removed;
                 // destination.addPin(pin);
-              } else if (player.playerWinningTokens[i] != true &&
-                  currentPinLocations[i] != pinLocation) {
+              } else if (player.playerWinningTokens[i] != true && currentPinLocations[i] != pinLocation) {
                 if (currentPinLocations[i] == 0 && pinLocation != 0) {
                   // Remove from home and add to board
                   final pin = playerHome.removePin(i);
@@ -326,17 +314,16 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
                     await pin.removed;
                   }
 
-                  await board.addPin(pin,
-                      location: pinLocation - player.playerId * 13 - 1);
+                  await board!.addPin(pin, location: pinLocation - player.playerId * 13 - 1);
                 } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
                   // Pin attacked
-                  final pin = board.getPinWithIndex(player.playerId, i);
+                  final pin = board!.getPinWithIndex(player.playerId, i);
                   movePinsCompleter.future.then((_) async {
-                    await board.attackPin(pin!);
+                    await board!.attackPin(pin!);
                   });
                 } else {
                   // Move pin
-                  final pin = board.getPinWithIndex(player.playerId, i);
+                  final pin = board!.getPinWithIndex(player.playerId, i);
                   await pin?.movePin(pinLocation - player.playerId * 13 - 1);
                 }
                 playerPinLocations[player.playerId][i] = pinLocation;
@@ -345,10 +332,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           }
           movePinsCompleter.complete();
         } catch (e) {
-          showGameMessage(
-            message: e.toString(),
-            backgroundColor: Colors.red,
-          );
+          showGameMessage(message: e.toString(), backgroundColor: Colors.red);
         }
       }
     }
@@ -356,6 +340,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     ludoSessionLoadingCompleter = null;
   }
 
+  @override
   Future<void> initGame() async {
     await Flame.images.load('spritesheet.png');
     await Flame.images.load('avatar_spritesheet.png');
@@ -364,29 +349,23 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     await Flame.images.load('play.png');
 
     camera.viewfinder.anchor = Anchor.topLeft;
-    _userIndex = _sessionData!.sessionUserStatus.indexWhere(
-        (user) => user.userId.toString() == ref.read(userProvider)?.id);
+    _userIndex = _sessionData!.sessionUserStatus.indexWhere((user) => user.userId.toString() == ref.read(userProvider)?.id);
     _currentPlayer = _sessionData!.nextPlayerIndex;
     board = Board();
-    await add(board);
+    await add(board!);
     final positions = [
-      Vector2(center.x - unitSize * 6.25,
-          center.y - unitSize * 6.25), // Top-left corner (Player 1)
-      Vector2(center.x + unitSize * 2.25,
-          center.y - unitSize * 6.25), // Top-right corner (Player 2)
-      Vector2(center.x + unitSize * 2.25,
-          center.y + unitSize * 2.25), // Bottom-right corner (Player 3)
-      Vector2(center.x - unitSize * 6.25,
-          center.y + unitSize * 2.25), // Bottom-left corner (Player 4)
+      Vector2(center.x - unitSize * 6.25, center.y - unitSize * 6.25), // Top-left corner (Player 1)
+      Vector2(center.x + unitSize * 2.25, center.y - unitSize * 6.25), // Top-right corner (Player 2)
+      Vector2(center.x + unitSize * 2.25, center.y + unitSize * 2.25), // Bottom-right corner (Player 3)
+      Vector2(center.x - unitSize * 6.25, center.y + unitSize * 2.25), // Bottom-left corner (Player 4)
     ];
     for (int i = 0; i < positions.length; i++) {
-      playerHomes
-          .add(PlayerHome(i, _sessionData!.sessionUserStatus[i], positions[i]));
+      playerHomes.add(PlayerHome(i, _sessionData!.sessionUserStatus[i], positions[i]));
       await add(playerHomes.last);
     }
 
     destination = Destination();
-    await add(destination);
+    await add(destination!);
 
     await createAndSetCurrentPlayerDice();
     startMoveTimer();
@@ -402,14 +381,12 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
           color: Colors.white,
           shadows: [
             Shadow(
-              color: _sessionData!.getListOfColors[_currentPlayer]
-                  .withOpacity(0.8),
+              color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
               offset: const Offset(0, 0),
               blurRadius: 20,
             ),
             Shadow(
-              color: _sessionData!.getListOfColors[_currentPlayer]
-                  .withOpacity(0.8),
+              color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
               offset: const Offset(0, 0),
               blurRadius: 10,
             ),
@@ -425,20 +402,18 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       final pinLocations = player.playerTokensPosition;
       final playerHome = playerHomes[player.playerId];
       for (int i = 0; i < pinLocations.length; i++) {
-        var pinLocation = int.parse(pinLocations[i]) +
-            (player.playerTokensCircled?[i] ?? false ? 52 : 0);
+        var pinLocation = int.parse(pinLocations[i]) + (player.playerTokensCircled?[i] ?? false ? 52 : 0);
 
         if (player.playerWinningTokens[i] == true) {
           playerPinLocations[player.playerId][i] = -1;
           // playerHome.removePin(i);
           final pin = playerHome.removePin(i);
           // await pin.removed;
-          destination.addPin(pin);
+          destination!.addPin(pin);
         } else if (pinLocation != 0 || player.playerTokensCircled?[i] == true) {
           final pin = playerHome.removePin(i);
           //  pin.removed;
-          board.addPin(pin,
-              location: pinLocation - player.playerId * 13 - 1, isInit: true);
+          board!.addPin(pin, location: pinLocation - player.playerId * 13 - 1, isInit: true);
           playerPinLocations[player.playerId][i] = pinLocation;
         }
       }
@@ -479,8 +454,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
 
   void updateTurnText() {
     final playerName = playerNames[_currentPlayer];
-    turnText.text =
-        _currentPlayer == _userIndex ? 'Your Turn' : "$playerName's Turn";
+    turnText.text = _currentPlayer == _userIndex ? 'Your Turn' : "$playerName's Turn";
     turnText.textRenderer = TextPaint(
       style: TextStyle(
         fontSize: unitSize * 1.2,
@@ -494,8 +468,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
             blurRadius: 10,
           ),
           Shadow(
-            color:
-                _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+            color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
             offset: const Offset(0, 0),
             blurRadius: 6,
           ),
@@ -505,32 +478,39 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
   }
 
   Future<void> rollDice() async {
-    print("rollDice called, playerCanMove: $playerCanMove");
+    if (kDebugMode) print("rollDice called, playerCanMove: $playerCanMove");
     if (playerCanMove) return;
 
     // Show animated dice dialog
-    if (buildContext != null && buildContext!.mounted) {
-      await showDialog(
+    if (buildContext?.mounted == true) {
+      showDialog(
         context: buildContext!,
         barrierDismissible: false,
+        useRootNavigator: false,
         builder: (context) => Dialog(
           backgroundColor: Colors.transparent,
-          child: SizedBox(
-            width: 120,
-            height: 120,
-            child: DiceAnimationWidget(),
-          ),
+          child: SizedBox(width: 120, height: 120, child: DiceAnimationWidget()),
         ),
       );
     }
 
-    print("Rolling dice...");
-    await diceContainer.currentDice.roll();
-    // // playState = PlayState.finished;
+    if (kDebugMode) print("Rolling dice...");
+    await diceContainer!.currentDice.roll();
+    Navigator.of(buildContext!).pop();
+    if (kDebugMode) print("Dice rolled, value: ${diceContainer!.currentDice.value}");
+    if (diceContainer!.currentDice.value > 0 && diceContainer!.currentDice.value < 7) {
+      await showDialog(
+        context: buildContext!,
+        barrierDismissible: false,
+        useRootNavigator: false,
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          child: SizedBox(width: 120, height: 120, child: DiceAnimationWidget(dieFace: diceContainer!.currentDice.value)),
+        ),
+      );
+    }
 
-    print("Dice rolled, value: ${diceContainer.currentDice.value}");
-
-    List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(_userIndex);
+    List<PlayerPin> listOfPlayerPin = board!.getPlayerPinsOnBoard(_userIndex);
     List<PlayerPin> movablePins = [];
 
     for (PlayerPin pin in listOfPlayerPin) {
@@ -542,17 +522,16 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
     // If there are no movable pins and the dice value is less than 6, show a snackbar
     if (movablePins.isEmpty) {
       final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
-      if (diceContainer.currentDice.value < 6) {
+      if (diceContainer!.currentDice.value < 6) {
         if (pinsAtHome.isNotEmpty) {
-          showGameMessage(
-              message: "Can not move from Basement, try to get a 6!!");
+          showGameMessage(message: "Can not move from Basement, try to get a 6!!");
           // If there are pins at home, play the first one (dummy move)
           await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
           return;
         } else {
           showGameMessage(message: "No pins to move!!");
           // If there are no pins at home, play the first pin on the board (dummy move)
-          final pins = board.getPlayerPinsOnBoard(_userIndex);
+          final pins = board!.getPlayerPinsOnBoard(_userIndex);
           await playMove(pins[0].homeIndex, isAuto: true);
           return;
         }
@@ -561,7 +540,7 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
         if (pinsAtHome.isEmpty) {
           showGameMessage(message: "No pins to move!!");
           // If there are no pins at home, play the first pin on the board (dummy move)
-          final pins = board.getPlayerPinsOnBoard(_userIndex);
+          final pins = board!.getPlayerPinsOnBoard(_userIndex);
           await playMove(pins[0].homeIndex, isAuto: true);
           return;
         } else if (pinsAtHome.length == 1) {
@@ -572,10 +551,8 @@ class LudoGame extends FlameGame with TapCallbacks, RiverpodGameMixin {
       }
     }
 
-    if ((movablePins.length == 1 && diceContainer.currentDice.value < 6) ||
-        (movablePins.length == 1 &&
-            diceContainer.currentDice.value > 6 &&
-            playerHomes[_userIndex].pinsAtHome.isEmpty)) {
+    if ((movablePins.length == 1 && diceContainer!.currentDice.value < 6) ||
+        (movablePins.length == 1 && diceContainer!.currentDice.value > 6 && playerHomes[_userIndex].pinsAtHome.isEmpty)) {
       // Automatically play move on the only movable pin
       await playMove(movablePins[0].homeIndex);
       return;
@@ -612,7 +589,7 @@ void onRemove() {
       size: Vector2(200, 80),
       dice: newDice,
     );
-    await add(diceContainer);
+    await add(diceContainer!);
   }
 
   Future<void> prepareNextPlayerDice(int playerIndex, int diceValue) async {
@@ -620,34 +597,31 @@ void onRemove() {
     await playerHome.setDiceValue(diceValue);
   }
 
-  Future<void> showDiceDialog() async {
-    if (!buildContext!.mounted) return;
+  //Unused Method
 
-    showDialog(
-      context: buildContext!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: SizedBox(
-            width: 120,
-            height: 120,
-            child: GameWidget(
-              game: this,
-            ),
-          ),
-        );
-      },
-    );
+  // Future<void> showDiceDialog() async {
+  //   if (!buildContext!.mounted) return;
 
-    // Roll the dice
-    await rollDice();
+  //   showDialog(
+  //     context: buildContext!,
+  //     barrierDismissible: false,
+  //     useRootNavigator: false,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         backgroundColor: Colors.transparent,
+  //         child: SizedBox(width: 120, height: 120, child: GameWidget(game: this)),
+  //       );
+  //     },
+  //   );
 
-    // Close dialog after roll animation
-    if (buildContext!.mounted) {
-      Navigator.of(buildContext!).pop();
-    }
-  }
+  //   // Roll the dice
+  //   await rollDice();
+
+  //   // Close dialog after roll animation
+  //   if (buildContext!.mounted) {
+  //     Navigator.of(buildContext!).pop();
+  //   }
+  // }
 
   Future<void> showGameMessage({
     required String message,
@@ -677,11 +651,7 @@ void onRemove() {
           position: Vector2(130, 25),
           anchor: Anchor.centerLeft,
           textRenderer: TextPaint(
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ),
       ],
@@ -788,12 +758,7 @@ class CustomRectangleComponent extends PositionComponent {
     this.borderWidth = 0,
     Anchor anchor = Anchor.topLeft,
     List<Component>? children,
-  }) : super(
-          position: position,
-          size: size,
-          anchor: anchor,
-          children: children,
-        );
+  }) : super(position: position, size: size, anchor: anchor, children: children);
 
   @override
   void render(Canvas canvas) {
@@ -823,39 +788,50 @@ class CustomRectangleComponent extends PositionComponent {
   }
 }
 
-// Add this new widget class
 class DiceAnimationWidget extends StatefulWidget {
+  final bool _playInfinitely;
+  final int? _dieFace;
+
+  const DiceAnimationWidget(
+      {super.key,
+
+      /// If `dieFace` is provided, the dice will call `Navigator.pop()` after 2 seconds
+      int? dieFace})
+      : _dieFace = dieFace,
+        _playInfinitely = dieFace == null ? true : false;
   @override
-  _DiceAnimationWidgetState createState() => _DiceAnimationWidgetState();
+  State<DiceAnimationWidget> createState() => _DiceAnimationWidgetState();
 }
 
-class _DiceAnimationWidgetState extends State<DiceAnimationWidget>
-    with SingleTickerProviderStateMixin {
+class _DiceAnimationWidgetState extends State<DiceAnimationWidget> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late int currentDiceFace = 1;
+  late int currentDiceFace = widget._dieFace ?? 1;
   final List<int> diceSequence = [1, 2, 3, 4, 5, 6];
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
 
     _controller.addListener(() {
       // Change dice face every ~166ms (1000ms / 6 faces)
-      setState(() {
-        currentDiceFace = diceSequence[(_controller.value * 6).floor() % 6];
-      });
+      currentDiceFace = diceSequence[(_controller.value * 6).floor() % 6];
+      // setState(() {});
     });
 
-    // Start animation and close dialog when done
-    _controller.repeat();
-    Future.delayed(const Duration(seconds: 2), () {
-      _controller.stop();
-      Navigator.of(context).pop();
-    });
+    if (widget._playInfinitely) {
+      _controller.repeat();
+    } else if (widget._dieFace != null) {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) Navigator.of(context).pop();
+      });
+    } else {
+      _controller.repeat();
+      Future.delayed(const Duration(seconds: 2), () {
+        _controller.stop();
+        if (mounted) Navigator.of(context).pop();
+      });
+    }
   }
 
   @override
@@ -866,12 +842,13 @@ class _DiceAnimationWidgetState extends State<DiceAnimationWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Image.asset(
-        'assets/images/dice_$currentDiceFace.png', // Adjust path based on your assets
-        width: 80,
-        height: 80,
-      ),
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Center(
+          child: Image.asset('assets/images/dice_$currentDiceFace.png', width: 80, height: 80),
+        );
+      },
     );
   }
 }

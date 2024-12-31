@@ -2,27 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/games/ludo/ludo_game_controller.dart';
 import 'package:marquis_v2/games/ludo/ludo_session.dart';
 import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
 import 'package:marquis_v2/games/ludo/widgets/divider_shape.dart';
 import 'package:marquis_v2/games/ludo/widgets/pin_color_option.dart';
 import 'package:marquis_v2/games/ludo/widgets/radio_option.dart';
 import 'package:marquis_v2/games/ludo/widgets/vertical_stepper.dart';
+import 'package:marquis_v2/models/enums.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/error_dialog.dart';
 
 import '../../../widgets/balance_appbar.dart';
-
-enum NumberOfPlayers {
-  two,
-  four;
-}
-
-enum GameMode {
-  free,
-  token;
-}
 
 class CreateGameScreen extends ConsumerStatefulWidget {
   @override
@@ -105,7 +96,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
   int get _numberOfTabs => _gameMode == GameMode.token ? 4 : 3;
 
   Future<void> _createGame() async {
-    final game = ModalRoute.of(context)!.settings.arguments as LudoGame;
+    final game = ModalRoute.of(context)!.settings.arguments as LudoGameController;
     final color = _playerColor!.split("/").last.split(".").first.split("_").first;
     try {
       setState(() {
@@ -170,7 +161,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                       if (_activeTab != _numberOfTabs) ...[
                         SizedBox(
                           width: 32,
-                          child: VerticalStepper(activeTab: _activeTab, numberOfSteps: _numberOfTabs),
+                          child: VerticalStepper(activeTab: _activeTab, numberOfSteps: _numberOfTabs, activeColor: Colors.cyan),
                         ),
                         const SizedBox(width: 12),
                         Flexible(
@@ -410,99 +401,71 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                 if (snapshot.hasData) {
                                                   _selectedTokenBalance = snapshot.data!.toDouble();
                                                 }
-                                                return Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text("Amount", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
-                                                    const SizedBox(height: 4),
-                                                    TextField(
-                                                      controller: _tokenAmountController,
-                                                      decoration: InputDecoration(
-                                                        filled: true,
-                                                        fillColor: Color(0xFF363D43),
-                                                        hintText: "Enter Amount",
-                                                        border: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF363D43))),
-                                                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF363D43))),
-                                                        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF363D43))),
-                                                      ),
-                                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
-                                                      keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[.0-9]"))],
-                                                      onChanged: (value) {
-                                                        if (value.isEmpty) return;
-                                                        if (double.tryParse(value) == null ||
-                                                            double.parse(value) > (_selectedTokenBalance / 1e18) ||
-                                                            double.parse(value) == 0) {
-                                                          setState(() {
-                                                            _selectedTokenAmount = null;
-                                                          });
-                                                          return;
-                                                        }
-                                                        _selectTokenAmount(double.parse(value) * 1e18);
-                                                      },
-                                                    ),
-                                                    const SizedBox(height: 10),
-                                                    Slider(
-                                                      min: 0,
-                                                      divisions: 100,
-                                                      activeColor: Colors.white,
-                                                      label: ((_selectedTokenAmount ?? 0) / 1e18).toStringAsFixed(7),
-                                                      secondaryActiveColor: Colors.cyan,
-                                                      allowedInteraction: SliderInteraction.slideThumb,
-                                                      max: _selectedTokenBalance.toDouble(),
-                                                      value: _selectedTokenAmount ?? 0,
-                                                      onChanged: _selectTokenAmount,
-                                                    ),
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Text(
-                                                              'Min',
-                                                              style: GoogleFonts.montserrat(
-                                                                  fontSize: 10, color: const Color(0xFFFFFFFF), fontWeight: FontWeight.w400),
-                                                            ),
-                                                            const SizedBox(width: 13),
-                                                            SizedBox(
-                                                              width: 80,
-                                                              child: Text(
-                                                                ((_selectedTokenAmount ?? 0) / 1e18).toStringAsFixed(7),
-                                                                style: GoogleFonts.montserrat(
-                                                                  fontSize: 10,
-                                                                  color: const Color(0xFFFFFFFF),
-                                                                  fontWeight: FontWeight.w400,
-                                                                ),
-                                                                maxLines: 1,
-                                                                overflow: TextOverflow.ellipsis,
-                                                              ),
-                                                            ),
-                                                          ],
+                                                return Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 26),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text("Amount", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
+                                                      const SizedBox(height: 4),
+                                                      SizedBox(
+                                                        height: 41,
+                                                        child: TextField(
+                                                          controller: _tokenAmountController,
+                                                          decoration: InputDecoration(
+                                                            contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                                                            filled: true,
+                                                            fillColor: Color(0xFF363D43),
+                                                            hintText: "Enter Amount",
+                                                            border: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF363D43))),
+                                                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF363D43))),
+                                                            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF363D43))),
+                                                          ),
+                                                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                                                          keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[.0-9]"))],
+                                                          onChanged: (value) {
+                                                            if (value.isEmpty) return;
+                                                            if (double.tryParse(value) == null ||
+                                                                double.parse(value) > (_selectedTokenBalance / 1e18) ||
+                                                                double.parse(value) == 0) {
+                                                              setState(() {
+                                                                _selectedTokenAmount = null;
+                                                              });
+                                                              return;
+                                                            }
+                                                            _selectTokenAmount(double.parse(value) * 1e18);
+                                                          },
                                                         ),
-                                                        Column(
-                                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: [
-                                                            Text(
-                                                              'Max',
-                                                              style: GoogleFonts.montserrat(
-                                                                  fontSize: 10, color: const Color(0xFFFFFFFF), fontWeight: FontWeight.w400),
-                                                            ),
-                                                            const SizedBox(width: 13),
-                                                            Row(
-                                                              mainAxisAlignment: MainAxisAlignment.end,
-                                                              children: [
-                                                                Text(
-                                                                  'Balance\t\t',
-                                                                  style: GoogleFonts.montserrat(
-                                                                    fontSize: 10,
-                                                                    color: const Color(0xFFFFFFFF),
-                                                                    fontWeight: FontWeight.w400,
-                                                                  ),
-                                                                ),
-                                                                Text(
-                                                                  (_selectedTokenBalance.toDouble() / 1e18).toStringAsFixed(7),
+                                                      ),
+                                                      const SizedBox(height: 10),
+                                                      Slider(
+                                                        min: 0,
+                                                        divisions: 100,
+                                                        activeColor: Colors.cyan,
+                                                        thumbColor: Colors.white,
+                                                        label: ((_selectedTokenAmount ?? 0) / 1e18).toStringAsFixed(7),
+                                                        allowedInteraction: SliderInteraction.slideThumb,
+                                                        max: _selectedTokenBalance.toDouble(),
+                                                        value: _selectedTokenAmount ?? 0,
+                                                        onChanged: _selectTokenAmount,
+                                                      ),
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              Text(
+                                                                'Min',
+                                                                style: GoogleFonts.montserrat(
+                                                                    fontSize: 10, color: const Color(0xFFFFFFFF), fontWeight: FontWeight.w400),
+                                                              ),
+                                                              const SizedBox(width: 13),
+                                                              SizedBox(
+                                                                width: 80,
+                                                                child: Text(
+                                                                  ((_selectedTokenAmount ?? 0) / 1e18).toStringAsFixed(7),
                                                                   style: GoogleFonts.montserrat(
                                                                     fontSize: 10,
                                                                     color: const Color(0xFFFFFFFF),
@@ -511,13 +474,48 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                                                   maxLines: 1,
                                                                   overflow: TextOverflow.ellipsis,
                                                                 ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        )
-                                                      ],
-                                                    )
-                                                  ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              Text(
+                                                                'Max',
+                                                                style: GoogleFonts.montserrat(
+                                                                    fontSize: 10, color: const Color(0xFFFFFFFF), fontWeight: FontWeight.w400),
+                                                              ),
+                                                              const SizedBox(width: 13),
+                                                              Row(
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                children: [
+                                                                  Text(
+                                                                    'Balance\t\t',
+                                                                    style: GoogleFonts.montserrat(
+                                                                      fontSize: 10,
+                                                                      color: const Color(0xFFFFFFFF),
+                                                                      fontWeight: FontWeight.w400,
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    (_selectedTokenBalance.toDouble() / 1e18).toStringAsFixed(7),
+                                                                    style: GoogleFonts.montserrat(
+                                                                      fontSize: 10,
+                                                                      color: const Color(0xFFFFFFFF),
+                                                                      fontWeight: FontWeight.w400,
+                                                                    ),
+                                                                    maxLines: 1,
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          )
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
                                                 );
                                               },
                                             ),
@@ -545,7 +543,7 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
                                             selectedPinColor: _playerColor,
                                             onTap: _selectPinColor,
                                           ),
-                                          SizedBox(width: scaledHeight(12)),
+                                          const SizedBox(width: 8),
                                           PinColorOption(
                                             gradient: const LinearGradient(
                                               begin: Alignment.topCenter,
