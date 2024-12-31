@@ -79,7 +79,7 @@ class LudoGameController extends MarquisGameController {
 
   Future<void> playMove(int index, {bool isAuto = false}) async {
     try {
-        diceContainer.currentDice.state = DiceState.playingMove;
+        diceContainer!.currentDice.state = DiceState.playingMove;
         await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
         _moveTimer?.reset();
     } catch (e) {
@@ -714,7 +714,7 @@ void onRemove() {
         } else {
           if (currentPlayer == userIndex) {
             if (playerCanMove) {
-              List<PlayerPin> listOfPlayerPin = board.getPlayerPinsOnBoard(userIndex);
+              List<PlayerPin> listOfPlayerPin = board!.getPlayerPinsOnBoard(userIndex);
               if (listOfPlayerPin.isNotEmpty) {
                 playMove(listOfPlayerPin[0].homeIndex, isAuto: true);
               }
