@@ -20,7 +20,11 @@ void main() async {
   Hive.registerAdapter(UserDataImplAdapter());
   Hive.registerAdapter(LudoSessionDataImplAdapter());
   Hive.registerAdapter(LudoSessionUserStatusImplAdapter());
-  await Future.wait([_loadAppStateBox(), Hive.openBox<UserData>("user"), Hive.openBox<LudoSessionData>("ludoSession")]);
+  await Future.wait([
+    _loadAppStateBox(),
+    Hive.openBox<UserData>("user"),
+    Hive.openBox<LudoSessionData>("ludoSession")
+  ]);
   runApp(const ProviderScope(child: MyApp()));
   // Magic.instance = Magic("pk_live_D38AAC9114F908B0");
 }
@@ -49,7 +53,7 @@ class MyApp extends ConsumerWidget {
       children: [
         MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          title: 'Marquis V2',
+          title: 'The Marquis',
           scrollBehavior: MyCustomScrollBehavior(),
           theme: ThemeData(
             useMaterial3: true,
@@ -58,7 +62,9 @@ class MyApp extends ConsumerWidget {
               surface: const Color(0xff0f1118),
               brightness: Brightness.dark,
             ),
-            textTheme: GoogleFonts.orbitronTextTheme(Theme.of(context).textTheme).apply(bodyColor: Colors.white),
+            textTheme:
+                GoogleFonts.orbitronTextTheme(Theme.of(context).textTheme)
+                    .apply(bodyColor: Colors.white),
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
           routeInformationParser: AppRouteInformationParser(),
@@ -70,7 +76,8 @@ class MyApp extends ConsumerWidget {
             listenable: snackbarService,
             builder: (context, child) {
               return ListView.builder(
-                itemBuilder: (context, index) => snackbarService.snackbars[index],
+                itemBuilder: (context, index) =>
+                    snackbarService.snackbars[index],
                 itemCount: snackbarService.snackbars.length,
                 shrinkWrap: true,
                 reverse: true,
