@@ -677,36 +677,8 @@ void onRemove() {
   }
 
   void startMoveTimer() {
-    if (_timerText == null) {
-      _timerText = TextComponent(
-        text: 'Time 60:00',
-        position: Vector2(100, 25),  
-        anchor: Anchor.center,
-        textRenderer: TextPaint(
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      );
-
-      final timerContainer = CustomRectangleComponent(
-        position: Vector2(size.x / 2, size.y - 200), 
-        size: Vector2(200, 50),
-        anchor: Anchor.center,
-        color: Colors.transparent,
-        borderRadius: 15,
-        borderColor: const Color(0xFF00ECFF),
-        borderWidth: 2,
-        children: [_timerText!],
-      );
-      
-      add(timerContainer);
-    }
-    
     _moveTimer = Timer(
-      60,
+      60,  // 1 minute
       onTick: () {
         if (_moveTimeLeft > 0) {
           _moveTimeLeft--;
@@ -714,9 +686,38 @@ void onRemove() {
         } else {
           if (currentPlayer == userIndex) {
             if (playerCanMove) {
-              List<PlayerPin> listOfPlayerPin = board!.getPlayerPinsOnBoard(userIndex);
-              if (listOfPlayerPin.isNotEmpty) {
-                playMove(listOfPlayerPin[0].homeIndex, isAuto: true);
+              // Get all relevant pin information
+              List<PlayerPin> pinsOnBoard = board!.getPlayerPinsOnBoard(userIndex);
+              List<PlayerPin?> pinsAtHome = playerHomes[userIndex].pinsAtHome;
+              int diceValue = diceContainer!.currentDice.value;
+              
+              // Case 1 & 2: All pins at home or some pins in destination with pins at home
+              if (pinsAtHome.isNotEmpty && diceValue >= 6) {
+                // Auto play first pin from home
+                playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+                return;
+              }
+              
+              // Case 3: Pins on board not movable with pins at home
+              if (pinsOnBoard.isNotEmpty && pinsAtHome.isNotEmpty && diceValue >= 6) {
+                bool anyPinMovable = false;
+                for (var pin in pinsOnBoard) {
+                  if (pin.canMove) {
+                    anyPinMovable = true;
+                    break;
+                  }
+                }
+                
+                if (!anyPinMovable) {
+                  // No movable pins on board, play from home
+                  playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+                  return;
+                }
+              }
+              
+              // Default case: Play first movable pin on board
+              if (pinsOnBoard.isNotEmpty) {
+                playMove(pinsOnBoard[0].homeIndex, isAuto: true);
               }
             } else {
               rollDice();
