@@ -1,9 +1,9 @@
 import 'dart:async' as dart_async;
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/ludo/components/board.dart';
@@ -39,10 +39,11 @@ class LudoGameController extends MarquisGameController {
   int? winnerIndex;
   LudoSessionData? _sessionData;
   int pendingMoves = 0;
-  String? currentMessage;
   bool isErrorMessage = false;
   dart_async.Timer? _messageTimer;
   Completer<void>? ludoSessionLoadingCompleter;
+
+  set sessionData(LudoSessionData value) => _sessionData = value;
 
   LudoGameController()
       : super(
@@ -75,23 +76,23 @@ class LudoGameController extends MarquisGameController {
       final res = await ref.read(ludoSessionProvider.notifier).generateMove();
       return res;
     } catch (e) {
-      showGameMessage(message: e.toString(), backgroundColor: Colors.red);
+      await showGameMessage(message: e.toString(), backgroundColor: Colors.red);
       return [];
     }
   }
 
-  Future<void> playMove(int index, {bool isAuto = false}) async {
+  Future<void> playMove(int index) async {
     try {
       diceContainer?.currentDice.state = DiceState.playingMove;
       await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
     } catch (e) {
       diceContainer!.currentDice.state = DiceState.rolledDice;
-      showGameMessage(message: e.toString(), backgroundColor: Colors.red);
+      await showGameMessage(message: e.toString(), backgroundColor: Colors.red);
     }
   }
 
   @override
-  set playState(PlayState value) {
+  Future<void> updatePlayState(PlayState value) async {
     if (playStateNotifier.value == value) return;
     if (value != PlayState.playing) {
       if (board != null) {
@@ -121,11 +122,7 @@ class LudoGameController extends MarquisGameController {
         break;
       case PlayState.playing:
         overlays.clear();
-        if (_sessionData != null) {
-          Future.microtask(() async {
-            await initGame();
-          });
-        }
+        if (_sessionData != null) await initGame();
         break;
       case PlayState.finished:
         overlays.clear();
@@ -261,7 +258,7 @@ class LudoGameController extends MarquisGameController {
     _sessionData = next;
     if (_sessionData != null) {
       if (_sessionData!.message != null) {
-        showGameMessage(
+        await showGameMessage(
           message: _sessionData!.message!,
           backgroundColor: Colors.red,
         );
@@ -269,12 +266,13 @@ class LudoGameController extends MarquisGameController {
           await ref
               .read(ludoSessionProvider.notifier)
               .clearData(refreshUser: true);
-          playState = PlayState.welcome;
+          overlays.clear();
+          await updatePlayState(PlayState.welcome);
           return;
         }
       }
       if (playState == PlayState.welcome) {
-        playState = PlayState.waiting;
+        await updatePlayState(PlayState.waiting);
       }
       // Update pin locations
       if (playState == PlayState.playing && isInit) {
@@ -338,7 +336,8 @@ class LudoGameController extends MarquisGameController {
           }
           movePinsCompleter.complete();
         } catch (e) {
-          showGameMessage(message: e.toString(), backgroundColor: Colors.red);
+          await showGameMessage(
+              message: e.toString(), backgroundColor: Colors.red);
         }
       }
     }
@@ -348,12 +347,16 @@ class LudoGameController extends MarquisGameController {
 
   @override
   Future<void> initGame() async {
-    await Flame.images.load('spritesheet.png');
-    await Flame.images.load('avatar_spritesheet.png');
-    await Flame.images.load('dice_interface.png');
-    await Flame.images.load('active_button.png');
-    await Flame.images.load('play.png');
-
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      await Flame.images.loadAll([
+        'spritesheet.png',
+        'avatar_spritesheet.png',
+        'dice_interface.png',
+        'active_button.png',
+        'play.png',
+        'dice_icon.png',
+      ]);
+    }
     camera.viewfinder.anchor = Anchor.topLeft;
     _userIndex = _sessionData!.sessionUserStatus.indexWhere(
         (user) => user.userId.toString() == ref.read(userProvider)?.id);
@@ -444,7 +447,7 @@ class LudoGameController extends MarquisGameController {
       borderRadius: 12,
       children: [
         SpriteComponent(
-          sprite: await Sprite.load('dice_icon.png'),
+          sprite: Sprite(Flame.images.fromCache('dice_icon.png')),
           position: Vector2(100, 25), // Center horizontally and vertically
           size: Vector2(24, 24),
           anchor: Anchor.center,
@@ -495,7 +498,7 @@ class LudoGameController extends MarquisGameController {
   }
 
   Future<void> rollDice() async {
-    if (kDebugMode) print("rollDice called, playerCanMove: $playerCanMove");
+    // if (kDebugMode) print("rollDice called, playerCanMove: $playerCanMove");
     if (playerCanMove) return;
 
     // Show animated dice dialog
@@ -512,13 +515,13 @@ class LudoGameController extends MarquisGameController {
       );
     }
 
-    if (kDebugMode) print("Rolling dice...");
+    // if (kDebugMode) print("Rolling dice...");
     await diceContainer!.currentDice.roll();
-    Navigator.of(buildContext!).pop();
-    if (kDebugMode)
-      print("Dice rolled, value: ${diceContainer!.currentDice.value}");
+    if (buildContext?.mounted == true) Navigator.of(buildContext!).pop();
+    // if (kDebugMode) print("Dice rolled, value: ${diceContainer!.currentDice.value}");
     if (diceContainer!.currentDice.value > 0 &&
-        diceContainer!.currentDice.value < 7) {
+        diceContainer!.currentDice.value < 7 &&
+        buildContext?.mounted == true) {
       await showDialog(
         context: buildContext!,
         barrierDismissible: false,
@@ -548,25 +551,25 @@ class LudoGameController extends MarquisGameController {
       final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
       if (diceContainer!.currentDice.value < 6) {
         if (pinsAtHome.isNotEmpty) {
-          showGameMessage(
+          await showGameMessage(
               message: "Can not move from Basement, try to get a 6!!");
           // If there are pins at home, play the first one (dummy move)
-          await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+          await playMove(pinsAtHome[0]!.homeIndex);
           return;
         } else {
-          showGameMessage(message: "No pins to move!!");
+          await showGameMessage(message: "No pins to move!!");
           // If there are no pins at home, play the first pin on the board (dummy move)
           final pins = board!.getPlayerPinsOnBoard(_userIndex);
-          await playMove(pins[0].homeIndex, isAuto: true);
+          await playMove(pins[0].homeIndex);
           return;
         }
       } else {
         // If the dice value is greater or equal to 6, play the first pin on the board or the only pin at home
         if (pinsAtHome.isEmpty) {
-          showGameMessage(message: "No pins to move!!");
+          await showGameMessage(message: "No pins to move!!");
           // If there are no pins at home, play the first pin on the board (dummy move)
           final pins = board!.getPlayerPinsOnBoard(_userIndex);
-          await playMove(pins[0].homeIndex, isAuto: true);
+          await playMove(pins[0].homeIndex);
           return;
         } else if (pinsAtHome.length == 1) {
           // If there is only one pin at home, play it
@@ -666,7 +669,7 @@ class LudoGameController extends MarquisGameController {
       borderRadius: 12,
       children: [
         SpriteComponent(
-          sprite: await Sprite.load('dice_icon.png'),
+          sprite: Sprite(Flame.images.fromCache('dice_icon.png')),
           position: Vector2(100, 25),
           size: Vector2(24, 24),
           anchor: Anchor.center,
@@ -686,10 +689,8 @@ class LudoGameController extends MarquisGameController {
     await add(messageContainer);
 
     if (durationSeconds > 0) {
-      Future.delayed(Duration(seconds: durationSeconds), () {
-        if (contains(messageContainer)) {
-          remove(messageContainer);
-        }
+      await Future.delayed(Duration(seconds: durationSeconds), () {
+        if (contains(messageContainer)) remove(messageContainer);
       });
     }
   }
