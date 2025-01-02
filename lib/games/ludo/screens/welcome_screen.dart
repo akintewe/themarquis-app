@@ -118,9 +118,9 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                                       }
                                       if (session == null) return;
                                       if (session.sessionUserStatus.where((e) => e.status == "ACTIVE").length == 4) {
-                                        widget.game.playState = PlayState.playing;
+                                        await widget.game.updatePlayState(PlayState.playing);
                                       } else {
-                                        widget.game.playState = PlayState.waiting;
+                                        await widget.game.updatePlayState(PlayState.waiting);
                                       }
                                     } catch (e) {
                                       if (!context.mounted) return;
@@ -378,7 +378,7 @@ class _FindRoomDialogState extends ConsumerState<_FindRoomDialog> {
     });
     try {
       FocusScope.of(context).unfocus();
-      final ludoSession = await getLudoSessionFromId(_roomIdController.text);
+      final ludoSession = await ref.read(ludoSessionProvider.notifier).getLudoSessionFromId(_roomIdController.text);
       if (ludoSession == null) {
         if (!mounted) return;
         showErrorDialog("Room not found", context);
@@ -394,7 +394,7 @@ class _FindRoomDialogState extends ConsumerState<_FindRoomDialog> {
       if (res == true) {
         if (!mounted) return;
         Navigator.of(context).pop(true);
-        widget.game.playState = PlayState.waiting;
+        await widget.game.updatePlayState(PlayState.waiting);
       }
     } catch (e) {
       if (!mounted) return;
