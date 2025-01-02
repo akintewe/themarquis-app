@@ -15,25 +15,27 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 part "ludo_session.g.dart";
 
-final baseUrl = environment['build'] == 'DEBUG' ? environment['apiUrlDebug'] : environment['apiUrl'];
-final wsUrl = environment['build'] == 'DEBUG' ? environment['wsUrlDebug'] : environment['wsUrl'];
+final baseUrl = environment['build'] == 'DEBUG'
+    ? environment['apiUrlDebug']
+    : environment['apiUrl'];
+final wsUrl = environment['build'] == 'DEBUG'
+    ? environment['wsUrlDebug']
+    : environment['wsUrl'];
 
 @riverpod
 class LudoSession extends _$LudoSession {
   //Details Declaration
   late WebSocketChannel _channel;
-  final Box<LudoSessionData>? _hiveBox;
-  final http.Client _httpClient;
+  late final Box<LudoSessionData>? _hiveBox;
+  late final http.Client _httpClient;
   String? _id;
   int? _currentDiceValue;
   bool _playMoveFailed = false;
 
-  LudoSession({Box<LudoSessionData>? hiveBox, http.Client? httpClient})
-      : _hiveBox = hiveBox ?? Hive.box<LudoSessionData>("ludoSession"),
-        _httpClient = httpClient ?? http.Client();
-
   @override
   LudoSessionData? build() {
+    _hiveBox = Hive.box<LudoSessionData>("ludoSession");
+    _httpClient = http.Client();
     if (!Platform.environment.containsKey('FLUTTER_TEST')) _connectWebSocket();
     return null;
   }
@@ -68,7 +70,8 @@ class LudoSession extends _$LudoSession {
               final data = jsonDecode(dataStr) as Map;
               if (data["session_id"] != _id) return;
               state = state?.copyWith(
-                message: "EXITED: Player ${data['player_id']} has left the session, session ${data['session_id']} has finished.",
+                message:
+                    "EXITED: Player ${data['player_id']} has left the session, session ${data['session_id']} has finished.",
               );
               break;
           }
@@ -107,7 +110,8 @@ class LudoSession extends _$LudoSession {
       },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     final ludoSession = LudoSessionData(
@@ -121,9 +125,18 @@ class LudoSession extends _$LudoSession {
       sessionUserStatus: [
         ...decodedResponse['session_user_status'].map(
           (e) {
-            final List<String> playerTokensPosition = (e['player_tokens_position'] as List<dynamic>).map((e) => e.toString()).toList();
-            final List<bool> playerWinningTokens = (e['player_winning_tokens'] as List<dynamic>).map((e) => e as bool).toList();
-            final List<bool> playerTokensCircled = (e['player_tokens_circled'] as List<dynamic>).map((e) => e as bool).toList();
+            final List<String> playerTokensPosition =
+                (e['player_tokens_position'] as List<dynamic>)
+                    .map((e) => e.toString())
+                    .toList();
+            final List<bool> playerWinningTokens =
+                (e['player_winning_tokens'] as List<dynamic>)
+                    .map((e) => e as bool)
+                    .toList();
+            final List<bool> playerTokensCircled =
+                (e['player_tokens_circled'] as List<dynamic>)
+                    .map((e) => e as bool)
+                    .toList();
             return LudoSessionUserStatus(
               playerId: e['player_id'],
               playerTokensPosition: playerTokensPosition,
@@ -140,7 +153,8 @@ class LudoSession extends _$LudoSession {
         ),
       ],
       nextPlayerId: decodedResponse['next_player_id'],
-      createdAt: DateTime.fromMillisecondsSinceEpoch(decodedResponse['created_at'] * 1000),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+          decodedResponse['created_at'] * 1000),
       creator: "",
       currentDiceValue: _currentDiceValue ?? -1,
       playMoveFailed: _playMoveFailed,
@@ -151,13 +165,17 @@ class LudoSession extends _$LudoSession {
 
   Future<LudoSessionData?> getLudoSessionFromId(String id) async {
     final url = Uri.parse('$baseUrl/game/session/$id');
-    final response = await _httpClient.get(url, headers: {'Content-Type': 'application/json'});
+    final response = await _httpClient
+        .get(url, headers: {'Content-Type': 'application/json'});
     debugPrint("${response.headers}");
     debugPrint(response.body);
     debugPrint("${response.statusCode}");
     if (response.statusCode != 201 && response.statusCode != 200) {
-      if (!kReleaseMode) throw HttpException('${jsonDecode(utf8.decode(response.bodyBytes))["message"]}');
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse: ${utf8.decode(response.bodyBytes)}');
+      if (!kReleaseMode)
+        throw HttpException(
+            '${jsonDecode(utf8.decode(response.bodyBytes))["message"]}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse: ${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     final ludoSession = LudoSessionData(
@@ -171,9 +189,18 @@ class LudoSession extends _$LudoSession {
       sessionUserStatus: [
         ...decodedResponse['session_user_status'].map(
           (e) {
-            final List<String> playerTokensPosition = (e['player_tokens_position'] as List<dynamic>).map((e) => e.toString()).toList();
-            final List<bool> playerWinningTokens = (e['player_winning_tokens'] as List<dynamic>).map((e) => e as bool).toList();
-            final List<bool> playerTokensCircled = (e['player_tokens_circled'] as List<dynamic>).map((e) => e as bool).toList();
+            final List<String> playerTokensPosition =
+                (e['player_tokens_position'] as List<dynamic>)
+                    .map((e) => e.toString())
+                    .toList();
+            final List<bool> playerWinningTokens =
+                (e['player_winning_tokens'] as List<dynamic>)
+                    .map((e) => e as bool)
+                    .toList();
+            final List<bool> playerTokensCircled =
+                (e['player_tokens_circled'] as List<dynamic>)
+                    .map((e) => e as bool)
+                    .toList();
             return LudoSessionUserStatus(
               playerId: e['player_id'],
               playerTokensPosition: playerTokensPosition,
@@ -190,7 +217,8 @@ class LudoSession extends _$LudoSession {
         ),
       ],
       nextPlayerId: decodedResponse['next_player_id'],
-      createdAt: DateTime.fromMillisecondsSinceEpoch(decodedResponse['created_at'] * 1000),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+          decodedResponse['created_at'] * 1000),
       creator: "",
       currentDiceValue: -1,
       playMoveFailed: false,
@@ -205,9 +233,11 @@ class LudoSession extends _$LudoSession {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    final decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
     return decodedResponse
         .map(
           (sessionData) => LudoSessionData(
@@ -221,9 +251,18 @@ class LudoSession extends _$LudoSession {
             sessionUserStatus: [
               ...sessionData['session_user_status'].map(
                 (e) {
-                  final List<String> playerTokensPosition = (e['player_tokens_position'] as List<dynamic>).map((e) => e.toString()).toList();
-                  final List<bool> playerWinningTokens = (e['player_winning_tokens'] as List<dynamic>).map((e) => e as bool).toList();
-                  final List<bool> playerTokensCircled = (e['player_tokens_circled'] as List<dynamic>).map((e) => e as bool).toList();
+                  final List<String> playerTokensPosition =
+                      (e['player_tokens_position'] as List<dynamic>)
+                          .map((e) => e.toString())
+                          .toList();
+                  final List<bool> playerWinningTokens =
+                      (e['player_winning_tokens'] as List<dynamic>)
+                          .map((e) => e as bool)
+                          .toList();
+                  final List<bool> playerTokensCircled =
+                      (e['player_tokens_circled'] as List<dynamic>)
+                          .map((e) => e as bool)
+                          .toList();
                   return LudoSessionUserStatus(
                     playerId: e['player_id'],
                     playerTokensPosition: playerTokensPosition,
@@ -240,7 +279,8 @@ class LudoSession extends _$LudoSession {
               ),
             ],
             nextPlayerId: sessionData['next_player_id'],
-            createdAt: DateTime.fromMillisecondsSinceEpoch(sessionData['created_at'] * 1000),
+            createdAt: DateTime.fromMillisecondsSinceEpoch(
+                sessionData['created_at'] * 1000),
             creator: "",
             currentDiceValue: -1,
             playMoveFailed: false,
@@ -251,11 +291,14 @@ class LudoSession extends _$LudoSession {
 
   Future<List<Map>> getTransactions(String id) async {
     final url = Uri.parse('$baseUrl/game/session/$id/transactions');
-    final response = await _httpClient.get(url, headers: {'Content-Type': 'application/json'});
+    final response = await _httpClient
+        .get(url, headers: {'Content-Type': 'application/json'});
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    final decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
     if (kDebugMode) print(decodedResponse);
     return decodedResponse.map((e) => e as Map).toList();
   }
@@ -264,12 +307,17 @@ class LudoSession extends _$LudoSession {
     final url = Uri.parse('$baseUrl/game/session/$_id/generate-move');
     final response = await _httpClient.post(
       url,
-      headers: {'Content-Type': 'application/json', 'Authorization': ref.read(appStateProvider).bearerToken},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken
+      },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    final decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
     return decodedResponse.map((e) => e as int).toList();
   }
 
@@ -277,10 +325,14 @@ class LudoSession extends _$LudoSession {
     final url = Uri.parse('$baseUrl/game/session/$_id/play-move/$tokenId');
     final response = await _httpClient.post(
       url,
-      headers: {'Content-Type': 'application/json', 'Authorization': ref.read(appStateProvider).bearerToken},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken
+      },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
   }
 
@@ -293,7 +345,8 @@ class LudoSession extends _$LudoSession {
     }
   }
 
-  Future<void> createSession(String amount, String color, String tokenAddress) async {
+  Future<void> createSession(
+      String amount, String color, String tokenAddress) async {
     final url = Uri.parse('$baseUrl/session/create');
     log(jsonEncode({
       'amount': amount,
@@ -313,7 +366,8 @@ class LudoSession extends _$LudoSession {
       },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     if (kDebugMode) print(decodedResponse);
@@ -336,7 +390,8 @@ class LudoSession extends _$LudoSession {
       },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     if (kDebugMode) print(decodedResponse);
@@ -353,7 +408,8 @@ class LudoSession extends _$LudoSession {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     if (kDebugMode) print(decodedResponse);
@@ -375,7 +431,8 @@ class LudoSession extends _$LudoSession {
       },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     if (kDebugMode) print(decodedResponse);

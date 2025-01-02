@@ -3,6 +3,7 @@ import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/router/router_delegate.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:marquis_v2/services/snackbar_service.dart';
 
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({
@@ -27,7 +28,9 @@ class _AppShellState extends ConsumerState<AppShell> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Defer back button dispatching to the child router
-    _backButtonDispatcher = Router.of(context).backButtonDispatcher!.createChildBackButtonDispatcher();
+    _backButtonDispatcher = Router.of(context)
+        .backButtonDispatcher!
+        .createChildBackButtonDispatcher();
   }
 
   @override
@@ -36,10 +39,35 @@ class _AppShellState extends ConsumerState<AppShell> {
     // to pick which one should take priority;
     _backButtonDispatcher.takePriority();
     final appState = ref.watch(appStateProvider);
+    final snackbarService = SnackbarService();
     return Scaffold(
-      body: Router(
-        routerDelegate: _routerDelegate,
-        backButtonDispatcher: _backButtonDispatcher,
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          Router(
+            routerDelegate: _routerDelegate,
+            backButtonDispatcher: _backButtonDispatcher,
+          ),
+          if (snackbarService.snackbars.isNotEmpty)
+            Positioned(
+              bottom: 0,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: ListenableBuilder(
+                  listenable: snackbarService,
+                  builder: (context, child) {
+                    return ListView.builder(
+                      itemBuilder: (context, index) =>
+                          snackbarService.snackbars[index],
+                      itemCount: snackbarService.snackbars.length,
+                      shrinkWrap: true,
+                      reverse: true,
+                    );
+                  },
+                ),
+              ),
+            ),
+        ],
       ),
       bottomNavigationBar: appState.selectedGame != null
           ? null
@@ -66,7 +94,9 @@ class _AppShellState extends ConsumerState<AppShell> {
               ],
               currentIndex: appState.navigatorIndex,
               onTap: (newIndex) {
-                ref.read(appStateProvider.notifier).changeNavigatorIndex(newIndex);
+                ref
+                    .read(appStateProvider.notifier)
+                    .changeNavigatorIndex(newIndex);
               },
             ),
     );
