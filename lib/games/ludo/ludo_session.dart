@@ -26,16 +26,25 @@ final wsUrl = environment['build'] == 'DEBUG'
 class LudoSession extends _$LudoSession {
   //Details Declaration
   late WebSocketChannel _channel;
-  late final Box<LudoSessionData>? _hiveBox;
-  late final http.Client _httpClient;
+  Box<LudoSessionData>? _hiveBox;
+  http.Client? _httpClient;
   String? _id;
   int? _currentDiceValue;
   bool _playMoveFailed = false;
 
+  LudoSession({Box<LudoSessionData>? hiveBox, http.Client? httpClient}) {
+    if (hiveBox != null) {
+      _hiveBox = hiveBox;
+    }
+    if (httpClient != null) {
+      _httpClient = httpClient;
+    }
+  }
+
   @override
   LudoSessionData? build() {
-    _hiveBox = Hive.box<LudoSessionData>("ludoSession");
-    _httpClient = http.Client();
+    _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
+    _httpClient ??= http.Client();
     if (!Platform.environment.containsKey('FLUTTER_TEST')) _connectWebSocket();
     return null;
   }
@@ -102,7 +111,7 @@ class LudoSession extends _$LudoSession {
       if (_id == null) return;
     }
     final url = Uri.parse('$baseUrl/game/session/$_id');
-    final response = await _httpClient.get(
+    final response = await _httpClient!.get(
       url,
       headers: {
         'Content-Type': 'application/json',
@@ -165,7 +174,7 @@ class LudoSession extends _$LudoSession {
 
   Future<LudoSessionData?> getLudoSessionFromId(String id) async {
     final url = Uri.parse('$baseUrl/game/session/$id');
-    final response = await _httpClient
+    final response = await _httpClient!
         .get(url, headers: {'Content-Type': 'application/json'});
     debugPrint("${response.headers}");
     debugPrint(response.body);
@@ -228,7 +237,7 @@ class LudoSession extends _$LudoSession {
 
   Future<List<LudoSessionData>> getOpenSessions() async {
     final url = Uri.parse('$baseUrl/session/get-open-sessions');
-    final response = await _httpClient.get(
+    final response = await _httpClient!.get(
       url,
       headers: {'Content-Type': 'application/json'},
     );
@@ -291,7 +300,7 @@ class LudoSession extends _$LudoSession {
 
   Future<List<Map>> getTransactions(String id) async {
     final url = Uri.parse('$baseUrl/game/session/$id/transactions');
-    final response = await _httpClient
+    final response = await _httpClient!
         .get(url, headers: {'Content-Type': 'application/json'});
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw HttpException(
@@ -305,7 +314,7 @@ class LudoSession extends _$LudoSession {
 
   Future<List<int>> generateMove() async {
     final url = Uri.parse('$baseUrl/game/session/$_id/generate-move');
-    final response = await _httpClient.post(
+    final response = await _httpClient!.post(
       url,
       headers: {
         'Content-Type': 'application/json',
@@ -323,7 +332,7 @@ class LudoSession extends _$LudoSession {
 
   Future<void> playMove(String tokenId) async {
     final url = Uri.parse('$baseUrl/game/session/$_id/play-move/$tokenId');
-    final response = await _httpClient.post(
+    final response = await _httpClient!.post(
       url,
       headers: {
         'Content-Type': 'application/json',
@@ -353,7 +362,7 @@ class LudoSession extends _$LudoSession {
       'user_creator_color': color,
       'token_address': tokenAddress,
     }));
-    final response = await _httpClient.post(
+    final response = await _httpClient!.post(
       url,
       body: jsonEncode({
         'amount': amount,
@@ -378,7 +387,7 @@ class LudoSession extends _$LudoSession {
 
   Future<void> joinSession(String sessionId, String color) async {
     final url = Uri.parse('$baseUrl/session/join');
-    final response = await _httpClient.post(
+    final response = await _httpClient!.post(
       url,
       body: jsonEncode({
         'session_id': sessionId,
@@ -402,7 +411,7 @@ class LudoSession extends _$LudoSession {
 
   Future<void> closeSession(String tokenId) async {
     final url = Uri.parse('$baseUrl/session/close');
-    final response = await _httpClient.post(
+    final response = await _httpClient!.post(
       url,
       body: jsonEncode({'session_id': _id}),
       headers: {'Content-Type': 'application/json'},
@@ -422,7 +431,7 @@ class LudoSession extends _$LudoSession {
       if (_id == null) return;
     }
     final url = Uri.parse('$baseUrl/session/exit-game');
-    final response = await _httpClient.post(
+    final response = await _httpClient!.post(
       url,
       body: jsonEncode({'session_id': _id}),
       headers: {

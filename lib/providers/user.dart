@@ -20,6 +20,15 @@ class User extends _$User {
   Box<UserData>? _hiveBox;
   Client? _httpClient;
 
+  User({Box<UserData>? hiveBox, Client? httpClient}) {
+    if (hiveBox != null) {
+      _hiveBox = hiveBox;
+    }
+    if (httpClient != null) {
+      _httpClient = httpClient;
+    }
+  }
+
   @override
   UserData? build() {
     _hiveBox ??= Hive.box<UserData>("user");
