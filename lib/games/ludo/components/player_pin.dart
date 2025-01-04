@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/flame.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:marquis_v2/games/ludo/components/board.dart';
 import 'package:marquis_v2/games/ludo/config.dart';
-import 'package:marquis_v2/games/ludo/ludo_game.dart';
+import 'package:marquis_v2/games/ludo/ludo_game_controller.dart';
 
 Map<Color, List<double>> spriteLocationMap = {
   const Color(0xffd04c2f): [1, 1, 366, 590], // x, y, w, h
@@ -17,8 +17,7 @@ Map<Color, List<double>> spriteLocationMap = {
   const Color(0xffb0d02f): [737, 431, 290, 472],
 };
 
-class PlayerPin extends SpriteComponent
-    with TapCallbacks, HasGameReference<LudoGame> {
+class PlayerPin extends SpriteComponent with TapCallbacks, HasGameReference<LudoGameController> {
   bool Function(TapUpEvent event, PlayerPin pin) onTap;
   final int playerIndex;
   final int homeIndex;
@@ -42,11 +41,8 @@ class PlayerPin extends SpriteComponent
     size = Vector2(game.unitSize * 0.5, game.unitSize * 0.8);
     sprite = Sprite(
       Flame.images.fromCache('spritesheet.png'),
-      srcPosition: Vector2(
-          spriteLocationMap[game.listOfColors[playerIndex]]![0],
-          spriteLocationMap[game.listOfColors[playerIndex]]![1]),
-      srcSize: Vector2(spriteLocationMap[game.listOfColors[playerIndex]]![2],
-          spriteLocationMap[game.listOfColors[playerIndex]]![3]),
+      srcPosition: Vector2(spriteLocationMap[game.listOfColors[playerIndex]]![0], spriteLocationMap[game.listOfColors[playerIndex]]![1]),
+      srcSize: Vector2(spriteLocationMap[game.listOfColors[playerIndex]]![2], spriteLocationMap[game.listOfColors[playerIndex]]![3]),
     );
     return super.onLoad();
   }
@@ -105,8 +101,7 @@ class PlayerPin extends SpriteComponent
     }
   }
 
-  bool get canMove =>
-      game.diceContainer.currentDice.value + currentPosIndex <= 56;
+  bool get canMove => game.diceContainer!.currentDice.value + currentPosIndex <= 56;
 
   void returnToHome(Vector2 homePosition) {
     currentPosIndex = -1;
@@ -142,14 +137,12 @@ class PlayerPin extends SpriteComponent
 
     // Ensure we're actually moving
     if (targetIndex <= startIndex) {
-      throw Exception(
-          "Invalid move: target index ($targetIndex) is not greater than start index ($startIndex)");
+      throw Exception("Invalid move: target index ($targetIndex) is not greater than start index ($startIndex)");
     } else if (targetIndex > 56) {
-      throw Exception(
-          "Invalid move: target index ($targetIndex) is greater than 56");
+      throw Exception("Invalid move: target index ($targetIndex) is greater than 56");
     }
 
-    print("Player $playerIndex moving to position $targetIndex");
+    if (kDebugMode) print("Player $playerIndex moving to position $targetIndex");
 
     currentPosIndex = targetIndex;
 
@@ -164,10 +157,7 @@ class PlayerPin extends SpriteComponent
       moveEffects.add(
         MoveEffect.to(
           newPosition,
-          EffectController(
-              duration: timePerStep * 0.8,
-              curve: Curves.easeInOut,
-              startDelay: moveEffects.isEmpty ? 0 : timePerStep * 1.2),
+          EffectController(duration: timePerStep * 0.8, curve: Curves.easeInOut, startDelay: moveEffects.isEmpty ? 0 : timePerStep * 1.2),
         ),
       );
     }
@@ -179,11 +169,11 @@ class PlayerPin extends SpriteComponent
       moveEffects.last.onComplete = () async {
         position = routeIndexToPos(playerIndex, targetIndex);
         if (currentPosIndex == 56) {
-          game.board.remove(this);
+          game.board!.remove(this);
           if (!isRemoved) {
             await removed;
           }
-          game.destination.addPin(this);
+          game.destination!.addPin(this);
         } else if (parent is Board) {
           (parent as Board).updateOverlappingPins();
         }
@@ -200,7 +190,7 @@ class PlayerPin extends SpriteComponent
       // Wait for the animation to complete
       await completer.future;
     } else {
-      print("No movement required: start and target positions are the same");
+      if (kDebugMode) print("No movement required: start and target positions are the same");
     }
   }
 

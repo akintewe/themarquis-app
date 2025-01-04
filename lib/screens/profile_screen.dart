@@ -5,15 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gal/gal.dart';
+import 'package:marquis_v2/dialog/auth_dialog.dart';
 import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_path.dart';
-import 'package:marquis_v2/dialog/auth_dialog.dart';
+import 'package:marquis_v2/services/snackbar_service.dart';
+import 'package:marquis_v2/widgets/profile_item.dart';
+import 'package:marquis_v2/widgets/ui_widgets.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../widgets/referral_field.dart';
 
 class ProfilePath extends AppRoutePath {
   @override
@@ -45,8 +52,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                   onPressed: () async {
-                    showDialog(
-                        context: context, builder: (ctx) => const AuthDialog());
+                    showDialog(context: context,useRootNavigator: false, builder: (ctx) => const AuthDialog());
                   },
                   child: const Padding(
                     padding: EdgeInsets.all(8.0),
@@ -59,88 +65,101 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
               )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      elevation: 8.0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(36),
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    Text(
+                      'Edit profile',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w900),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Card(
+                          elevation: 8.0,
+                          color: const Color(0xff212329),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(36),
+                            ),
+                            child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage: AssetImage('assets/images/avatar.png'), // Add your avatar image in assets folder
+                                      backgroundColor: Colors.transparent,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(
+                                        user.email,
+                                        textAlign: TextAlign.center,
+                                        style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w900),
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                          ),
                         ),
-                        child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const CircleAvatar(
-                                  radius: 50,
-                                  backgroundImage: AssetImage(
-                                      'assets/images/avatar.png'), // Add your avatar image in assets folder
-                                  backgroundColor: Colors.transparent,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Text(
-                                    user.email.split("@").first,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge!
-                                        .copyWith(fontWeight: FontWeight.w900),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: SelectableText(
-                                    user.accountAddress,
-                                    style: const TextStyle(fontSize: 8),
-                                  ),
-                                ),
-                              ],
-                            )),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: InkWell(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => InviteFriendDialog(user: user),
-                        );
-                      },
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
                       child: Card(
                           elevation: 8.0,
+                          color: const Color(0xff212329),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(24),
                             ),
                             padding: const EdgeInsets.all(16.0),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.max,
+                            child: Column(
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Icon(Icons.share),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: SvgPicture.asset('assets/svg/wallet_icon.svg'),
+                                    ),
+                                    const Text('Wallet Address'),
+                                  ],
                                 ),
-                                Text('Show Referral Code'),
+                                ReferralField(
+                                  label: '',
+                                  value: user.accountAddress,
+                                )
                               ],
                             ),
                           )),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: InkWell(
+                    ProfileItem(
+                        icon: SvgPicture.asset('assets/svg/invite_friend.svg'),
+                        title: 'Invite Friend',
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            useRootNavigator: false,
+                            builder: (context) => InviteFriendDialog(user: user),
+                          );
+                        }),
+                    verticalSpace(8.0),
+                    ProfileItem(
+                      icon: const Icon(Icons.help_outline_rounded),
+                      title: 'Help and Support',
                       onTap: () {
                         showDialog(
                           context: context,
+                          useRootNavigator: false,
                           builder: (context) => const AlertDialog(
                             title: Text('Help and Support'),
                             content: Column(
@@ -152,59 +171,28 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         );
                       },
-                      child: Card(
-                          elevation: 8.0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            padding: const EdgeInsets.all(16.0),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Icon(Icons.help),
-                                ),
-                                Text('Help and Support'),
-                              ],
-                            ),
-                          )),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: InkWell(
+                    verticalSpace(8.0),
+                    ProfileItem(
+                      icon: Icon(
+                        Icons.logout,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      title: 'Log Out',
+                      textColor: Theme.of(context).colorScheme.primary,
                       onTap: () {
                         ref.read(appStateProvider.notifier).logout();
                       },
-                      child: Card(
-                          elevation: 8.0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            padding: const EdgeInsets.all(16.0),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Icon(
-                                    Icons.logout,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                Text(
-                                  'Logout',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          )),
                     ),
-                  ),
-                ],
+                    verticalSpace(8.0),
+                    ProfileItem(
+                      icon: SvgPicture.asset('assets/svg/trash_icon.svg'),
+                      title: 'Delete Account',
+                      textColor: Colors.red,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
               ),
       ),
     );
@@ -224,6 +212,8 @@ class InviteFriendDialog extends StatefulWidget {
 }
 
 class _InviteFriendDialogState extends State<InviteFriendDialog> {
+  final _snackBarService = SnackbarService();
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -252,16 +242,17 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
             ),
             const SizedBox(height: 20),
             QrImageView(
-              data:
-                  "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
+              data: "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
               size: 150,
               backgroundColor: Colors.white,
             ),
             const SizedBox(height: 20),
-            _buildReferralField('Referral Code', widget.user.referralCode),
+            ReferralField(
+              label: 'Referral Code',
+              value: widget.user.referralCode,
+            ),
             const SizedBox(height: 10),
-            _buildReferralField('Referral Link',
-                'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'),
+            ReferralField(label: 'Referral Link', value: 'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'),
             const SizedBox(height: 18),
             FutureBuilder<Uint8List>(future: () async {
               final image = await createImageFromWidget(
@@ -284,20 +275,14 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                                 padding: EdgeInsets.all(6.0),
                                 child: Text(
                                   "The Marquis",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(4.0),
                                 child: Text(
                                   "Referral Code: ${widget.user.referralCode}",
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
+                                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               QrImageView(
@@ -310,8 +295,7 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                                   dataModuleShape: QrDataModuleShape.square,
                                   color: Colors.white,
                                 ),
-                                data:
-                                    "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
+                                data: "https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}",
                                 size: 250,
                               ),
                             ],
@@ -332,21 +316,16 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildActionButton(FontAwesomeIcons.xTwitter, 'X',
-                              () async {
+                          _buildActionButton(FontAwesomeIcons.xTwitter, 'X', () async {
                             // Prepare the tweet text
-                            final tweetText =
-                                'Join TheMarquis with my referral code: ${widget.user.referralCode}';
-                            final url =
-                                'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}';
+                            final tweetText = 'Join TheMarquis with my referral code: ${widget.user.referralCode}';
+                            final url = 'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}';
 
                             // Use the Twitter app's URL scheme
-                            final tweetUrl = Uri.encodeFull(
-                                'twitter://post?message=$tweetText\n$url');
+                            final tweetUrl = Uri.encodeFull('twitter://post?message=$tweetText\n$url');
 
                             // Fallback to web URL if the app isn't installed
-                            final webTweetUrl = Uri.encodeFull(
-                                'https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz');
+                            final webTweetUrl = Uri.encodeFull('https://x.com/intent/tweet?text=$tweetText&url=$url&via=themarquisxyz');
 
                             try {
                               await launchUrl(Uri.parse(tweetUrl));
@@ -355,26 +334,23 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
                             }
                           }),
                           _buildActionButton(Icons.link, 'Copy Link', () {
-                            Clipboard.setData(ClipboardData(
-                                text:
-                                    'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Copied to clipboard')),
-                            );
+                            Clipboard.setData(ClipboardData(text: 'https://themarquis.xyz/signup?referralcode=${widget.user.referralCode}'));
+                            _snackBarService.displaySnackbar('Copied to clipboard');
+                          }),
+                          _buildActionButton(Icons.photo_outlined, 'Save image', () async {
+                            await Gal.putImageBytes(snapshot.data!);
+                            if (!context.mounted) return;
+                            _snackBarService.displaySnackbar('Saved to device');
                           }),
                           _buildActionButton(Icons.share, 'Share', () async {
-                            final image = await rootBundle
-                                .load('assets/images/share_banner.png');
+                            final image = await rootBundle.load('assets/images/share_banner.png');
                             // showDialog(
                             //     context: context,
+                            //     useRootNavigator: false,
                             //     builder: (context) => AlertDialog(
                             //         content: Image.memory(snapshot.data!)));
                             // final image = snapshot.data!;
-                            Share.shareXFiles([
-                              XFile.fromData(image.buffer.asUint8List(),
-                                  mimeType: 'image/png', name: 'qr_code.png')
-                            ],
+                            Share.shareXFiles([XFile.fromData(image.buffer.asUint8List(), mimeType: 'image/png', name: 'qr_code.png')],
                                 subject: 'TheMarquis Referral Code',
                                 text:
                                     'Join TheMarquis with my referral code: ${widget.user.referralCode}\nhttps://themarquis.xyz/signup?referralcode=${widget.user.referralCode}');
@@ -389,41 +365,7 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
     );
   }
 
-  Widget _buildReferralField(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '$label    $value',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: value));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Copied to clipboard')),
-              );
-            },
-            icon: const Icon(Icons.copy, color: Colors.white),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton(
-      IconData icon, String label, VoidCallback onPressed) {
+  Widget _buildActionButton(IconData icon, String label, VoidCallback onPressed) {
     return Column(
       children: [
         InkWell(
@@ -443,19 +385,16 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
     );
   }
 
-  Future<Uint8List> createImageFromWidget(Widget widget,
-      {Duration? wait, Size? logicalSize}) async {
+  Future<Uint8List> createImageFromWidget(Widget widget, {Duration? wait, Size? logicalSize}) async {
     final RenderRepaintBoundary repaintBoundary = RenderRepaintBoundary();
     final view = PlatformDispatcher.instance.views.first;
     logicalSize ??= view.physicalSize / view.devicePixelRatio;
 
     final RenderView renderView = RenderView(
       view: view,
-      child: RenderPositionedBox(
-          alignment: Alignment.center, child: repaintBoundary),
+      child: RenderPositionedBox(alignment: Alignment.center, child: repaintBoundary),
       configuration: ViewConfiguration(
-        logicalConstraints: BoxConstraints(
-            maxWidth: logicalSize.width, maxHeight: logicalSize.height),
+        logicalConstraints: BoxConstraints(maxWidth: logicalSize.width, maxHeight: logicalSize.height),
         devicePixelRatio: 1.0,
       ),
     );
@@ -466,8 +405,7 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
     pipelineOwner.rootNode = renderView;
     renderView.prepareInitialFrame();
 
-    final RenderObjectToWidgetElement<RenderBox> rootElement =
-        RenderObjectToWidgetAdapter<RenderBox>(
+    final RenderObjectToWidgetElement<RenderBox> rootElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: repaintBoundary,
       child: widget,
     ).attachToRenderTree(buildOwner);
@@ -486,8 +424,7 @@ class _InviteFriendDialogState extends State<InviteFriendDialog> {
     pipelineOwner.flushPaint();
 
     final ui.Image image = await repaintBoundary.toImage();
-    final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
     return Uint8List.view(byteData!.buffer);
   }

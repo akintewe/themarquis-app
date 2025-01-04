@@ -1,9 +1,12 @@
 import 'dart:async';
 
-import 'package:marquis_v2/games/ludo/main.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marquis_v2/games/checkers/checkers_main.dart';
+import 'package:marquis_v2/games/ludo/ludo_main.dart';
 import 'package:marquis_v2/models/app_state.dart';
-import 'package:marquis_v2/router/app_shell.dart';
 import 'package:marquis_v2/providers/app_state.dart';
+import 'package:marquis_v2/router/app_shell.dart';
 import 'package:marquis_v2/router/fade_animation.dart';
 import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/screens/game_screen.dart';
@@ -11,21 +14,15 @@ import 'package:marquis_v2/screens/home_screen.dart';
 import 'package:marquis_v2/screens/page_not_found_screen.dart';
 import 'package:marquis_v2/screens/profile_screen.dart';
 import 'package:marquis_v2/screens/splash_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final routerDelegateProvider =
-    Provider<AppRouterDelegate>((ref) => AppRouterDelegate(ref));
+final routerDelegateProvider = Provider<AppRouterDelegate>((ref) => AppRouterDelegate(ref));
 
-final innerRouterDelegateProvider =
-    Provider<InnerRouterDelegate>((ref) => InnerRouterDelegate(ref));
+final innerRouterDelegateProvider = Provider<InnerRouterDelegate>((ref) => InnerRouterDelegate(ref));
 
-class AppRouterDelegate extends RouterDelegate<AppRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
+class AppRouterDelegate extends RouterDelegate<AppRoutePath> with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
   @override
   final GlobalKey<NavigatorState> navigatorKey;
-
   bool? _showPageNotFound;
   bool _isSignUp = false;
   final ProviderRef ref;
@@ -34,10 +31,16 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   AppRouterDelegate(this.ref) : navigatorKey = GlobalKey<NavigatorState>() {
     _appState = ref.read(appStateProvider);
 
-    ref.listen(appStateProvider, (previous, next) {
+    // Listen to state changes and force rebuild
+    ref.listen<AppStateData>(appStateProvider, (previous, next) {
       _appState = next;
-      notifyListeners();
+      notifyListeners(); // Ensure navigation state is updated
     });
+  }
+
+  // Add method to force rebuild
+  void forceRebuild() {
+    notifyListeners();
   }
 
   @override
@@ -48,6 +51,9 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     if (_appState.selectedGame != null) {
       if (_appState.selectedGame == 'ludo') {
         return LudoGameAppPath(_appState.selectedGameSessionId);
+      }
+      if (_appState.selectedGame == 'checkers') {
+        return CheckersGameAppPath(_appState.selectedGameSessionId);
       }
       return GamePath(_appState.selectedGame!);
     }
@@ -132,9 +138,11 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     }
 
     if (configuration is LudoGameAppPath) {
-      ref
-          .read(appStateProvider.notifier)
-          .selectGameSessionId("ludo", configuration.id);
+      ref.read(appStateProvider.notifier).selectGameSessionId("ludo", configuration.id);
+    }
+
+    if (configuration is CheckersGameAppPath) {
+      ref.read(appStateProvider.notifier).selectGameSessionId("checkers", configuration.id);
     }
 
     // if (configuration is AchievementsPath) {
@@ -151,8 +159,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   }
 }
 
-class InnerRouterDelegate extends RouterDelegate<AppRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
+class InnerRouterDelegate extends RouterDelegate<AppRoutePath> with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
   @override
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -204,6 +211,10 @@ class InnerRouterDelegate extends RouterDelegate<AppRoutePath>
             "ludo" => FadeAnimationPage(
                 key: ValueKey('LudoGame${_appState.selectedGame}Page'),
                 child: const LudoGameApp(),
+              ),
+            "checkers" => FadeAnimationPage(
+                key: ValueKey('CheckersGame${_appState.selectedGame}Page'),
+                child: const CheckersGameApp(),
               ),
             _ => FadeAnimationPage(
                 key: ValueKey('Game${_appState.selectedGame}Page'),

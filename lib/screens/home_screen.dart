@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:marquis_v2/dialog/deposit_dialog.dart';
-import 'package:marquis_v2/providers/app_state.dart';
-import 'package:marquis_v2/providers/user.dart';
-import 'package:marquis_v2/router/route_path.dart';
 import 'package:marquis_v2/dialog/auth_dialog.dart';
+import 'package:marquis_v2/providers/app_state.dart';
+import 'package:marquis_v2/router/route_path.dart';
+import 'package:marquis_v2/widgets/balance_appbar.dart';
+import 'package:marquis_v2/widgets/locked_game_widget.dart';
+import 'package:marquis_v2/widgets/ui_widgets.dart';
 
 class HomePath extends AppRoutePath {
   @override
@@ -23,337 +25,140 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool showBalance = false;
+
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
     return Scaffold(
       body: SingleChildScrollView(
         child: Stack(
           children: [
             Column(
               children: [
-                const SizedBox(
-                  height: 64,
-                ),
-                Image.asset(
-                  'assets/images/banner.png',
-                  fit: BoxFit.fitWidth,
-                ),
+                const SizedBox(height: 64),
+                Image.asset('assets/images/banner.png',
+                    width: MediaQuery.of(context).size.width, fit: BoxFit.fill),
               ],
             ),
             Column(
               children: [
                 AppBar(
-                  backgroundColor: Colors.transparent,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: user == null
-                            ? () {
-                                showDialog(
-                                    context: context,
-                                    builder: (c) => const AuthDialog());
-                              }
-                            : () {
-                                //go to profile page
-                              },
-                        child: Row(
-                          children: [
-                            user == null
-                                ? const Icon(
-                                    Icons.account_circle,
-                                    size: 25,
-                                  )
-                                : const CircleAvatar(
-                                    radius: 15,
-                                    backgroundImage: AssetImage(
-                                      'assets/images/avatar.png',
-                                    ), // Add your avatar image in assets folder
-                                    backgroundColor: Colors.transparent,
-                                  ),
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            Text(
-                              user == null
-                                  ? "LOGIN"
-                                  : user.email.split("@").first,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall!
-                                  .copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 18,
-                            child: Image.asset('assets/images/member.png'),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            user?.points.toString() ?? "0",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(width: 15),
-                          SvgPicture.asset(
-                            "assets/svg/STRK_logo.svg",
-                            width: 19,
-                          ),
-                          const SizedBox(width: 5),
-                          FutureBuilder<BigInt>(
-                            future: ref.read(userProvider.notifier).getTokenBalance(
-                                "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              }
-                              if (snapshot.hasError) {
-                                return Container();
-                              }
-                              return Text(
-                                ((snapshot.data! / BigInt.from(1e18))
-                                    .toStringAsFixed(8)
-                                    .replaceAll(RegExp(r'0+$'), '')
-                                    .replaceAll(RegExp(r'\.$'), '')),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 10),
-                          GestureDetector(
-                            onTap: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (c) {
-                                    return const DepositDialog();
-                                  });
-                            },
-                            child: const Icon(
-                              Icons.add,
-                              size: 24,
-                              color: Colors.white,
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
+                  backgroundColor: Colors.white.withOpacity(0.02),
+                  systemOverlayStyle: const SystemUiOverlayStyle(
+                      statusBarIconBrightness: Brightness.light,
+                      statusBarBrightness: Brightness.light),
+                  title: const BalanceAppBar(),
                 ),
-                const SizedBox(
-                  height: 24.0,
-                ),
+                const SizedBox(height: 24.0),
                 const ListTile(
-                  title: Text(
-                    'Top picks',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Lets explore our games',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                  title: Text('Top picks',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                  subtitle: Text('Lets explore our games',
+                      style: TextStyle(fontSize: 12)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Card(
                     child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Stack(
-                          children: [
-                            Image.asset('assets/images/ludo.png',
-                                fit: BoxFit.fitWidth,
-                                color: Colors.black.withAlpha(100),
-                                colorBlendMode: BlendMode.darken),
-                            const Positioned(
-                              bottom: 0,
-                              left: 0,
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Dice Game',
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                    Text(
-                                      'Ludo',
+                      decoration:
+                          BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                      child: Stack(
+                        children: [
+                          Image.asset('assets/images/ludo.png',
+                              fit: BoxFit.fitWidth,
+                              color: Colors.black.withAlpha(100),
+                              colorBlendMode: BlendMode.darken),
+                          const Positioned(
+                            bottom: 0,
+                            left: 0,
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Dice Game',
+                                      style: TextStyle(fontSize: 12)),
+                                  Text('Ludo',
                                       style: TextStyle(
                                           fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  ],
+                                          fontWeight: FontWeight.bold))
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: IconButton(
+                                onPressed: () {
+                                  if (!ref.read(appStateProvider).isAuth) {
+                                    showDialog(
+                                        context: context,
+                                        useRootNavigator: false,
+                                        builder: (ctx) => const AuthDialog());
+                                    return;
+                                  }
+                                  ref
+                                      .read(appStateProvider.notifier)
+                                      .selectGame("ludo");
+                                },
+                                icon: const Icon(Icons.arrow_forward, size: 32),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: Colors.white.withAlpha(100),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16)),
                                 ),
                               ),
                             ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: IconButton(
-                                  onPressed: () {
-                                    if (!ref.read(appStateProvider).isAuth) {
-                                      showDialog(
-                                          context: context,
-                                          builder: (ctx) => const AuthDialog());
-                                      return;
-                                    }
-                                    ref
-                                        .read(appStateProvider.notifier)
-                                        .selectGame("ludo");
-                                  },
-                                  icon: const Icon(
-                                    Icons.arrow_forward,
-                                    size: 32,
-                                  ),
-                                  style: IconButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.white.withAlpha(100),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(color: const Color(0xff181B25))),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            verticalSpace(8.0),
+                            const LockedGameWidget(
+                              // showIconButton: true,
+                              title: 'Checkers',
+                              subTitle: 'Board Game',
+                              image: 'assets/images/checkers.png',
                             ),
+                            const LockedGameWidget(
+                              title: 'Yahtzee',
+                              subTitle: 'Dice Game',
+                              image: 'assets/images/yahtzee.png',
+                            ),
+                            const LockedGameWidget(
+                              title: '6 nimmt',
+                              subTitle: 'Card Game',
+                              image: 'assets/images/6nimmt.png',
+                            )
                           ],
-                        )),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                'assets/images/yahtzee.png',
-                                fit: BoxFit.fitWidth,
-                                width: 64,
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Yahtzee',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      'Dice Game',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                                side: const BorderSide(color: Colors.cyan),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0)),
-                            child: const Text(
-                              'Coming Soon',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
+                      Positioned(
+                        right: 0,
+                        top: 100,
+                        child: SvgPicture.asset(
+                          'assets/svg/locked_badge.svg',
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    child: Container(
-                      width: double.maxFinite,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image.asset(
-                                'assets/images/6nimmt.png',
-                                fit: BoxFit.fitWidth,
-                                width: 64,
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '6 nimmt',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      'Card Game',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                                side: const BorderSide(color: Colors.cyan),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0)),
-                            child: const Text(
-                              'Coming Soon',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               ],

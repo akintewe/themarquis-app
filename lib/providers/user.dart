@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:hive/hive.dart';
+import 'package:http/http.dart';
 import 'package:marquis_v2/env.dart';
 import 'package:marquis_v2/models/user.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:http/http.dart' as http;
 
 part "user.g.dart";
 
@@ -17,25 +17,35 @@ final baseUrl = environment['build'] == 'DEBUG'
 
 @Riverpod(keepAlive: true)
 class User extends _$User {
-  //Details Declaration
   Box<UserData>? _hiveBox;
+  Client? _httpClient;
+
+  User({Box<UserData>? hiveBox, Client? httpClient}) {
+    if (hiveBox != null) {
+      _hiveBox = hiveBox;
+    }
+    if (httpClient != null) {
+      _httpClient = httpClient;
+    }
+  }
 
   @override
   UserData? build() {
     _hiveBox ??= Hive.box<UserData>("user");
+    _httpClient ??= Client();
     return _hiveBox!.get("user");
   }
 
   Future<void> getUser() async {
     final url = Uri.parse('$baseUrl/user/info');
-    final response = await http.get(
+    final response = await _httpClient!.get(
       url,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': ref.read(appStateProvider).bearerToken
       },
     );
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201 && response.statusCode != 200) {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
@@ -64,7 +74,7 @@ class User extends _$User {
 
   Future<void> clearData() async {
     await _hiveBox!.delete("user");
-    // state = null;
+    state = null;
     ref.invalidateSelf();
   }
 
@@ -99,14 +109,14 @@ class User extends _$User {
 
   Future<List<Map<String, String>>> getSupportedTokens() async {
     final url = Uri.parse('$baseUrl/game/supported-tokens');
-    final response = await http.get(
+    final response = await _httpClient!.get(
       url,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': ref.read(appStateProvider).bearerToken
       },
     );
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201 && response.statusCode != 200) {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
@@ -126,14 +136,14 @@ class User extends _$User {
     if (state == null) return BigInt.from(0);
     final url = Uri.parse(
         '$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
-    final response = await http.get(
+    final response = await _httpClient!.get(
       url,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': ref.read(appStateProvider).bearerToken
       },
     );
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201 && response.statusCode != 200) {
       throw HttpException(
           'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
