@@ -49,7 +49,7 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    final user = ref.read(userProvider);
+    final user = ref.watch(userProvider);
     if (user == null) {
       return const Center(child: Text("Not Logged In"));
     }
