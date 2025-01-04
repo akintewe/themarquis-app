@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/ludo/components/board.dart';
@@ -38,7 +38,6 @@ class LudoGameController extends MarquisGameController {
   int? winnerIndex;
   LudoSessionData? _sessionData;
   int pendingMoves = 0;
-  String? currentMessage;
   bool isErrorMessage = false;
   Timer? _messageTimer;
   Completer<void>? ludoSessionLoadingCompleter;
@@ -46,7 +45,12 @@ class LudoGameController extends MarquisGameController {
   int _moveTimeLeft = 60; 
   TextComponent? _timerText;
 
-  LudoGameController() : super(camera: CameraComponent.withFixedResolution(width: kLudoGameWidth, height: kLudoGameHeight));
+  set sessionData(LudoSessionData value) => _sessionData = value;
+
+  LudoGameController()
+      : super(
+            camera: CameraComponent.withFixedResolution(
+                width: kLudoGameWidth, height: kLudoGameHeight));
 
   int get currentPlayer => _currentPlayer;
 
@@ -62,7 +66,9 @@ class LudoGameController extends MarquisGameController {
         Color(0xffb0d02f),
       ];
   int get userIndex => _userIndex;
-  List<String> get playerNames => _sessionData!.sessionUserStatus.map((user) => user.email.split('@')[0]).toList();
+  List<String> get playerNames => _sessionData!.sessionUserStatus
+      .map((user) => user.email.split('@')[0])
+      .toList();
 
   Dice get currentDice => diceContainer!.currentDice;
   Dice? getPlayerDice(int playerIndex) => playerHomes[playerIndex].playerDice;
@@ -72,24 +78,24 @@ class LudoGameController extends MarquisGameController {
       final res = await ref.read(ludoSessionProvider.notifier).generateMove();
       return res;
     } catch (e) {
-      showGameMessage(message: e.toString(), backgroundColor: Colors.red);
+      await showGameMessage(message: e.toString(), backgroundColor: Colors.red);
       return [];
     }
   }
 
-  Future<void> playMove(int index, {bool isAuto = false}) async {
+  Future<void> playMove(int index) async {
     try {
         diceContainer!.currentDice.state = DiceState.playingMove;
         await ref.read(ludoSessionProvider.notifier).playMove(index.toString());
         _moveTimer?.reset();
     } catch (e) {
       diceContainer!.currentDice.state = DiceState.rolledDice;
-      showGameMessage(message: e.toString(), backgroundColor: Colors.red);
+      await showGameMessage(message: e.toString(), backgroundColor: Colors.red);
     }
   }
 
   @override
-  set playState(PlayState value) {
+  Future<void> updatePlayState(PlayState value) async {
     if (playStateNotifier.value == value) return;
     if (value != PlayState.playing) {
       if (board != null) {
@@ -119,11 +125,7 @@ class LudoGameController extends MarquisGameController {
         break;
       case PlayState.playing:
         overlays.clear();
-        if (_sessionData != null) {
-          Future.microtask(() async {
-            await initGame();
-          });
-        }
+        if (_sessionData != null) await initGame();
         break;
       case PlayState.finished:
         overlays.clear();
@@ -207,7 +209,8 @@ class LudoGameController extends MarquisGameController {
                                 onTap: () {
                                   Navigator.pop(context);
                                 },
-                                child: SvgPicture.asset('assets/images/ok_btn.svg'),
+                                child: SvgPicture.asset(
+                                    'assets/images/ok_btn.svg'),
                               ),
                               const SizedBox(height: 16),
                             ],
@@ -258,19 +261,21 @@ class LudoGameController extends MarquisGameController {
     _sessionData = next;
     if (_sessionData != null) {
       if (_sessionData!.message != null) {
-        showGameMessage(
+        await showGameMessage(
           message: _sessionData!.message!,
           backgroundColor: Colors.red,
         );
         if (_sessionData!.message!.startsWith("EXITED")) {
-          await ref.read(ludoSessionProvider.notifier).clearData(refreshUser: true);
+          await ref
+              .read(ludoSessionProvider.notifier)
+              .clearData(refreshUser: true);
           overlays.clear();
-          playState = PlayState.welcome;
+          await updatePlayState(PlayState.welcome);
           return;
         }
       }
       if (playState == PlayState.welcome) {
-        playState = PlayState.waiting;
+        await updatePlayState(PlayState.waiting);
       }
       // Update pin locations
       if (playState == PlayState.playing && isInit) {
@@ -297,8 +302,10 @@ class LudoGameController extends MarquisGameController {
             final currentPinLocations = playerPinLocations[player.playerId];
             final playerHome = playerHomes[player.playerId];
             for (int i = 0; i < pinLocations.length; i++) {
-              final pinLocation = int.parse(pinLocations[i]) + (player.playerTokensCircled?[i] ?? false ? 52 : 0);
-              if (player.playerWinningTokens[i] == true && currentPinLocations[i] != -1) {
+              final pinLocation = int.parse(pinLocations[i]) +
+                  (player.playerTokensCircled?[i] ?? false ? 52 : 0);
+              if (player.playerWinningTokens[i] == true &&
+                  currentPinLocations[i] != -1) {
                 // Remove from board and add to destination
                 playerPinLocations[player.playerId][i] = -1;
                 final pin = board!.getPinWithIndex(player.playerId, i);
@@ -306,7 +313,8 @@ class LudoGameController extends MarquisGameController {
                 // board.remove(pin!);
                 // await pin.removed;
                 // destination.addPin(pin);
-              } else if (player.playerWinningTokens[i] != true && currentPinLocations[i] != pinLocation) {
+              } else if (player.playerWinningTokens[i] != true &&
+                  currentPinLocations[i] != pinLocation) {
                 if (currentPinLocations[i] == 0 && pinLocation != 0) {
                   // Remove from home and add to board
                   final pin = playerHome.removePin(i);
@@ -314,7 +322,8 @@ class LudoGameController extends MarquisGameController {
                     await pin.removed;
                   }
 
-                  await board!.addPin(pin, location: pinLocation - player.playerId * 13 - 1);
+                  await board!.addPin(pin,
+                      location: pinLocation - player.playerId * 13 - 1);
                 } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
                   // Pin attacked
                   final pin = board!.getPinWithIndex(player.playerId, i);
@@ -332,7 +341,8 @@ class LudoGameController extends MarquisGameController {
           }
           movePinsCompleter.complete();
         } catch (e) {
-          showGameMessage(message: e.toString(), backgroundColor: Colors.red);
+          await showGameMessage(
+              message: e.toString(), backgroundColor: Colors.red);
         }
       }
     }
@@ -342,25 +352,35 @@ class LudoGameController extends MarquisGameController {
 
   @override
   Future<void> initGame() async {
-    await Flame.images.load('spritesheet.png');
-    await Flame.images.load('avatar_spritesheet.png');
-    await Flame.images.load('dice_interface.png');
-    await Flame.images.load('active_button.png');
-    await Flame.images.load('play.png');
-
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      await Flame.images.loadAll([
+        'spritesheet.png',
+        'avatar_spritesheet.png',
+        'dice_interface.png',
+        'active_button.png',
+        'play.png',
+        'dice_icon.png',
+      ]);
+    }
     camera.viewfinder.anchor = Anchor.topLeft;
-    _userIndex = _sessionData!.sessionUserStatus.indexWhere((user) => user.userId.toString() == ref.read(userProvider)?.id);
+    _userIndex = _sessionData!.sessionUserStatus.indexWhere(
+        (user) => user.userId.toString() == ref.read(userProvider)?.id);
     _currentPlayer = _sessionData!.nextPlayerIndex;
     board = Board();
     await add(board!);
     final positions = [
-      Vector2(center.x - unitSize * 6.25, center.y - unitSize * 6.25), // Top-left corner (Player 1)
-      Vector2(center.x + unitSize * 2.25, center.y - unitSize * 6.25), // Top-right corner (Player 2)
-      Vector2(center.x + unitSize * 2.25, center.y + unitSize * 2.25), // Bottom-right corner (Player 3)
-      Vector2(center.x - unitSize * 6.25, center.y + unitSize * 2.25), // Bottom-left corner (Player 4)
+      Vector2(center.x - unitSize * 6.25,
+          center.y - unitSize * 6.25), // Top-left corner (Player 1)
+      Vector2(center.x + unitSize * 2.25,
+          center.y - unitSize * 6.25), // Top-right corner (Player 2)
+      Vector2(center.x + unitSize * 2.25,
+          center.y + unitSize * 2.25), // Bottom-right corner (Player 3)
+      Vector2(center.x - unitSize * 6.25,
+          center.y + unitSize * 2.25), // Bottom-left corner (Player 4)
     ];
     for (int i = 0; i < positions.length; i++) {
-      playerHomes.add(PlayerHome(i, _sessionData!.sessionUserStatus[i], positions[i]));
+      playerHomes
+          .add(PlayerHome(i, _sessionData!.sessionUserStatus[i], positions[i]));
       await add(playerHomes.last);
     }
 
@@ -381,12 +401,14 @@ class LudoGameController extends MarquisGameController {
           color: Colors.white,
           shadows: [
             Shadow(
-              color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+              color: _sessionData!.getListOfColors[_currentPlayer]
+                  .withOpacity(0.8),
               offset: const Offset(0, 0),
               blurRadius: 20,
             ),
             Shadow(
-              color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+              color: _sessionData!.getListOfColors[_currentPlayer]
+                  .withOpacity(0.8),
               offset: const Offset(0, 0),
               blurRadius: 10,
             ),
@@ -402,7 +424,8 @@ class LudoGameController extends MarquisGameController {
       final pinLocations = player.playerTokensPosition;
       final playerHome = playerHomes[player.playerId];
       for (int i = 0; i < pinLocations.length; i++) {
-        var pinLocation = int.parse(pinLocations[i]) + (player.playerTokensCircled?[i] ?? false ? 52 : 0);
+        var pinLocation = int.parse(pinLocations[i]) +
+            (player.playerTokensCircled?[i] ?? false ? 52 : 0);
 
         if (player.playerWinningTokens[i] == true) {
           playerPinLocations[player.playerId][i] = -1;
@@ -413,7 +436,8 @@ class LudoGameController extends MarquisGameController {
         } else if (pinLocation != 0 || player.playerTokensCircled?[i] == true) {
           final pin = playerHome.removePin(i);
           //  pin.removed;
-          board!.addPin(pin, location: pinLocation - player.playerId * 13 - 1, isInit: true);
+          board!.addPin(pin,
+              location: pinLocation - player.playerId * 13 - 1, isInit: true);
           playerPinLocations[player.playerId][i] = pinLocation;
         }
       }
@@ -429,7 +453,7 @@ class LudoGameController extends MarquisGameController {
       borderRadius: 12,
       children: [
         SpriteComponent(
-          sprite: await Sprite.load('dice_icon.png'),
+          sprite: Sprite(Flame.images.fromCache('dice_icon.png')),
           position: Vector2(100, 25), // Center horizontally and vertically
           size: Vector2(24, 24),
           anchor: Anchor.center,
@@ -454,7 +478,8 @@ class LudoGameController extends MarquisGameController {
 
   void updateTurnText() {
     final playerName = playerNames[_currentPlayer];
-    turnText.text = _currentPlayer == _userIndex ? 'Your Turn' : "$playerName's Turn";
+    turnText.text =
+        _currentPlayer == _userIndex ? 'Your Turn' : "$playerName's Turn";
     turnText.textRenderer = TextPaint(
       style: TextStyle(
         fontSize: unitSize * 1.2,
@@ -468,7 +493,8 @@ class LudoGameController extends MarquisGameController {
             blurRadius: 10,
           ),
           Shadow(
-            color: _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
+            color:
+                _sessionData!.getListOfColors[_currentPlayer].withOpacity(0.8),
             offset: const Offset(0, 0),
             blurRadius: 6,
           ),
@@ -478,7 +504,7 @@ class LudoGameController extends MarquisGameController {
   }
 
   Future<void> rollDice() async {
-    if (kDebugMode) print("rollDice called, playerCanMove: $playerCanMove");
+    // if (kDebugMode) print("rollDice called, playerCanMove: $playerCanMove");
     if (playerCanMove) return;
 
     // Show animated dice dialog
@@ -489,23 +515,30 @@ class LudoGameController extends MarquisGameController {
         useRootNavigator: false,
         builder: (context) => Dialog(
           backgroundColor: Colors.transparent,
-          child: SizedBox(width: 120, height: 120, child: DiceAnimationWidget()),
+          child:
+              SizedBox(width: 120, height: 120, child: DiceAnimationWidget()),
         ),
       );
     }
 
-    if (kDebugMode) print("Rolling dice...");
+    // if (kDebugMode) print("Rolling dice...");
     await diceContainer!.currentDice.roll();
-    Navigator.of(buildContext!).pop();
-    if (kDebugMode) print("Dice rolled, value: ${diceContainer!.currentDice.value}");
-    if (diceContainer!.currentDice.value > 0 && diceContainer!.currentDice.value < 7) {
+    if (buildContext?.mounted == true) Navigator.of(buildContext!).pop();
+    // if (kDebugMode) print("Dice rolled, value: ${diceContainer!.currentDice.value}");
+    if (diceContainer!.currentDice.value > 0 &&
+        diceContainer!.currentDice.value < 7 &&
+        buildContext?.mounted == true) {
       await showDialog(
         context: buildContext!,
         barrierDismissible: false,
         useRootNavigator: false,
         builder: (context) => Dialog(
           backgroundColor: Colors.transparent,
-          child: SizedBox(width: 120, height: 120, child: DiceAnimationWidget(dieFace: diceContainer!.currentDice.value)),
+          child: SizedBox(
+              width: 120,
+              height: 120,
+              child: DiceAnimationWidget(
+                  dieFace: diceContainer!.currentDice.value)),
         ),
       );
     }
@@ -524,24 +557,25 @@ class LudoGameController extends MarquisGameController {
       final pinsAtHome = playerHomes[_userIndex].pinsAtHome;
       if (diceContainer!.currentDice.value < 6) {
         if (pinsAtHome.isNotEmpty) {
-          showGameMessage(message: "Can not move from Basement, try to get a 6!!");
+          await showGameMessage(
+              message: "Can not move from Basement, try to get a 6!!");
           // If there are pins at home, play the first one (dummy move)
-          await playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+          await playMove(pinsAtHome[0]!.homeIndex);
           return;
         } else {
-          showGameMessage(message: "No pins to move!!");
+          await showGameMessage(message: "No pins to move!!");
           // If there are no pins at home, play the first pin on the board (dummy move)
           final pins = board!.getPlayerPinsOnBoard(_userIndex);
-          await playMove(pins[0].homeIndex, isAuto: true);
+          await playMove(pins[0].homeIndex);
           return;
         }
       } else {
         // If the dice value is greater or equal to 6, play the first pin on the board or the only pin at home
         if (pinsAtHome.isEmpty) {
-          showGameMessage(message: "No pins to move!!");
+          await showGameMessage(message: "No pins to move!!");
           // If there are no pins at home, play the first pin on the board (dummy move)
           final pins = board!.getPlayerPinsOnBoard(_userIndex);
-          await playMove(pins[0].homeIndex, isAuto: true);
+          await playMove(pins[0].homeIndex);
           return;
         } else if (pinsAtHome.length == 1) {
           // If there is only one pin at home, play it
@@ -552,7 +586,9 @@ class LudoGameController extends MarquisGameController {
     }
 
     if ((movablePins.length == 1 && diceContainer!.currentDice.value < 6) ||
-        (movablePins.length == 1 && diceContainer!.currentDice.value > 6 && playerHomes[_userIndex].pinsAtHome.isEmpty)) {
+        (movablePins.length == 1 &&
+            diceContainer!.currentDice.value > 6 &&
+            playerHomes[_userIndex].pinsAtHome.isEmpty)) {
       // Automatically play move on the only movable pin
       await playMove(movablePins[0].homeIndex);
       return;
@@ -641,7 +677,7 @@ void onRemove() {
       borderRadius: 12,
       children: [
         SpriteComponent(
-          sprite: await Sprite.load('dice_icon.png'),
+          sprite: Sprite(Flame.images.fromCache('dice_icon.png')),
           position: Vector2(100, 25),
           size: Vector2(24, 24),
           anchor: Anchor.center,
@@ -651,7 +687,8 @@ void onRemove() {
           position: Vector2(130, 25),
           anchor: Anchor.centerLeft,
           textRenderer: TextPaint(
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ),
       ],
@@ -660,10 +697,8 @@ void onRemove() {
     await add(messageContainer);
 
     if (durationSeconds > 0) {
-      Future.delayed(Duration(seconds: durationSeconds), () {
-        if (contains(messageContainer)) {
-          remove(messageContainer);
-        }
+      await Future.delayed(Duration(seconds: durationSeconds), () {
+        if (contains(messageContainer)) remove(messageContainer);
       });
     }
   }
@@ -759,7 +794,8 @@ class CustomRectangleComponent extends PositionComponent {
     this.borderWidth = 0,
     Anchor anchor = Anchor.topLeft,
     List<Component>? children,
-  }) : super(position: position, size: size, anchor: anchor, children: children);
+  }) : super(
+            position: position, size: size, anchor: anchor, children: children);
 
   @override
   void render(Canvas canvas) {
@@ -804,7 +840,8 @@ class DiceAnimationWidget extends StatefulWidget {
   State<DiceAnimationWidget> createState() => _DiceAnimationWidgetState();
 }
 
-class _DiceAnimationWidgetState extends State<DiceAnimationWidget> with SingleTickerProviderStateMixin {
+class _DiceAnimationWidgetState extends State<DiceAnimationWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late int currentDiceFace = widget._dieFace ?? 1;
   final List<int> diceSequence = [1, 2, 3, 4, 5, 6];
@@ -812,7 +849,8 @@ class _DiceAnimationWidgetState extends State<DiceAnimationWidget> with SingleTi
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1000));
 
     _controller.addListener(() {
       // Change dice face every ~166ms (1000ms / 6 faces)
@@ -847,7 +885,8 @@ class _DiceAnimationWidgetState extends State<DiceAnimationWidget> with SingleTi
       animation: _controller,
       builder: (context, child) {
         return Center(
-          child: Image.asset('assets/images/dice_$currentDiceFace.png', width: 80, height: 80),
+          child: Image.asset('assets/images/dice_$currentDiceFace.png',
+              width: 80, height: 80),
         );
       },
     );

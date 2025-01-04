@@ -30,7 +30,8 @@ class LudoGameApp extends ConsumerStatefulWidget {
 
 class _LudoGameAppState extends ConsumerState<LudoGameApp> {
   final _game = LudoGameController();
-  final _gameWidgetKey = GlobalKey<RiverpodAwareGameWidgetState<LudoGameController>>();
+  final _gameWidgetKey =
+      GlobalKey<RiverpodAwareGameWidgetState<LudoGameController>>();
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +54,13 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                     GameTopBar(game: _game),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 80.0, right: 80),
-                        child: AspectRatio(
-                          aspectRatio: 7 / 20,
-                          child: FittedBox(
-                            fit: BoxFit.fitHeight,
-                            child: SizedBox(width: kLudoGameWidth, height: kLudoGameHeight, child: _buildRiverpodGameWidget()),
-                          ),
+                        padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: SizedBox(
+                              width: kLudoGameWidth,
+                              height: kLudoGameHeight,
+                              child: _buildRiverpodGameWidget()),
                         ),
                       ),
                     ),
@@ -73,7 +74,10 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
                     aspectRatio: 7 / 20,
                     child: FittedBox(
                       fit: BoxFit.fitHeight,
-                      child: SizedBox(width: kLudoGameWidth, height: kLudoGameHeight, child: _buildRiverpodGameWidget()),
+                      child: SizedBox(
+                          width: kLudoGameWidth,
+                          height: kLudoGameHeight,
+                          child: _buildRiverpodGameWidget()),
                     ),
                   ),
                 );
@@ -91,9 +95,12 @@ class _LudoGameAppState extends ConsumerState<LudoGameApp> {
       key: _gameWidgetKey,
       game: _game,
       overlayBuilderMap: {
-        PlayState.welcome.name: (context, game) => LudoWelcomeScreen(game: game),
-        PlayState.waiting.name: (context, game) => FourPlayerWaitingRoomScreen(game: game),
-        PlayState.finished.name: (context, game) => MatchResultsScreen(game: game, session: ref.read(ludoSessionProvider)!),
+        PlayState.welcome.name: (context, game) =>
+            LudoWelcomeScreen(game: game),
+        PlayState.waiting.name: (context, game) =>
+            FourPlayerWaitingRoomScreen(game: game),
+        PlayState.finished.name: (context, game) => MatchResultsScreen(
+            game: game, session: ref.read(ludoSessionProvider)!),
       },
     );
   }

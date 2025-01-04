@@ -82,15 +82,14 @@ class _TwoPlayerWaitingRoomScreenState extends ConsumerState<TwoPlayerWaitingRoo
 
   void _startCountdown() {
     _countdown = 15;
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_countdown > 0) {
-          _countdown--;
-        } else {
-          _countdownTimer?.cancel();
-          widget.game.playState = PlayState.playing;
-        }
-      });
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (_countdown > 0) {
+        _countdown--;
+      } else {
+        _countdownTimer?.cancel();
+        await widget.game.updatePlayState(PlayState.playing);
+      }
+      setState(() {});
     });
   }
 

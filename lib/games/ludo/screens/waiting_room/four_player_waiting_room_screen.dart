@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -84,15 +82,14 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
 
   void _startCountdown() {
     _countdown = 15;
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_countdown > 0) {
-          _countdown--;
-        } else {
-          _countdownTimer?.cancel();
-          widget.game.playState = PlayState.playing;
-        }
-      });
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (_countdown > 0) {
+        _countdown--;
+      } else {
+        _countdownTimer?.cancel();
+        await widget.game.updatePlayState(PlayState.playing);
+      }
+      setState(() {});
     });
   }
 
@@ -435,7 +432,7 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
       onTap: () async {
         final imageBytes = await _buildShareImage(session);
         final qrImageBytes = await _buildQrImage(session);
-        if (!context.mounted) return;
+        if (!mounted) return;
         showDialog(
           useRootNavigator: false,
           barrierColor: Colors.black.withAlpha(220),
@@ -772,9 +769,9 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               GestureDetector(
-                onTap: () {
+                onTap: () async {
                   // Navigator.pop(context);
-                  game.playState = PlayState.welcome;
+                  await game.updatePlayState(PlayState.welcome);
                 },
                 child: Container(
                   decoration: ShapeDecoration(color: Colors.white, shape: ChevronBorder()),
