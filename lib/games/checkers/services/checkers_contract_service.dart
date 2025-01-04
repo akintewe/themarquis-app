@@ -1,11 +1,13 @@
-import 'package:js/js.dart';
+import 'dart:js_interop';
+
+import 'package:starknet/starknet.dart';
 import '../bindings/checkers_bindings.dart';
 
 @JS('setupWorld')
 external dynamic _setupWorld(dynamic provider);
 
 class CheckersContractService {
-  final dynamic _provider; // this is the DojoProvider
+  final dynamic _provider; // Keep dynamic for compatibility
   dynamic _actions;
 
   CheckersContractService(this._provider) {
@@ -14,6 +16,7 @@ class CheckersContractService {
 
   Future<void> createLobby(dynamic account) async {
     try {
+      // Use account directly since it should already be a starknet Account
       await _actions.createLobby(account);
     } catch (e) {
       print('Error creating lobby: $e');
