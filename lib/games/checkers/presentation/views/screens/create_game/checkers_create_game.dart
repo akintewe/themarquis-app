@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:marquis_v2/games/checkers/core/game/checkers_game_controller.dart';
-import 'package:marquis_v2/games/checkers/views/widgets/checkers_radio.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/widgets/checkers_radio.dart';
 import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
 import 'package:marquis_v2/games/ludo/widgets/divider_shape.dart';
 import 'package:marquis_v2/models/enums.dart';
 import 'package:marquis_v2/providers/user.dart';
 
-import '../../../../ludo/widgets/vertical_stepper.dart';
+import '../../../../../ludo/widgets/vertical_stepper.dart';
 
 class CheckersCreateGame extends ConsumerStatefulWidget {
   final CheckersGameController _gameController;

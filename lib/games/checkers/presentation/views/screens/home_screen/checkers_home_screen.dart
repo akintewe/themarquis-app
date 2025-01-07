@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/games/checkers/core/game/checkers_game_controller.dart';
-import 'package:marquis_v2/games/checkers/views/screens/create_game/checkers_create_game.dart';
-import 'package:marquis_v2/games/checkers/views/screens/find_game/find_game_dialogue.dart';
-import 'package:marquis_v2/games/checkers/views/screens/join_game/join_game_dialogue.dart';
-import 'package:marquis_v2/games/checkers/views/widgets/checkers_menu_button_widget.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/screens/create_game/checkers_create_game.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/screens/find_game/find_game_dialogue.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/screens/join_game/join_game_dialogue.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/widgets/checkers_menu_button_widget.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/widgets/balance_appbar.dart';
 

@@ -1,11 +1,11 @@
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:marquis_v2/games/checkers/views/dialogs/game_outcome_dialog.dart';
-import 'package:marquis_v2/games/checkers/views/screens/create_game/create_game_waiting_room.dart';
-import 'package:marquis_v2/games/checkers/views/screens/game/checkers_game_screen.dart';
-import 'package:marquis_v2/games/checkers/views/screens/home_screen/checkers_home_screen.dart';
-import 'package:marquis_v2/games/checkers/views/screens/match_result/match_result_screen.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/dialogs/game_outcome_dialog.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/screens/create_game/create_game_waiting_room.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/screens/game/checkers_game_screen.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/screens/home_screen/checkers_home_screen.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/screens/match_result/match_result_screen.dart';
 import 'package:marquis_v2/models/enums.dart';
 import 'package:marquis_v2/router/route_path.dart';
 
