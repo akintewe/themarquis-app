@@ -28,11 +28,11 @@ class GameTopBar extends StatelessWidget {
           Transform.translate(
             offset: Offset(-5, 4),
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
                 if (game.playState == PlayState.waiting) {
                   Navigator.of(context).pushReplacementNamed('/');
                 } else if (game.playState == PlayState.finished) {
-                  game.playState = PlayState.welcome;
+                  await game.updatePlayState(PlayState.welcome);
                 } else {
                   showDialog(
                     context: context,
@@ -46,9 +46,9 @@ class GameTopBar extends StatelessWidget {
                           child: Text('Cancel'),
                         ),
                         TextButton(
-                          onPressed: () {
+                          onPressed: () async {
                             Navigator.pop(context);
-                            game.playState = PlayState.welcome;
+                            game.updatePlayState(PlayState.welcome);
                           },
                           child: Text('Leave'),
                         ),

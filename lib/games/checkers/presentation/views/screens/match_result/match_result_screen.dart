@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:marquis_v2/games/checkers/core/game/checkers_game_controller.dart';
-import 'package:marquis_v2/games/checkers/views/widgets/match_result_widget.dart';
+import 'package:marquis_v2/games/checkers/presentation/views/widgets/match_result_widget.dart';
 import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
 import 'package:marquis_v2/games/ludo/widgets/custom_divider_shape.dart';
 import 'package:marquis_v2/games/ludo/widgets/divider_shape.dart';
@@ -201,7 +201,7 @@ class CheckersMatchResultScreen extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => _game.playState = PlayState.welcome,
+                  onPressed: () async => await _game.updatePlayState(PlayState.welcome),
                   style: OutlinedButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     foregroundColor: const Color(0xFFF3B46E),
@@ -214,7 +214,7 @@ class CheckersMatchResultScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 32, top: 8),
               child: GestureDetector(
-                onTap: () => _game.playState = PlayState.welcome,
+                onTap: () async => _game.updatePlayState(PlayState.welcome),
                 child: Container(
                   height: 43,
                   width: double.infinity,

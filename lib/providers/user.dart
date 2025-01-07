@@ -11,30 +11,43 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part "user.g.dart";
 
-final baseUrl = environment['build'] == 'DEBUG' ? environment['apiUrlDebug'] : environment['apiUrl'];
+final baseUrl = environment['build'] == 'DEBUG'
+    ? environment['apiUrlDebug']
+    : environment['apiUrl'];
 
 @Riverpod(keepAlive: true)
 class User extends _$User {
-  final Box<UserData> _hiveBox;
-  final Client _httpClient;
+  Box<UserData>? _hiveBox;
+  Client? _httpClient;
 
-  User({Box<UserData>? hiveBox, Client? httpClient})
-      : _hiveBox = hiveBox ?? Hive.box<UserData>("user"),
-        _httpClient = httpClient ?? Client();
+  User({Box<UserData>? hiveBox, Client? httpClient}) {
+    if (hiveBox != null) {
+      _hiveBox = hiveBox;
+    }
+    if (httpClient != null) {
+      _httpClient = httpClient;
+    }
+  }
 
   @override
   UserData? build() {
-    return _hiveBox.get("user");
+    _hiveBox ??= Hive.box<UserData>("user");
+    _httpClient ??= Client();
+    return _hiveBox!.get("user");
   }
 
   Future<void> getUser() async {
     final url = Uri.parse('$baseUrl/user/info');
-    final response = await _httpClient.get(
+    final response = await _httpClient!.get(
       url,
-      headers: {'Content-Type': 'application/json', 'Authorization': ref.read(appStateProvider).bearerToken},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken
+      },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     final user = UserData(
@@ -47,18 +60,20 @@ class User extends _$User {
       referralId: decodedResponse['user']['referral_id'],
       walletId: decodedResponse['user']['wallet_id'],
       profileImageUrl: decodedResponse['user']['profile_image_url'],
-      createdAt: DateTime.fromMillisecondsSinceEpoch(decodedResponse['user']['created_at'] * 1000),
-      updatedAt: DateTime.fromMicrosecondsSinceEpoch(decodedResponse['user']['updated_at'] * 1000),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+          decodedResponse['user']['created_at'] * 1000),
+      updatedAt: DateTime.fromMicrosecondsSinceEpoch(
+          decodedResponse['user']['updated_at'] * 1000),
       referralCode: decodedResponse['referral_code'],
       accountAddress: decodedResponse['account_address'],
       sessionId: decodedResponse['session_id'],
     );
-    await _hiveBox.put("user", user);
+    await _hiveBox!.put("user", user);
     state = user;
   }
 
   Future<void> clearData() async {
-    await _hiveBox.delete("user");
+    await _hiveBox!.delete("user");
     state = null;
     ref.invalidateSelf();
   }
@@ -94,15 +109,20 @@ class User extends _$User {
 
   Future<List<Map<String, String>>> getSupportedTokens() async {
     final url = Uri.parse('$baseUrl/game/supported-tokens');
-    final response = await _httpClient.get(
+    final response = await _httpClient!.get(
       url,
-      headers: {'Content-Type': 'application/json', 'Authorization': ref.read(appStateProvider).bearerToken},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken
+      },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final List<Map<String, String>> results = [];
-    final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    final decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
     for (var e in decodedResponse) {
       results.add({
         'tokenAddress': e['address'],
@@ -114,13 +134,18 @@ class User extends _$User {
 
   Future<BigInt> getTokenBalance(String tokenAddress) async {
     if (state == null) return BigInt.from(0);
-    final url = Uri.parse('$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
-    final response = await _httpClient.get(
+    final url = Uri.parse(
+        '$baseUrl/game/token/balance/$tokenAddress/${state!.accountAddress}');
+    final response = await _httpClient!.get(
       url,
-      headers: {'Content-Type': 'application/json', 'Authorization': ref.read(appStateProvider).bearerToken},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ref.read(appStateProvider).bearerToken
+      },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     return BigInt.parse(decodedResponse['balance']);
