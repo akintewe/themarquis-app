@@ -12,8 +12,6 @@ import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_information_parser.dart';
 import 'package:marquis_v2/router/router_delegate.dart';
 
-import 'services/snackbar_service.dart';
-
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(AppStateDataImplAdapter());

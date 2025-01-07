@@ -500,6 +500,7 @@ class LudoGameController extends MarquisGameController {
   Future<void> rollDice() async {
     // if (kDebugMode) print("rollDice called, playerCanMove: $playerCanMove");
     if (playerCanMove) return;
+    if (diceContainer!.currentDice.state == DiceState.rollingDice) return;
 
     // Show animated dice dialog
     if (buildContext?.mounted == true) {

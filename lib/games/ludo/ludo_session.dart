@@ -60,6 +60,7 @@ class LudoSession extends _$LudoSession {
             case 'play_move':
             case 'player_joined':
             case 'play_move_failed':
+            case 'session_finished':
               final dataStr = decodedResponse['data'] as String;
               final data = jsonDecode(dataStr) as Map;
               if (data["session_id"] != _id) return;
