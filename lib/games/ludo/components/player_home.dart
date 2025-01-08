@@ -9,7 +9,8 @@ import 'package:marquis_v2/games/ludo/components/player_pin.dart';
 import 'package:marquis_v2/games/ludo/ludo_game_controller.dart';
 import 'package:marquis_v2/games/ludo/models/ludo_session.dart';
 
-class PlayerHome extends PositionComponent with HasGameReference<LudoGameController> {
+class PlayerHome extends PositionComponent
+    with HasGameReference<LudoGameController> {
   final int playerIndex;
   final LudoSessionUserStatus userStatus;
   late TextComponent playerName;
@@ -19,15 +20,25 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
   late Dice _playerDice;
   Dice? get playerDice => _playerDice;
 
-  bool get isHomeFull => _homePins[0] != null && _homePins[1] != null && _homePins[2] != null && _homePins[3] != null;
+  bool get isHomeFull =>
+      _homePins[0] != null &&
+      _homePins[1] != null &&
+      _homePins[2] != null &&
+      _homePins[3] != null;
 
-  bool get isHomeEmpty => _homePins[0] == null && _homePins[1] == null && _homePins[2] == null && _homePins[3] == null;
+  bool get isHomeEmpty =>
+      _homePins[0] == null &&
+      _homePins[1] == null &&
+      _homePins[2] == null &&
+      _homePins[3] == null;
 
   List<PlayerPin?> get homePins => _homePins;
 
-  List<PlayerPin?> get pinsAtHome => _homePins.where((pin) => pin != null).toList();
+  List<PlayerPin?> get pinsAtHome =>
+      _homePins.where((pin) => pin != null).toList();
 
-  PlayerHome(this.playerIndex, this.userStatus, Vector2 position) : super(position: position);
+  PlayerHome(this.playerIndex, this.userStatus, Vector2 position)
+      : super(position: position);
 
   @override
   FutureOr<void> onLoad() async {
@@ -104,7 +115,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
 
     //player name
     playerName = TextComponent(
-      text: playerIndex == game.userIndex ? "You" : userStatus.email.split("@").first,
+      text: playerIndex == game.userIndex
+          ? "You"
+          : userStatus.email.split("@").first,
       position: (playerIndex == 0 || playerIndex == 1)
           ? (playerIndex % 2 == 0)
               ? Vector2(size.x / 2, size.y / -2)
@@ -127,10 +140,14 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
     await add(PlayerAvatar(_avatarPositions[playerIndex], playerIndex));
 
     final targetPosition = switch (playerIndex) {
-      0 => _avatarPositions[playerIndex] + Vector2(game.unitSize * 3.5, game.unitSize * 1.2),
-      1 => _avatarPositions[playerIndex] + Vector2(-game.unitSize * 0.8, game.unitSize * 1.2),
-      2 => _avatarPositions[playerIndex] + Vector2(-game.unitSize * 0.8, game.unitSize * 1.2),
-      3 => _avatarPositions[playerIndex] + Vector2(game.unitSize * 3.5, game.unitSize * 1.2),
+      0 => _avatarPositions[playerIndex] +
+          Vector2(game.unitSize * 3.5, game.unitSize * 1.2),
+      1 => _avatarPositions[playerIndex] +
+          Vector2(-game.unitSize * 0.8, game.unitSize * 1.2),
+      2 => _avatarPositions[playerIndex] +
+          Vector2(-game.unitSize * 0.8, game.unitSize * 1.2),
+      3 => _avatarPositions[playerIndex] +
+          Vector2(game.unitSize * 3.5, game.unitSize * 1.2),
       _ => throw Exception("Invalid player index"),
     };
 
@@ -145,7 +162,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
 
     // Add colored background glow
     final diceContainerGlow = RectangleComponent(
-        position: targetPosition - Vector2(game.unitSize * 0.4, game.unitSize * 0.4),
+        position:
+            targetPosition - Vector2(game.unitSize * 0.4, game.unitSize * 0.4),
         size: Vector2(game.unitSize * 0.8, game.unitSize * 0.8),
         paint: Paint()
           ..color = Colors.black
@@ -153,7 +171,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
 
     // Add border with glow
     final diceContainerBorder = RectangleComponent(
-        position: targetPosition - Vector2(game.unitSize * 0.4, game.unitSize * 0.4),
+        position:
+            targetPosition - Vector2(game.unitSize * 0.4, game.unitSize * 0.4),
         size: Vector2(game.unitSize * 0.8, game.unitSize * 0.8),
         paint: Paint()
           ..color = game.listOfColors[playerIndex]
@@ -162,7 +181,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
 
     // Add inner border
     final diceContainerInnerBorder = RectangleComponent(
-      position: targetPosition - Vector2(game.unitSize * 0.35, game.unitSize * 0.35),
+      position:
+          targetPosition - Vector2(game.unitSize * 0.35, game.unitSize * 0.35),
       size: Vector2(game.unitSize * 0.7, game.unitSize * 0.7),
       paint: Paint()
         ..color = game.listOfColors[playerIndex].withOpacity(0.5)
@@ -187,7 +207,8 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
   void render(Canvas canvas) {
     super.render(canvas);
     //player home
-    final rrect = RRect.fromLTRBR(0, 0, game.unitSize * 4, game.unitSize * 4, const Radius.circular(16.0));
+    final rrect = RRect.fromLTRBR(0, 0, game.unitSize * 4, game.unitSize * 4,
+        const Radius.circular(16.0));
     final paint = Paint()
       ..color = game.listOfColors[playerIndex]
       ..style = PaintingStyle.stroke
@@ -255,8 +276,9 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
     );
   }
 
-  PlayerPin removePin(int homePinIndex) {
+  PlayerPin? removePin(int homePinIndex) {
     // if (_homePins[homePinIndex]!.isMounted) {
+    if (_homePins[homePinIndex] == null) return null;
     remove(_homePins[homePinIndex]!);
     // }
     final result = _homePins[homePinIndex]!..position += position;
@@ -267,14 +289,16 @@ class PlayerHome extends PositionComponent with HasGameReference<LudoGameControl
   Future<void> returnPin(PlayerPin pin) async {
     _homePins[pin.homeIndex] = pin
       ..onTap = (event, pin) {
-        if ((game.currentDice.value >= 6) && game.currentPlayer == pin.playerIndex) {
+        if ((game.currentDice.value >= 6) &&
+            game.currentPlayer == pin.playerIndex) {
           return true;
         } else {
           return false;
         }
       }
       ..returnToHome(_homePinLocations[pin.homeIndex]);
-    if (kDebugMode) print("Player ${pin.playerIndex} pin ${pin.homeIndex} returned to home");
+    if (kDebugMode)
+      print("Player ${pin.playerIndex} pin ${pin.homeIndex} returned to home");
     await add(_homePins[pin.homeIndex]!);
   }
 
