@@ -97,6 +97,7 @@ class LudoSession extends _$LudoSession {
             _connectWebSocket();
           });
         },
+        cancelOnError: false,
       );
     } catch (e) {
       if (kDebugMode) print('WS Connection Error $e');
