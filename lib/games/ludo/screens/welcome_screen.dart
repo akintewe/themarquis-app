@@ -206,7 +206,9 @@ class _LudoWelcomeScreenState extends ConsumerState<LudoWelcomeScreen> {
                                       showErrorDialog(e.toString(), context);
                                     } finally {
                                       widget.game.hideLoader();
-                                      setState(() {});
+                                      if (mounted) {
+                                        setState(() {});
+                                      }
                                     }
                                   }),
                             ),

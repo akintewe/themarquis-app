@@ -190,7 +190,6 @@ class LudoGameController extends MarquisGameController {
           await ref
               .read(ludoSessionProvider.notifier)
               .clearData(refreshUser: true);
-          overlays.clear();
           await updatePlayState(PlayState.welcome);
           return;
         }
