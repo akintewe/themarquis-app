@@ -17,7 +17,8 @@ enum DiceState {
   playingMove,
 }
 
-class Dice extends PositionComponent with TapCallbacks, HasGameReference<LudoGameController> {
+class Dice extends PositionComponent
+    with TapCallbacks, HasGameReference<LudoGameController> {
   List<int> _values = [1];
   DiceState _state = DiceState.inactive;
   SpriteSheet? diceSpriteSheet;
@@ -35,16 +36,22 @@ class Dice extends PositionComponent with TapCallbacks, HasGameReference<LudoGam
   List<int> get values => _values;
   set values(List<int> newValues) {
     _values = newValues;
-    _currentSprites = values.map((value) => diceSpriteSheet!.getSprite(0, min(value - 1, 5))).toList();
+    _currentSprites = values
+        .map((value) => diceSpriteSheet!.getSprite(0, min(value - 1, 5)))
+        .toList();
     update(0);
   }
 
   void setValue(int value) {
+    print(" reach here ! value: $value");
     _values = [
       ...List.filled(value ~/ 6, 6),
       if (value % 6 != 0) value % 6,
     ];
-    _currentSprites = _values.map((value) => diceSpriteSheet!.getSprite(0, min(value - 1, 5))).toList();
+    print(" reach here ! _values: $_values");
+    _currentSprites = _values
+        .map((value) => diceSpriteSheet!.getSprite(0, min(value - 1, 5)))
+        .toList();
     update(0);
   }
 
@@ -150,7 +157,8 @@ class Dice extends PositionComponent with TapCallbacks, HasGameReference<LudoGam
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
 
-    final sweepAngle = 2 * pi * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000;
+    final sweepAngle =
+        2 * pi * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -pi / 2,
@@ -182,7 +190,8 @@ class Dice extends PositionComponent with TapCallbacks, HasGameReference<LudoGam
         break;
     }
 
-    canvas.drawCircle(Offset(size.x * 0.9, size.y * 0.1), size.x / 20, indicatorPaint);
+    canvas.drawCircle(
+        Offset(size.x * 0.9, size.y * 0.1), size.x / 20, indicatorPaint);
   }
 
   Future<void> roll() async {
@@ -190,7 +199,9 @@ class Dice extends PositionComponent with TapCallbacks, HasGameReference<LudoGam
     try {
       final moveResults = await game.generateMove();
       _values = moveResults;
-      _currentSprites = _values.map((value) => diceSpriteSheet!.getSprite(0, min(value - 1, 5))).toList();
+      _currentSprites = _values
+          .map((value) => diceSpriteSheet!.getSprite(0, min(value - 1, 5)))
+          .toList();
       state = DiceState.rolledDice;
     } catch (e) {
       if (kDebugMode) print(e);

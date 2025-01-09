@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flame/components.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:marquis_v2/games/ludo/components/board.dart';
 import 'package:marquis_v2/games/ludo/components/destination.dart';
@@ -130,109 +131,32 @@ class LudoGameController extends MarquisGameController {
       case PlayState.finished:
         overlays.clear();
         overlays.add(value.name);
-        Future.microtask(() async {
-          if (buildContext != null && buildContext!.mounted) {
-            // Force rebuild of game over screen
-            (buildContext! as Element).markNeedsBuild();
+        Future.microtask(
+          () async {
+            if (buildContext != null && buildContext!.mounted) {
+              // Force rebuild of game over screen
+              (buildContext! as Element).markNeedsBuild();
 
-            if (playState == PlayState.finished) {
-              if (buildContext != null && buildContext!.mounted) {
-                await showDialog(
-                  context: buildContext!,
-                  useRootNavigator: false,
-                  barrierDismissible: false,
-                  builder: (context) => Center(
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.topCenter,
-                      children: [
-                        // Main Dialog Container
-                        Container(
-                          margin: const EdgeInsets.only(top: 40),
-                          width: 180,
-                          decoration: BoxDecoration(
-                            color: Color.fromRGBO(26, 32, 45, 1),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(height: 60),
-                              const Text(
-                                'REWARD',
-                                style: TextStyle(
-                                  color: Color(0xFF00ECFF),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SvgPicture.asset(
-                                    'assets/images/starknet-token-strk-logo (4) 7.svg',
-                                    height: 24,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    '400',
-                                    style: TextStyle(
-                                      color: Colors.yellow,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SvgPicture.asset(
-                                    'assets/images/会员.svg',
-                                    height: 24,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    '400 EXP',
-                                    style: TextStyle(
-                                      color: Color(0xFF00ECFF),
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: SvgPicture.asset(
-                                    'assets/images/ok_btn.svg'),
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        ),
-                        // Header Image positioned on top
-                        Positioned(
-                          top: -20,
-                          child: Image.asset(
-                            'assets/images/header.png',
-                            height: 100,
-                            width: 300,
-                          ),
-                        ),
-                      ],
+              if (playState == PlayState.finished) {
+                if (buildContext != null && buildContext!.mounted) {
+                  await showDialog(
+                    context: buildContext!,
+                    useRootNavigator: false,
+                    barrierDismissible: false,
+                    builder: (context) => GameOverDialog(
+                      isWinning: _sessionData!
+                              .sessionUserStatus[_currentPlayer].playerId ==
+                          winnerIndex,
+                      playerName: playerNames[winnerIndex!],
+                      tokenAddress: _sessionData!.playToken,
+                      tokenAmount: _sessionData!.playAmount,
                     ),
-                  ),
-                );
+                  );
+                }
               }
             }
-          }
-        });
+          },
+        );
 
         break;
     }
@@ -269,7 +193,6 @@ class LudoGameController extends MarquisGameController {
           await ref
               .read(ludoSessionProvider.notifier)
               .clearData(refreshUser: true);
-          overlays.clear();
           await updatePlayState(PlayState.welcome);
           return;
         }
@@ -318,12 +241,14 @@ class LudoGameController extends MarquisGameController {
                 if (currentPinLocations[i] == 0 && pinLocation != 0) {
                   // Remove from home and add to board
                   final pin = playerHome.removePin(i);
-                  if (!pin.isRemoved) {
-                    await pin.removed;
-                  }
 
-                  await board!.addPin(pin,
-                      location: pinLocation - player.playerId * 13 - 1);
+                  if (pin != null) {
+                    if (!pin.isRemoved) {
+                      await pin.removed;
+                    }
+                    await board!.addPin(pin,
+                        location: pinLocation - player.playerId * 13 - 1);
+                  }
                 } else if (currentPinLocations[i] != 0 && pinLocation == 0) {
                   // Pin attacked
                   final pin = board!.getPinWithIndex(player.playerId, i);
@@ -432,13 +357,17 @@ class LudoGameController extends MarquisGameController {
           // playerHome.removePin(i);
           final pin = playerHome.removePin(i);
           // await pin.removed;
-          destination!.addPin(pin);
+          if (pin != null) {
+            destination!.addPin(pin);
+          }
         } else if (pinLocation != 0 || player.playerTokensCircled?[i] == true) {
           final pin = playerHome.removePin(i);
           //  pin.removed;
-          board!.addPin(pin,
-              location: pinLocation - player.playerId * 13 - 1, isInit: true);
-          playerPinLocations[player.playerId][i] = pinLocation;
+          if (pin != null) {
+            board!.addPin(pin,
+                location: pinLocation - player.playerId * 13 - 1, isInit: true);
+            playerPinLocations[player.playerId][i] = pinLocation;
+          }
         }
       }
     }
@@ -506,6 +435,7 @@ class LudoGameController extends MarquisGameController {
   Future<void> rollDice() async {
     // if (kDebugMode) print("rollDice called, playerCanMove: $playerCanMove");
     if (playerCanMove) return;
+    if (diceContainer!.currentDice.state == DiceState.rollingDice) return;
 
     // Show animated dice dialog
     if (buildContext?.mounted == true) {
@@ -525,6 +455,9 @@ class LudoGameController extends MarquisGameController {
     await diceContainer!.currentDice.roll();
     if (buildContext?.mounted == true) Navigator.of(buildContext!).pop();
     // if (kDebugMode) print("Dice rolled, value: ${diceContainer!.currentDice.value}");
+    await prepareNextPlayerDice(
+        _currentPlayer, diceContainer!.currentDice.value);
+
     if (diceContainer!.currentDice.value > 0 &&
         diceContainer!.currentDice.value < 7 &&
         buildContext?.mounted == true) {
@@ -889,6 +822,140 @@ class _DiceAnimationWidgetState extends State<DiceAnimationWidget>
               width: 80, height: 80),
         );
       },
+    );
+  }
+}
+
+class GameOverDialog extends ConsumerStatefulWidget {
+  const GameOverDialog({
+    super.key,
+    required this.isWinning,
+    required this.tokenAddress,
+    required this.tokenAmount,
+    required this.playerName,
+  });
+  final bool isWinning;
+  final String playerName;
+  final String tokenAddress;
+  final String tokenAmount;
+  @override
+  ConsumerState<GameOverDialog> createState() => _GameOverDialogState();
+}
+
+class _GameOverDialogState extends ConsumerState<GameOverDialog> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          // Main Dialog Container
+          Container(
+            margin: const EdgeInsets.only(top: 40),
+            width: 180,
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(26, 32, 45, 1),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 60),
+                Text(
+                  widget.isWinning ? 'REWARD' : 'WINNER',
+                  style: const TextStyle(
+                    color: Color(0xFF00ECFF),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    //show player profile image, if winner not current user
+                    if (!widget.isWinning)
+                      Column(
+                        children: [
+                          Image.asset('assets/images/jason.png'),
+                          Text(widget.playerName),
+                        ],
+                      ),
+                    //show token amount and token address
+                    Column(
+                      children: [
+                        FutureBuilder(
+                            future: ref
+                                .read(userProvider.notifier)
+                                .getSupportedTokens(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Text("");
+                              } else {
+                                final roomStake = widget.tokenAmount == '0'
+                                    ? "Free"
+                                    : "${(((double.tryParse(widget.tokenAmount)) ?? 0) / 1e18).toStringAsFixed(7)}"
+                                        "${snapshot.data!.firstWhere((e) => e["tokenAddress"] == widget.tokenAddress)["tokenName"]}";
+                                return Text(
+                                  roomStake,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              }
+                            }),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SvgPicture.asset(
+                              'assets/images/会员.svg',
+                              height: 24,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              '400 EXP',
+                              style: TextStyle(
+                                color: Color(0xFF00ECFF),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: SvgPicture.asset('assets/images/ok_btn.svg'),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+          // Header Image positioned on top
+          Positioned(
+            top: -20,
+            child: Image.asset(
+              widget.isWinning
+                  ? 'assets/images/header-win.png'
+                  : 'assets/images/header-lose.png',
+              height: 100,
+              width: 300,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -12,7 +12,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part "app_state.g.dart";
 
-final baseUrl = environment['build'] == 'DEBUG' ? environment['apiUrlDebug'] : environment['apiUrl'];
+final baseUrl = environment['build'] == 'DEBUG'
+    ? environment['apiUrlDebug']
+    : environment['apiUrl'];
 
 @Riverpod(keepAlive: true)
 class AppState extends _$AppState {
@@ -28,7 +30,11 @@ class AppState extends _$AppState {
   @override
   AppStateData build() {
     _httpClient ??= Client();
-    return _hiveBox.get("appState", defaultValue: AppStateData(autoLoginResult: null))!;
+    return _hiveBox
+        .get("appState", defaultValue: AppStateData(autoLoginResult: null))!
+        .copyWith(
+          autoLoginResult: null,
+        );
   }
 
   void changeNavigatorIndex(int newIndex) {
@@ -66,7 +72,8 @@ class AppState extends _$AppState {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
   }
 
@@ -78,7 +85,8 @@ class AppState extends _$AppState {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     final accessTokenExpiryTime = DateTime.now().add(const Duration(hours: 1));
@@ -94,7 +102,9 @@ class AppState extends _$AppState {
     );
     if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
-      state.accessTokenExpiry!.subtract(Duration(minutes: 10)).difference(DateTime.now()),
+      state.accessTokenExpiry!
+          .subtract(Duration(minutes: 10))
+          .difference(DateTime.now()),
       () {
         refreshToken();
       },
@@ -118,7 +128,8 @@ class AppState extends _$AppState {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
   }
 
@@ -132,7 +143,8 @@ class AppState extends _$AppState {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
@@ -145,7 +157,9 @@ class AppState extends _$AppState {
     );
     if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
-      state.accessTokenExpiry!.subtract(Duration(minutes: 10)).difference(DateTime.now()),
+      state.accessTokenExpiry!
+          .subtract(Duration(minutes: 10))
+          .difference(DateTime.now()),
       () {
         refreshToken();
       },
@@ -171,7 +185,8 @@ class AppState extends _$AppState {
       },
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
-      throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+      throw HttpException(
+          'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
     }
     final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     //verify token
@@ -184,7 +199,9 @@ class AppState extends _$AppState {
     );
     if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
     _refreshTokenTimer = Timer(
-      state.accessTokenExpiry!.subtract(Duration(minutes: 10)).difference(DateTime.now()),
+      state.accessTokenExpiry!
+          .subtract(Duration(minutes: 10))
+          .difference(DateTime.now()),
       () {
         refreshToken();
       },
@@ -266,14 +283,19 @@ class AppState extends _$AppState {
         final response = await _httpClient!.post(
           url,
           body: jsonEncode({'refresh_token': state.refreshToken}),
-          headers: {'Content-Type': 'application/json', 'Authorization': state.bearerToken},
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': state.bearerToken
+          },
         );
 
         if (response.statusCode != 201 && response.statusCode != 200) {
-          throw HttpException('Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
+          throw HttpException(
+              'Request error with status code ${response.statusCode}.\nResponse:${utf8.decode(response.bodyBytes)}');
         }
 
-        final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+        final decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map;
         // Verify token
         state = state.copyWith(
           accessToken: decodedResponse['access_token'],
@@ -285,14 +307,17 @@ class AppState extends _$AppState {
 
         if (_refreshTokenTimer != null) _refreshTokenTimer!.cancel();
         _refreshTokenTimer = Timer(
-          state.accessTokenExpiry!.subtract(Duration(minutes: 10)).difference(DateTime.now()),
+          state.accessTokenExpiry!
+              .subtract(Duration(minutes: 10))
+              .difference(DateTime.now()),
           () {
             refreshToken();
           },
         );
 
         if (_logoutTimer != null) _logoutTimer!.cancel();
-        _logoutTimer = Timer(state.refreshTokenExpiry!.difference(DateTime.now()), logout);
+        _logoutTimer =
+            Timer(state.refreshTokenExpiry!.difference(DateTime.now()), logout);
 
         await _hiveBox.put("appState", state);
         await ref.read(userProvider.notifier).getUser();

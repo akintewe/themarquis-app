@@ -29,10 +29,12 @@ class FourPlayerWaitingRoomScreen extends ConsumerStatefulWidget {
   final LudoGameController game;
 
   @override
-  ConsumerState<FourPlayerWaitingRoomScreen> createState() => _FourPlayerWaitingRoomScreenState();
+  ConsumerState<FourPlayerWaitingRoomScreen> createState() =>
+      _FourPlayerWaitingRoomScreenState();
 }
 
-class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingRoomScreen> {
+class _FourPlayerWaitingRoomScreenState
+    extends ConsumerState<FourPlayerWaitingRoomScreen> {
   Timer? _countdownTimer;
   Timer? _sessionTimer;
   int _countdown = 15;
@@ -89,6 +91,7 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
         _countdownTimer?.cancel();
         await widget.game.updatePlayState(PlayState.playing);
       }
+      if (!mounted) return;
       setState(() {});
     });
   }
@@ -319,7 +322,8 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
         height: 418,
         child: Stack(
           children: [
-            Image.asset('assets/images/share_waiting_room_bg.png', fit: BoxFit.cover),
+            Image.asset('assets/images/share_waiting_room_bg.png',
+                fit: BoxFit.cover),
             Column(
               children: [
                 const SizedBox(height: 80),
@@ -379,19 +383,23 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
         ),
       ),
     );
-    return await createImageFromWidget(shareWidget, logicalSize: const Size(800, 418));
+    return await createImageFromWidget(shareWidget,
+        logicalSize: const Size(800, 418));
   }
 
-  Future<Uint8List> createImageFromWidget(Widget widget, {Duration? wait, Size? logicalSize}) async {
+  Future<Uint8List> createImageFromWidget(Widget widget,
+      {Duration? wait, Size? logicalSize}) async {
     final RenderRepaintBoundary repaintBoundary = RenderRepaintBoundary();
     final view = PlatformDispatcher.instance.views.first;
     logicalSize ??= view.physicalSize / view.devicePixelRatio;
 
     final RenderView renderView = RenderView(
       view: view,
-      child: RenderPositionedBox(alignment: Alignment.center, child: repaintBoundary),
+      child: RenderPositionedBox(
+          alignment: Alignment.center, child: repaintBoundary),
       configuration: ViewConfiguration(
-        logicalConstraints: BoxConstraints(maxWidth: logicalSize.width, maxHeight: logicalSize.height),
+        logicalConstraints: BoxConstraints(
+            maxWidth: logicalSize.width, maxHeight: logicalSize.height),
         devicePixelRatio: 1.0,
       ),
     );
@@ -402,7 +410,8 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
     pipelineOwner.rootNode = renderView;
     renderView.prepareInitialFrame();
 
-    final RenderObjectToWidgetElement<RenderBox> rootElement = RenderObjectToWidgetAdapter<RenderBox>(
+    final RenderObjectToWidgetElement<RenderBox> rootElement =
+        RenderObjectToWidgetAdapter<RenderBox>(
       container: repaintBoundary,
       child: widget,
     ).attachToRenderTree(buildOwner);
@@ -421,7 +430,8 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
     pipelineOwner.flushPaint();
 
     final ui.Image image = await repaintBoundary.toImage();
-    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
 
     return Uint8List.view(byteData!.buffer);
   }
@@ -458,11 +468,14 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
                               color: Colors.white,
                               iconSize: 20,
                               onPressed: () async {
-                                final tweetText = 'Join my Ludo Session\nRoom Id: ${session.id}';
-                                final url = 'https://themarquis.xyz/ludo?roomid=${session.id}';
+                                final tweetText =
+                                    'Join my Ludo Session\nRoom Id: ${session.id}';
+                                final url =
+                                    'https://themarquis.xyz/ludo?roomid=${session.id}';
 
                                 // Use the Twitter app's URL scheme
-                                final tweetUrl = Uri.encodeFull('twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
+                                final tweetUrl = Uri.encodeFull(
+                                    'twitter://post?message=$tweetText\n$url\ndata:image/png;base64,${base64Encode(imageBytes)}');
 
                                 // Fallback to web URL if the app isn't installed
                                 final webTweetUrl = Uri.encodeFull(
@@ -496,9 +509,12 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
                               iconSize: 20,
                               color: Colors.white,
                               onPressed: () async {
-                                Clipboard.setData(ClipboardData(text: "https://themarquis.xyz/ludo?roomid=${session.id}"));
+                                Clipboard.setData(ClipboardData(
+                                    text:
+                                        "https://themarquis.xyz/ludo?roomid=${session.id}"));
                                 if (!context.mounted) return;
-                                snackBarService.displaySnackbar('Link Copied to Clipboard');
+                                snackBarService.displaySnackbar(
+                                    'Link Copied to Clipboard');
                               },
                               icon: const Icon(FontAwesomeIcons.link),
                             ),
@@ -525,7 +541,8 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
                               onPressed: () async {
                                 await Gal.putImageBytes(qrImageBytes);
                                 if (!context.mounted) return;
-                                snackBarService.displaySnackbar('Image successfully saved to gallery');
+                                snackBarService.displaySnackbar(
+                                    'Image successfully saved to gallery');
                               },
                               icon: const Icon(Icons.qr_code),
                             ),
@@ -550,8 +567,14 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
                               iconSize: 20,
                               color: Colors.white,
                               onPressed: () {
-                                Share.shareXFiles([XFile.fromData(imageBytes, mimeType: 'image/png')],
-                                    subject: 'Ludo Invite', text: 'I am playing Ludo, please join us!', fileNameOverrides: ['share.png']);
+                                Share.shareXFiles(
+                                    [
+                                      XFile.fromData(imageBytes,
+                                          mimeType: 'image/png')
+                                    ],
+                                    subject: 'Ludo Invite',
+                                    text: 'I am playing Ludo, please join us!',
+                                    fileNameOverrides: ['share.png']);
                               },
                               icon: const Icon(Icons.share),
                             ),
@@ -598,7 +621,9 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
           Container(
             height: 24,
             width: 74,
-            decoration: BoxDecoration(color: const Color(0XFF00ECFF), borderRadius: BorderRadius.circular(5)),
+            decoration: BoxDecoration(
+                color: const Color(0XFF00ECFF),
+                borderRadius: BorderRadius.circular(5)),
             child: const Center(
               child: Text(
                 'Invite',
@@ -636,14 +661,20 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
                       padding: EdgeInsets.all(6.0),
                       child: Text(
                         "Game: Ludo",
-                        style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: Text(
                         "Room ID: ${session.id}",
-                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                     QrImageView(
@@ -696,7 +727,9 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
         border: Border.all(
           color: const Color(0xFF00ECFF),
         ),
-        gradient: RadialGradient(colors: [Colors.transparent, Color(0xFF00ECFF).withOpacity(0.9)], radius: 1.7),
+        gradient: RadialGradient(
+            colors: [Colors.transparent, Color(0xFF00ECFF).withOpacity(0.9)],
+            radius: 1.7),
       ),
       clipBehavior: Clip.antiAlias,
       alignment: Alignment.center,
@@ -718,7 +751,8 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
         alignment: Alignment.center,
         child: const Text(
           'Players',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
+          style: TextStyle(
+              fontSize: 12, fontWeight: FontWeight.w400, color: Colors.white),
         ),
       ),
     );
@@ -774,9 +808,12 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
                   await game.updatePlayState(PlayState.welcome);
                 },
                 child: Container(
-                  decoration: ShapeDecoration(color: Colors.white, shape: ChevronBorder()),
-                  padding: const EdgeInsets.only(top: 2, left: 8, bottom: 1, right: 31),
-                  child: const Text('MENU', style: TextStyle(color: Colors.black)),
+                  decoration: ShapeDecoration(
+                      color: Colors.white, shape: ChevronBorder()),
+                  padding: const EdgeInsets.only(
+                      top: 2, left: 8, bottom: 1, right: 31),
+                  child:
+                      const Text('MENU', style: TextStyle(color: Colors.black)),
                 ),
               ),
             ],
@@ -807,6 +844,8 @@ class _FourPlayerWaitingRoomScreenState extends ConsumerState<FourPlayerWaitingR
   }
 
   bool _isRoomFull(LudoSessionData? session) {
-    return session != null && session.sessionUserStatus.where((e) => e.status == "ACTIVE").length == 4;
+    return session != null &&
+        session.sessionUserStatus.where((e) => e.status == "ACTIVE").length ==
+            4;
   }
 }
