@@ -662,7 +662,7 @@ void onRemove() {
               // Case 1 & 2: All pins at home or some pins in destination with pins at home
               if (pinsAtHome.isNotEmpty && diceValue >= 6) {
                 // Auto play first pin from home
-                playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+                playMove(pinsAtHome[0]!.homeIndex, );
                 return;
               }
               
@@ -678,14 +678,14 @@ void onRemove() {
                 
                 if (!anyPinMovable) {
                   // No movable pins on board, play from home
-                  playMove(pinsAtHome[0]!.homeIndex, isAuto: true);
+                  playMove(pinsAtHome[0]!.homeIndex, );
                   return;
                 }
               }
               
               // Default case: Play first movable pin on board
               if (pinsOnBoard.isNotEmpty) {
-                playMove(pinsOnBoard[0].homeIndex, isAuto: true);
+                playMove(pinsOnBoard[0].homeIndex, );
               }
             } else {
               rollDice();

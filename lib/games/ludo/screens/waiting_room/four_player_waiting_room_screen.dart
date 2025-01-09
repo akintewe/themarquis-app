@@ -148,8 +148,8 @@ class _FourPlayerWaitingRoomScreenState
       padding: const EdgeInsets.all(8.0),
       child: GestureDetector(
         onTap: (_isRoomFull(session) && !isSessionExpired)
-            ? () {
-                widget.game.playState = PlayState.playing;
+            ? () async {
+                await widget.game.updatePlayState(PlayState.playing);
               }
             : null,
         child: IconButton(
