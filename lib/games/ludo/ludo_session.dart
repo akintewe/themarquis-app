@@ -45,11 +45,14 @@ class LudoSession extends _$LudoSession {
   LudoSessionData? build() {
     _hiveBox ??= Hive.box<LudoSessionData>("ludoSession");
     _httpClient ??= http.Client();
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) _connectWebSocket();
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) connectWebSocket();
+    ref.onDispose(() {
+      _channel.sink.close();
+    });
     return null;
   }
 
-  void _connectWebSocket() {
+  void connectWebSocket() {
     try {
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl!));
       _channel.stream.listen(
@@ -88,13 +91,13 @@ class LudoSession extends _$LudoSession {
         },
         onDone: () {
           Future.delayed(const Duration(seconds: 1), () {
-            _connectWebSocket();
+            connectWebSocket();
           });
         },
         onError: (error) {
           if (kDebugMode) print('WS Error $error');
           Future.delayed(const Duration(seconds: 1), () {
-            _connectWebSocket();
+            connectWebSocket();
           });
         },
         cancelOnError: false,
@@ -102,7 +105,7 @@ class LudoSession extends _$LudoSession {
     } catch (e) {
       if (kDebugMode) print('WS Connection Error $e');
       Future.delayed(const Duration(seconds: 1), () {
-        _connectWebSocket();
+        connectWebSocket();
       });
     }
   }

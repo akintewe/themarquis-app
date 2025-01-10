@@ -141,9 +141,7 @@ class LudoGameController extends MarquisGameController {
                     useRootNavigator: false,
                     barrierDismissible: false,
                     builder: (context) => GameOverDialog(
-                      isWinning: _sessionData!
-                              .sessionUserStatus[_currentPlayer].playerId ==
-                          winnerIndex,
+                      isWinning: _userIndex == winnerIndex,
                       playerName: playerNames[winnerIndex!],
                       tokenAddress: _sessionData!.playToken,
                       tokenAmount: _sessionData!.playAmount,
@@ -674,12 +672,13 @@ class DiceAnimationWidget extends StatefulWidget {
 class _DiceAnimationWidgetState extends State<DiceAnimationWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late int currentDiceFace = widget._dieFace ?? 1;
+  late int currentDiceFace;
   final List<int> diceSequence = [1, 2, 3, 4, 5, 6];
 
   @override
   void initState() {
     super.initState();
+    currentDiceFace = widget._dieFace ?? 1;
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1000));
 
@@ -783,30 +782,30 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                     //show token amount and token address
                     Column(
                       children: [
-                        FutureBuilder(
-                            future: ref
-                                .read(userProvider.notifier)
-                                .getSupportedTokens(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Text("");
-                              } else {
-                                final roomStake = widget.tokenAmount == '0'
-                                    ? "Free"
-                                    : "${(((double.tryParse(widget.tokenAmount)) ?? 0) / 1e18).toStringAsFixed(7)}"
-                                        "${snapshot.data!.firstWhere((e) => e["tokenAddress"] == widget.tokenAddress)["tokenName"]}";
-                                return Text(
-                                  roomStake,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              }
-                            }),
+                        if (widget.tokenAmount != '0')
+                          FutureBuilder(
+                              future: ref
+                                  .read(userProvider.notifier)
+                                  .getSupportedTokens(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text("");
+                                } else {
+                                  final roomStake =
+                                      "${(((double.tryParse(widget.tokenAmount)) ?? 0) / 1e18 * (widget.isWinning ? 4 : -1)).toStringAsFixed(7).replaceAll(RegExp(r'0*$'), '')}"
+                                      "${snapshot.data!.firstWhere((e) => e["tokenAddress"] == widget.tokenAddress)["tokenName"]}";
+                                  return Text(
+                                    roomStake,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }
+                              }),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
