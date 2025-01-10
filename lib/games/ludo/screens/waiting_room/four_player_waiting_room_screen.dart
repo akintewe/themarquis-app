@@ -90,6 +90,7 @@ class _FourPlayerWaitingRoomScreenState
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: AngledBorderButton(
+        key: const ValueKey("StartGameButton"),
         onTap: _isRoomFull(session)
             ? () async => await widget.game.updatePlayState(PlayState.playing)
             : null,

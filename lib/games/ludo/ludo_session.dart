@@ -22,10 +22,10 @@ final wsUrl = environment['build'] == 'DEBUG'
     ? environment['wsUrlDebug']
     : environment['wsUrl'];
 
-@riverpod
+@Riverpod(keepAlive: true)
 class LudoSession extends _$LudoSession {
   //Details Declaration
-  late WebSocketChannel _channel;
+  WebSocketChannel? _channel;
   Box<LudoSessionData>? _hiveBox;
   http.Client? _httpClient;
   String? _id;
@@ -47,7 +47,7 @@ class LudoSession extends _$LudoSession {
     _httpClient ??= http.Client();
     if (!Platform.environment.containsKey('FLUTTER_TEST')) connectWebSocket();
     ref.onDispose(() {
-      _channel.sink.close();
+      _channel?.sink.close();
     });
     return null;
   }
@@ -55,7 +55,7 @@ class LudoSession extends _$LudoSession {
   void connectWebSocket() {
     try {
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl!));
-      _channel.stream.listen(
+      _channel?.stream.listen(
         (data) async {
           if (kDebugMode) print("WS: $data");
           final decodedResponse = jsonDecode(data) as Map;

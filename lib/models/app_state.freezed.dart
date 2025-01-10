@@ -39,7 +39,9 @@ mixin _$AppStateData {
   @HiveField(10)
   bool get isBalanceVisible => throw _privateConstructorUsedError;
 
-  @JsonKey(ignore: true)
+  /// Create a copy of AppStateData
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $AppStateDataCopyWith<AppStateData> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -74,6 +76,8 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of AppStateData
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -168,6 +172,8 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
       _$AppStateDataImpl _value, $Res Function(_$AppStateDataImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of AppStateData
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -336,7 +342,9 @@ class _$AppStateDataImpl extends _AppStateData {
       selectedGameSessionId,
       isBalanceVisible);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of AppStateData
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$AppStateDataImplCopyWith<_$AppStateDataImpl> get copyWith =>
@@ -391,8 +399,11 @@ abstract class _AppStateData extends AppStateData {
   @override
   @HiveField(10)
   bool get isBalanceVisible;
+
+  /// Create a copy of AppStateData
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AppStateDataImplCopyWith<_$AppStateDataImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

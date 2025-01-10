@@ -280,6 +280,7 @@ class LudoGameController extends MarquisGameController {
         'dice_icon.png',
       ]);
     }
+
     camera.viewfinder.anchor = Anchor.topLeft;
     _userIndex = _sessionData!.sessionUserStatus.indexWhere(
         (user) => user.userId.toString() == ref.read(userProvider)?.id);
@@ -366,35 +367,35 @@ class LudoGameController extends MarquisGameController {
     updateTurnText();
     isInit = true;
     // Add message container with text
-    final messageContainer = CustomRectangleComponent(
-      position: Vector2(size.x / 2, size.y - 170),
-      size: Vector2(500, 50),
-      anchor: Anchor.center,
-      color: const Color(0xFF1A3B44),
-      borderRadius: 12,
-      children: [
-        SpriteComponent(
-          sprite: Sprite(Flame.images.fromCache('dice_icon.png')),
-          position: Vector2(100, 25), // Center horizontally and vertically
-          size: Vector2(24, 24),
-          anchor: Anchor.center,
-        ),
-        TextComponent(
-          text: 'No tokens available to move. Roll a 6 to start!',
-          position: Vector2(130, 25), // Position text next to centered icon
-          anchor: Anchor.centerLeft,
-          textRenderer: TextPaint(
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
+    // final messageContainer = CustomRectangleComponent(
+    //   position: Vector2(size.x / 2, size.y - 170),
+    //   size: Vector2(500, 50),
+    //   anchor: Anchor.center,
+    //   color: const Color(0xFF1A3B44),
+    //   borderRadius: 12,
+    //   children: [
+    //     SpriteComponent(
+    //       sprite: Sprite(Flame.images.fromCache('dice_icon.png')),
+    //       position: Vector2(100, 25), // Center horizontally and vertically
+    //       size: Vector2(24, 24),
+    //       anchor: Anchor.center,
+    //     ),
+    //     TextComponent(
+    //       text: 'No tokens available to move. Roll a 6 to start!',
+    //       position: Vector2(130, 25), // Position text next to centered icon
+    //       anchor: Anchor.centerLeft,
+    //       textRenderer: TextPaint(
+    //         style: const TextStyle(
+    //           color: Colors.white,
+    //           fontSize: 14,
+    //           fontWeight: FontWeight.w500,
+    //         ),
+    //       ),
+    //     ),
+    //   ],
+    // );
 
-    await add(messageContainer);
+    // await add(messageContainer);
   }
 
   void updateTurnText() {
@@ -605,13 +606,21 @@ class LudoGameController extends MarquisGameController {
           size: Vector2(24, 24),
           anchor: Anchor.center,
         ),
-        TextComponent(
+        TextBoxComponent(
           text: message,
           position: Vector2(130, 25),
           anchor: Anchor.centerLeft,
+          boxConfig: TextBoxConfig(
+            maxWidth:
+                340, // Container width (500) - icon position (100) - icon width (24) - padding (36)
+          ),
           textRenderer: TextPaint(
             style: const TextStyle(
-                color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Orbitron',
+            ),
           ),
         ),
       ],

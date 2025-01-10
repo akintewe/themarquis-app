@@ -1,3 +1,5 @@
+@Tags(['golden_test'])
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -16,6 +18,18 @@ import 'helpers/setup_hive.dart';
 
 final testDevices = [
   const Device(
+    name: "Screen_IpadPro13Inch",
+    size: Size(2064 / 2, 2752 / 2),
+    textScale: 1,
+    devicePixelRatio: 2,
+  ),
+  const Device(
+    name: "Screen_Iphone6Inch9",
+    size: Size(1320 / 2, 2868 / 2),
+    textScale: 1,
+    devicePixelRatio: 2,
+  ),
+  const Device(
     name: "Screen_Android",
     size: Size(369, 656),
     textScale: 1,
@@ -29,21 +43,9 @@ final testDevices = [
   ),
   const Device(
     name: "Screen_AndroidTablet10Inch",
-    size: Size(1080, 1920),
+    size: Size(1080 / 2, 1920 / 2),
     textScale: 1,
-    devicePixelRatio: 1,
-  ),
-  const Device(
-    name: "Screen_IpadPro13Inch",
-    size: Size(2064 / 2, 2752 / 2),
-    textScale: 1,
-    devicePixelRatio: 1,
-  ),
-  const Device(
-    name: "Screen_Iphone6Inch9",
-    size: Size(1320 / 2, 2868 / 2),
-    textScale: 1,
-    devicePixelRatio: 1,
+    devicePixelRatio: 2,
   ),
 ];
 
@@ -102,20 +104,21 @@ void main() {
       ludoSessionTest.createSession("0", "red", "0");
       userTest.setSessionId("testSessionId");
 
-      await tester.pump(const Duration(seconds: 2));
-
       await multiScreenGolden(
         tester,
-        "Ludo_Menu_Resume",
+        "Ludo_Waiting_Room",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 2));
         },
         devices: testDevices,
       );
 
-      expect(find.byKey(const ValueKey("ResumeGameButton")), findsOne);
-      await tester.tap(find.byKey(const ValueKey("ResumeGameButton")));
-      await tester.pump(const Duration(seconds: 2));
+      expect(find.byKey(const ValueKey("StartGameButton")), findsOne);
+      await tester.tap(find.byKey(const ValueKey("StartGameButton")));
+
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(seconds: 5));
+      });
 
       await multiScreenGolden(
         tester,

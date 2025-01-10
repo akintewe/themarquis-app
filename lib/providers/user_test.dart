@@ -11,7 +11,7 @@ class UserTest extends User {
 
   void setUser() {
     state = UserData(
-      id: "testId",
+      id: "0",
       email: "test@test.com",
       role: "testRole",
       status: "testStatus",
@@ -34,7 +34,22 @@ class UserTest extends User {
 
   @override
   Future<void> getUser() async {
-    return;
+    state = UserData(
+      id: "0",
+      email: "test@test.com",
+      role: "testRole",
+      status: "testStatus",
+      points: 100,
+      referredBy: "testReferredBy",
+      referralId: 0,
+      walletId: 0,
+      profileImageUrl: "testProfileImageUrl",
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      referralCode: "testReferralCode",
+      accountAddress: "testAccountAddress",
+      sessionId: null,
+    );
   }
 
   @override
