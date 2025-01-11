@@ -41,10 +41,10 @@ class MyApp extends ConsumerWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(appStateProvider);
+    final appState = ref.watch(appStateProvider);
     ref.watch(userProvider);
     return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: appState.isSandbox,
       title: 'The Marquis',
       scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(
