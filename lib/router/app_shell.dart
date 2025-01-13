@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/router/router_delegate.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:marquis_v2/services/snackbar_service.dart';
+import 'package:upgrader/upgrader.dart';
 
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({
@@ -41,33 +44,38 @@ class _AppShellState extends ConsumerState<AppShell> {
     final appState = ref.watch(appStateProvider);
     final snackbarService = SnackbarService();
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          Router(
-            routerDelegate: _routerDelegate,
-            backButtonDispatcher: _backButtonDispatcher,
-          ),
-          if (snackbarService.snackbars.isNotEmpty)
-            Positioned(
-              bottom: 0,
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: ListenableBuilder(
-                  listenable: snackbarService,
-                  builder: (context, child) {
-                    return ListView.builder(
-                      itemBuilder: (context, index) =>
-                          snackbarService.snackbars[index],
-                      itemCount: snackbarService.snackbars.length,
-                      shrinkWrap: true,
-                      reverse: true,
-                    );
-                  },
+      body: UpgradeAlert(
+        dialogStyle: Platform.isAndroid
+            ? UpgradeDialogStyle.material
+            : UpgradeDialogStyle.cupertino,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            Router(
+              routerDelegate: _routerDelegate,
+              backButtonDispatcher: _backButtonDispatcher,
+            ),
+            if (snackbarService.snackbars.isNotEmpty)
+              Positioned(
+                bottom: 0,
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: ListenableBuilder(
+                    listenable: snackbarService,
+                    builder: (context, child) {
+                      return ListView.builder(
+                        itemBuilder: (context, index) =>
+                            snackbarService.snackbars[index],
+                        itemCount: snackbarService.snackbars.length,
+                        shrinkWrap: true,
+                        reverse: true,
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: appState.selectedGame != null
           ? null
