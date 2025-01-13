@@ -10,8 +10,11 @@ import 'package:marquis_v2/providers/app_state.dart';
 import 'package:marquis_v2/providers/user.dart';
 import 'package:marquis_v2/router/route_information_parser.dart';
 import 'package:marquis_v2/router/router_delegate.dart';
+import 'package:upgrader/upgrader.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Upgrader.clearSavedSettings(); // REMOVE this for release builds
   await Hive.initFlutter();
   Hive.registerAdapter(AppStateDataImplAdapter());
   Hive.registerAdapter(UserDataImplAdapter());

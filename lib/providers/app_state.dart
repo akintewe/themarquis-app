@@ -79,6 +79,7 @@ class AppState extends _$AppState {
   }
 
   Future<void> loginSandbox(String email) async {
+    if (environment['build'] != 'DEBUG') throw Exception('Not in debug mode');
     final url = Uri.parse('$baseUrlDebug/auth/signin-sandbox');
     final response = await _httpClient!.post(
       url,
@@ -137,6 +138,7 @@ class AppState extends _$AppState {
   }
 
   Future<void> signupSandbox(String email) async {
+    if (environment['build'] != 'DEBUG') throw Exception('Not in debug mode');
     final url = Uri.parse('${environment['apiUrlDebug']}/auth/signup-sandbox');
     final response = await _httpClient!.post(
       url,
