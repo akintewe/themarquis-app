@@ -9,6 +9,8 @@ final gameEventsProvider = StreamProvider<GameEvent>((ref) async* {
   try {
     while (true) {
       try {
+
+        
         final movedEvents = await account.provider.call(
           request: FunctionCall(
             contractAddress: account.accountAddress,

@@ -4,6 +4,7 @@ import 'package:marquis_v2/games/checkers/core/models/pieces.dart';
 import 'package:marquis_v2/games/checkers/core/models/positions.dart';
 import 'package:marquis_v2/games/checkers/core/models/sessions.dart';
 import 'package:starknet/starknet.dart';
+import 'package:marquis_v2/games/checkers/core/bindings/contract_bindings.dart';
 
 class GameRepository {
   final Account account;
@@ -81,19 +82,16 @@ class GameRepository {
 
   Future<void> movePiece(Piece piece, Coordinates newPosition) async {
     try {
+      final encodedPiece = ContractBindings.encodePiece(piece);
+      final encodedMove = await ContractBindings.encodeMove(
+        piece.sessionId,
+        piece.coordinates,
+        newPosition,
+      );
+      
       await contract.execute(
         'move_piece',
-        [
-          Felt(piece.sessionId),
-          Felt(piece.row as BigInt),
-          Felt(piece.col as BigInt),
-          Felt.fromString(piece.player),
-          Felt(piece.position.value as BigInt),
-          Felt((piece.isKing ? 1 : 0) as BigInt),
-          Felt((piece.isAlive ? 1 : 0) as BigInt),
-          Felt(newPosition.row as BigInt),
-          Felt(newPosition.col as BigInt),
-        ],
+        [...encodedPiece, ...encodedMove],
       );
     } catch (e) {
       throw Exception('Failed to move piece: $e');

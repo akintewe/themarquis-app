@@ -8,6 +8,7 @@ import 'package:marquis_v2/games/ludo/widgets/chevron_border.dart';
 import 'package:marquis_v2/games/ludo/widgets/divider_shape.dart';
 import 'package:marquis_v2/models/enums.dart';
 import 'package:marquis_v2/providers/user.dart';
+import 'package:marquis_v2/games/checkers/presentation/state/providers/game_state_provider.dart';
 
 import '../../../../../ludo/widgets/vertical_stepper.dart';
 
@@ -578,4 +579,25 @@ class _CheckersCreateGameState extends ConsumerState<CheckersCreateGame> {
   }
 
   int get _numberOfTabs => _gameMode == GameMode.token ? 3 : 2;
+
+  void _createGame() async {
+    try {
+      widget._gameController.displayLoader();
+      
+      // Call create lobby through state provider
+      await ref.read(gameStateProvider.notifier).createLobby();
+      
+      // Update game state to waiting
+      await widget._gameController.updatePlayState(PlayState.waiting);
+      
+      Navigator.of(context).pop();
+    } catch (e) {
+      // Show error dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      widget._gameController.hideLoader();
+    }
+  }
 }
