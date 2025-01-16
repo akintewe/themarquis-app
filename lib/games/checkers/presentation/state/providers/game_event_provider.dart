@@ -47,6 +47,15 @@ final gameEventsProvider = StreamProvider<GameEvent>((ref) async* {
           blockId: BlockId.latest,
         );
 
+        final lobbyCreatedEvents = await account.provider.call(
+          request: FunctionCall(
+            contractAddress: account.accountAddress,
+            entryPointSelector: getSelectorByName('LobbyCreated'),
+            calldata: [],
+          ),
+          blockId: BlockId.latest,
+        );
+
         GameEvent? event;
 
         event = movedEvents.when(
@@ -99,6 +108,18 @@ final gameEventsProvider = StreamProvider<GameEvent>((ref) async* {
           }),
           error: (error) {
             print('Error getting King events: ${error.message}');
+            return null;
+          },
+        );
+        if (event != null) yield event;
+
+        event = lobbyCreatedEvents.when(
+          result: (data) => GameEvent.lobbyCreated({
+            'session_id': data[0].toString(),
+            'creator': data[1].toString(),
+          }),
+          error: (error) {
+            print('Error getting LobbyCreated events: ${error.message}');
             return null;
           },
         );

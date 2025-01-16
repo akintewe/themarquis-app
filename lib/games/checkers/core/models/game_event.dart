@@ -1,6 +1,6 @@
 import 'package:marquis_v2/games/checkers/core/models/positions.dart';
 
-enum GameEventType { moved, killed, winner, king }
+enum GameEventType { moved, killed, winner, king, lobbyCreated }
 
 class GameEvent {
   final GameEventType type;
@@ -49,4 +49,12 @@ class GameEvent {
         row: data['row'],
         col: data['col'],
       );
+
+  factory GameEvent.lobbyCreated(Map<String, dynamic> data) {
+    return GameEvent(
+      type: GameEventType.lobbyCreated,
+      sessionId: BigInt.parse(data['session_id']),
+      player: data['creator'],
+    );
+  }
 }
