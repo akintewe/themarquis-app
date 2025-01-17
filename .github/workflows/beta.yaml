@@ -53,7 +53,7 @@ jobs:
           read -a versionValue <<< "$fileData"
           buildNumber=$(( ${versionValue[0]} * 1000000 + ${versionValue[1]} * 10000 + ${{ github.run_number }} ))
           IFS=''
-          buildName="${versionValue[0]}.${versionValue[1]}.${{ github.run_number }}"
+          buildName="${versionValue[0]}.${versionValue[1]}.${versionValue[2]}-pre.${{ github.run_number }}"
           echo "buildName=$buildName" >> $GITHUB_OUTPUT
           echo "Building version $buildName ($buildNumber)"
           flutter build apk --release --build-number=$buildNumber --build-name=$buildName
@@ -128,7 +128,7 @@ jobs:
           read -a versionValue <<< "$fileData"
           buildNumber=$(( ${versionValue[0]} * 1000000 + ${versionValue[1]} * 10000 + ${{ github.run_number }} ))
           IFS=''
-          buildName="${versionValue[0]}.${versionValue[1]}.${{ github.run_number }}"
+          buildName="${versionValue[0]}.${versionValue[1]}.${versionValue[2]}-pre.${{ github.run_number }}"
           echo "Uploading build $buildName"
           flutter build ipa --release --build-number=$buildNumber --build-name=$buildName --export-options-plist=$HOME/export_options.plist
 
