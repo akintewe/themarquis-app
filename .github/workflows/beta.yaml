@@ -136,6 +136,9 @@ jobs:
         run: |
           APP_FILE=$(find $(pwd) -name "*.ipa")
           app-store-connect publish \
-          --path "$APP_FILE" 
+            --path "$APP_FILE" \
+            --testflight \
+            --beta-group "TheMarquis Private Test"
+            --submit-to-testflight true
 
 
