@@ -94,7 +94,7 @@ jobs:
 
       - name: Set build to DEBUG
         run: |
-          sed -i "s/'build': '[^']*'/'build': 'DEBUG'/" lib/env.dart
+          sed -i '' "s/'build': '[^']*'/'build': 'DEBUG'/" lib/env.dart
           
       - name: Install the CodeMagic CLI
         run:  pip install codemagic-cli-tools
