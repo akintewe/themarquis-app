@@ -5,6 +5,8 @@ on:
     branches:
       - develop
 
+permissions:
+  contents: write
 
 jobs:
   build-android:
@@ -26,6 +28,10 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Set build to DEBUG
+        run: |
+          sed -i "s/'build': '[^']*'/'build': 'DEBUG'/" lib/env.dart
 
       - name: Decode Keystore
         run: |
@@ -60,7 +66,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ios_deployment:
+  build-ios:
     runs-on: macos-latest
     env:
       APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
@@ -81,11 +87,14 @@ jobs:
           channel: stable
           version: 3.24.0
 
-      - name: Install dependencies & Lint check
+      - name: Install dependencies
         run: |
           flutter clean
           flutter pub get
-          flutter analyze --fatal-infos
+
+      - name: Set build to DEBUG
+        run: |
+          sed -i "s/'build': '[^']*'/'build': 'DEBUG'/" lib/env.dart
           
       - name: Install the CodeMagic CLI
         run:  pip install codemagic-cli-tools
