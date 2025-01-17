@@ -45,6 +45,7 @@ jobs:
           echo "storeFile=keystore.jks" >> android/key.properties
 
       - name: Build APK
+        id: build
         run: |
           file='VERSION'
           fileData=`cat $file`
@@ -53,6 +54,7 @@ jobs:
           buildNumber=$(( ${versionValue[0]} * 1000000 + ${versionValue[1]} * 10000 + ${{ github.run_number }} ))
           IFS=''
           buildName="${versionValue[0]}.${versionValue[1]}.${{ github.run_number }}"
+          echo "buildName=$buildName" >> $GITHUB_OUTPUT
           echo "Building version $buildName ($buildNumber)"
           flutter build apk --release --build-number=$buildNumber --build-name=$buildName
 
@@ -60,7 +62,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: beta-${{ github.sha }}
-          name: "Beta $buildName"
+          name: "Beta ${{ steps.build.outputs.buildName }}"
           files: build/app/outputs/flutter-apk/app-release.apk
           prerelease: true
         env:
@@ -73,7 +75,7 @@ jobs:
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
       APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_KEY_IDENTIFIER }}
       APP_STORE_APP_ID: ${{ secrets.APP_STORE_APP_ID }}
-      DISTRIBUTION_CERTIFICATE: ${{ secrets.DIST_CERTIFICATE_BASE64 }}
+      DISTRIBUTION_CERTIFICATE: ${{ secrets.DIS_CERTIFICATE_BASE64 }}
       DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.DIST_CERTIFICATE_PASSWORD }}
       PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
 
