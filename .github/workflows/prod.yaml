@@ -28,11 +28,13 @@ jobs:
       - name: Set build to PROD
         run: |
           sed -i "s/'build': '[^']*'/'build': 'PROD'/" lib/env.dart
+          sed -i "s|'apiUrl': '[^']*'|'apiUrl': '${{ secrets.THEMARQUIS_PRODUCTION_API }}'|" lib/env.dart
+          sed -i "s|'wsUrl': '[^']*'|'wsUrl': '${{ secrets.THEMARQUIS_PRODUCTION_WS }}'|" lib/env.dart
 
-          - name: Decode Keystore
-          run: |
-            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
-  
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+
       - name: Create key.properties
         run: |
           echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
@@ -93,6 +95,8 @@ jobs:
       - name: Set build to PROD
         run: |
           sed -i '' "s/'build': '[^']*'/'build': 'PROD'/" lib/env.dart
+          sed -i "s|'apiUrl': '[^']*'|'apiUrl': '${{ secrets.THEMARQUIS_PRODUCTION_API }}'|" lib/env.dart
+          sed -i "s|'wsUrl': '[^']*'|'wsUrl': '${{ secrets.THEMARQUIS_PRODUCTION_WS }}'|" lib/env.dart
 
           - name: Set up Provisioning Profile
           run: |
@@ -137,5 +141,4 @@ jobs:
                 --path "$APP_FILE" \
                 --testflight \
                 --beta-group "TheMarquis Private Test"
-                --submit-to-testflight true
     

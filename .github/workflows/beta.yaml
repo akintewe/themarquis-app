@@ -139,6 +139,5 @@ jobs:
             --path "$APP_FILE" \
             --testflight \
             --beta-group "TheMarquis Private Test"
-            --submit-to-testflight true
 
 
