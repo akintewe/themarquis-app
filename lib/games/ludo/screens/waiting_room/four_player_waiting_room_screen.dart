@@ -767,8 +767,9 @@ class _FourPlayerWaitingRoomScreenState
   }
 
   bool _isRoomFull(LudoSessionData? session) {
-    return session != null &&
-        session.sessionUserStatus.where((e) => e.status == "ACTIVE").length ==
-            4;
+    if (session == null) return false;
+    final requiredPlayers = session.requiredPlayers ?? 4; // Default to 4 if not specified
+    final activePlayers = session.sessionUserStatus.where((e) => e.status == "ACTIVE").length;
+    return activePlayers == requiredPlayers;
   }
 }

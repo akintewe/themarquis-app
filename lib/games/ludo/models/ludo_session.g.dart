@@ -31,13 +31,14 @@ class LudoSessionDataImplAdapter extends TypeAdapter<_$LudoSessionDataImpl> {
       currentDiceValue: fields[12] as int?,
       playMoveFailed: fields[13] as bool?,
       message: fields[14] as String?,
+      requiredPlayers: fields[15] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$LudoSessionDataImpl obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(2)
@@ -64,6 +65,8 @@ class LudoSessionDataImplAdapter extends TypeAdapter<_$LudoSessionDataImpl> {
       ..write(obj.playMoveFailed)
       ..writeByte(14)
       ..write(obj.message)
+      ..writeByte(15)
+      ..write(obj.requiredPlayers)
       ..writeByte(8)
       ..write(obj.sessionUserStatus);
   }
@@ -167,6 +170,7 @@ _$LudoSessionDataImpl _$$LudoSessionDataImplFromJson(
       currentDiceValue: (json['currentDiceValue'] as num?)?.toInt(),
       playMoveFailed: json['playMoveFailed'] as bool?,
       message: json['message'] as String?,
+      requiredPlayers: json['requiredPlayers'] as String? ?? "4",
     );
 
 Map<String, dynamic> _$$LudoSessionDataImplToJson(
@@ -186,6 +190,7 @@ Map<String, dynamic> _$$LudoSessionDataImplToJson(
       'currentDiceValue': instance.currentDiceValue,
       'playMoveFailed': instance.playMoveFailed,
       'message': instance.message,
+      'requiredPlayers': instance.requiredPlayers,
     };
 
 _$LudoSessionUserStatusImpl _$$LudoSessionUserStatusImplFromJson(

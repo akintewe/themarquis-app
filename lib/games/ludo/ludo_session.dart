@@ -172,6 +172,7 @@ class LudoSession extends _$LudoSession {
       creator: "",
       currentDiceValue: _currentDiceValue ?? -1,
       playMoveFailed: _playMoveFailed,
+      requiredPlayers: decodedResponse['required_players'] ?? "4",
     );
     await _hiveBox!.put(_id, ludoSession);
     state = ludoSession;
@@ -237,6 +238,7 @@ class LudoSession extends _$LudoSession {
       creator: "",
       currentDiceValue: -1,
       playMoveFailed: false,
+      requiredPlayers: decodedResponse['required_players'] ?? "4",
     );
     return ludoSession;
   }
@@ -300,6 +302,7 @@ class LudoSession extends _$LudoSession {
             creator: "",
             currentDiceValue: -1,
             playMoveFailed: false,
+            requiredPlayers: sessionData['required_players'] ?? "4",
           ),
         )
         .toList();
@@ -365,13 +368,17 @@ class LudoSession extends _$LudoSession {
   }
 
   Future<void> createSession(
-      String amount, String color, String tokenAddress) async {
+      String amount,
+      String color,
+      String tokenAddress,
+      String requiredPlayers) async {
     final url = Uri.parse(
         '${ref.read(appStateProvider).isSandbox ? baseUrlDebug : baseUrl}/session/create');
     log(jsonEncode({
       'amount': amount,
       'user_creator_color': color,
       'token_address': tokenAddress,
+      'required_players': requiredPlayers,
     }));
     final response = await _httpClient!.post(
       url,
@@ -379,6 +386,7 @@ class LudoSession extends _$LudoSession {
         'amount': amount,
         'user_creator_color': color,
         'token_address': tokenAddress,
+        'required_players': requiredPlayers,
       }),
       headers: {
         'Content-Type': 'application/json',

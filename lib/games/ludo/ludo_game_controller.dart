@@ -178,7 +178,14 @@ class LudoGameController extends MarquisGameController {
   Future<void> _handleLudoSessionUpdate(LudoSessionData? next) async {
     ludoSessionLoadingCompleter = Completer<void>();
     _sessionData = next;
+    
     if (_sessionData != null) {
+      // Handle session full event
+      if (_sessionData!.status == "FULL") {
+        await updatePlayState(PlayState.playing);
+        return;
+      }
+      
       if (_sessionData!.message != null) {
         await showGameMessage(
           message: _sessionData!.message!,
