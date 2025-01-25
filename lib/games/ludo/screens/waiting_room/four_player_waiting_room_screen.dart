@@ -39,6 +39,17 @@ class _FourPlayerWaitingRoomScreenState
   int _countdown = 15;
 
   @override
+  void initState() {
+    super.initState();
+    // Listen to session changes
+    ref.listenManual(ludoSessionProvider, (previous, next) {
+      if (next != null && _isRoomFull(next) && _countdownTimer == null) {
+        _startCountdown();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _countdownTimer?.cancel();
     super.dispose();
@@ -61,7 +72,6 @@ class _FourPlayerWaitingRoomScreenState
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(ludoSessionProvider);
-    if (_isRoomFull(session) && _countdownTimer == null) _startCountdown();
     return Scaffold(
       backgroundColor: Colors.black,
       body: session == null
