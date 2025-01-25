@@ -96,9 +96,7 @@ class _FourPlayerWaitingRoomScreenState
             : null,
         child: Text(
           _isRoomFull(session)
-              ? _countdownTimer == null
-                  ? 'Start Game'
-                  : 'Starting in $_countdown'
+              ? 'Starting in $_countdown'
               : 'Waiting for players',
           style: const TextStyle(
               color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
@@ -108,14 +106,14 @@ class _FourPlayerWaitingRoomScreenState
   }
 
   Widget _playesrDetailsList(LudoSessionData session) {
-    log("${session.getListOfColors}");
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          for (int i = 0; i < session.sessionUserStatus.length; i++)
-            playerAvatarCard(
+        children: List.generate(4, (i) {
+          if (i < session.sessionUserStatus.length && 
+              session.sessionUserStatus[i].status == "ACTIVE") {
+            return playerAvatarCard(
               session,
               index: i,
               size: 72,
@@ -123,8 +121,11 @@ class _FourPlayerWaitingRoomScreenState
               player: session.sessionUserStatus[i],
               color: session.getListOfColors[i],
               showText: true,
-            ),
-        ],
+            );
+          } else {
+            return _invitePlayer(session);
+          }
+        }),
       ),
     );
   }
@@ -179,51 +180,6 @@ class _FourPlayerWaitingRoomScreenState
                 padding: const EdgeInsets.only(top: 33),
                 child: _invitePlayer(session),
               ),
-        // : Column(
-        //     children: [
-        //       Padding(
-        //         padding: const EdgeInsets.only(top: 33),
-        //         child: Container(
-        //           width: 72,
-        //           height: 72,
-        //           decoration: BoxDecoration(
-        //             color: Colors.transparent,
-        //             borderRadius: BorderRadius.circular(15),
-        //             border: Border.all(
-        //               width: 2,
-        //               color: const Color(0XFF00ECFF),
-        //             ),
-        //           ),
-        //           child: Padding(
-        //             padding: const EdgeInsets.all(14.0),
-        //             child: SvgPicture.asset(
-        //               'assets/svg/invite.svg',
-        //               width: 15,
-        //               height: 15,
-        //             ),
-        //           ),
-        //         ),
-        //       ),
-        //       const SizedBox(height: 10),
-        //       Container(
-        //         height: 24,
-        //         width: 74,
-        //         decoration: BoxDecoration(
-        //             color: const Color(0XFF00ECFF),
-        //             borderRadius: BorderRadius.circular(5)),
-        //         child: const Center(
-        //           child: Text(
-        //             'Invite',
-        //             style: TextStyle(
-        //               fontSize: 14,
-        //               color: Colors.black,
-        //               fontWeight: FontWeight.w600,
-        //             ),
-        //           ),
-        //         ),
-        //       ),
-        //     ],
-        //   ),
         if (showText) const SizedBox(height: 10),
         Text(
           player.email.split("@").first.truncate(6),
@@ -276,7 +232,6 @@ class _FourPlayerWaitingRoomScreenState
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // SizedBox(width: 96),
                       ...List.generate(
                         4,
                         (index) => Container(
@@ -379,7 +334,6 @@ class _FourPlayerWaitingRoomScreenState
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Row(
-                    // mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
