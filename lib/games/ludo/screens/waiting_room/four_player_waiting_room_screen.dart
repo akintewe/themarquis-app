@@ -733,7 +733,7 @@ class _FourPlayerWaitingRoomScreenState
   bool _isRoomFull(LudoSessionData? session) {
     if (session == null) return false;
     
-    // Check both conditions: either status is "FULL" or all players are active
+
     if (session.status == "FULL") return true;
     
     final requiredPlayers = int.tryParse(session.requiredPlayers ?? "4") ?? 4;
