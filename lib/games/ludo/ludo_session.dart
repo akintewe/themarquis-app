@@ -87,7 +87,7 @@ class LudoSession extends _$LudoSession {
               await getLudoSession();
               // Update session status to indicate it's ready to start
               state = state?.copyWith(
-                status: "ACTIVE",
+                status: "FULL",
                 message: "Session is full and ready to start!",
               );
               break;

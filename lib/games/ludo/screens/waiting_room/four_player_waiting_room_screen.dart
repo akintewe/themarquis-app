@@ -732,8 +732,19 @@ class _FourPlayerWaitingRoomScreenState
 
   bool _isRoomFull(LudoSessionData? session) {
     if (session == null) return false;
-    final requiredPlayers = session.requiredPlayers ?? 4; // Default to 4 if not specified
+    
+    // Check both conditions: either status is "FULL" or all players are active
+    if (session.status == "FULL") return true;
+    
+    final requiredPlayers = int.tryParse(session.requiredPlayers ?? "4") ?? 4;
     final activePlayers = session.sessionUserStatus.where((e) => e.status == "ACTIVE").length;
-    return activePlayers == requiredPlayers;
+    
+    if (kDebugMode) {
+      print("Required Players: $requiredPlayers");
+      print("Active Players: $activePlayers");
+      print("Session Status: ${session.status}");
+    }
+    
+    return activePlayers >= requiredPlayers;
   }
 }
