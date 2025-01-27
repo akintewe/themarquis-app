@@ -37,13 +37,24 @@ class _FourPlayerWaitingRoomScreenState
     extends ConsumerState<FourPlayerWaitingRoomScreen> {
   Timer? _countdownTimer;
   int _countdown = 15;
+  bool _isCountdownStarted = false;
 
   @override
   void initState() {
     super.initState();
-    // Listen to session changes
+    // Check immediately if room is already full when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final session = ref.read(ludoSessionProvider);
+      if (session != null && _isRoomFull(session) && !_isCountdownStarted) {
+        _isCountdownStarted = true;
+        _startCountdown();
+      }
+    });
+    
+    // Listen for changes
     ref.listenManual(ludoSessionProvider, (previous, next) {
-      if (next != null && _isRoomFull(next) && _countdownTimer == null) {
+      if (next != null && _isRoomFull(next) && !_isCountdownStarted) {
+        _isCountdownStarted = true;
         _startCountdown();
       }
     });
@@ -56,16 +67,28 @@ class _FourPlayerWaitingRoomScreenState
   }
 
   void _startCountdown() {
-    _countdown = 15;
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (_countdown > 0) {
-        _countdown--;
-      } else {
-        _countdownTimer?.cancel();
-        await widget.game.updatePlayState(PlayState.playing);
-      }
+    if (_countdownTimer?.isActive ?? false) return;
+    
+    setState(() {
+      _countdown = 15;
+    });
+    
+    // Add initial delay before starting countdown
+    Future.delayed(const Duration(seconds: 1), () {
       if (!mounted) return;
-      setState(() {});
+      
+      _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+        if (!mounted) return;
+        
+        setState(() {
+          if (_countdown > 0) {
+            _countdown--;
+          } else {
+            _countdownTimer?.cancel();
+            widget.game.updatePlayState(PlayState.playing);
+          }
+        });
+      });
     });
   }
 
@@ -733,8 +756,10 @@ class _FourPlayerWaitingRoomScreenState
   bool _isRoomFull(LudoSessionData? session) {
     if (session == null) return false;
     
-
-    if (session.status == "FULL") return true;
+    if (session.status == "FULL") {
+      if (kDebugMode) print("Session is FULL");
+      return true;
+    }
     
     final requiredPlayers = int.tryParse(session.requiredPlayers ?? "4") ?? 4;
     final activePlayers = session.sessionUserStatus.where((e) => e.status == "ACTIVE").length;
@@ -743,6 +768,7 @@ class _FourPlayerWaitingRoomScreenState
       print("Required Players: $requiredPlayers");
       print("Active Players: $activePlayers");
       print("Session Status: ${session.status}");
+      print("Is Room Full: ${activePlayers >= requiredPlayers}");
     }
     
     return activePlayers >= requiredPlayers;

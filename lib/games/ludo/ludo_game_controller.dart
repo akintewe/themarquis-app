@@ -180,12 +180,8 @@ class LudoGameController extends MarquisGameController {
     _sessionData = next;
     
     if (_sessionData != null) {
-      // Handle session full event
-      if (_sessionData!.status == "FULL") {
-        await updatePlayState(PlayState.playing);
-        return;
-      }
-      
+      // Remove the immediate play state update for FULL status
+      // Let the timer handle the transition instead
       if (_sessionData!.message != null) {
         await showGameMessage(
           message: _sessionData!.message!,
